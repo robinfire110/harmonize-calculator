@@ -8,11 +8,6 @@ const {checkUser, checkUserOptional} = require("../Middleware/AuthMiddleWare");
 require('dotenv').config();
 
 /* GET */
-router.get("/test", async (req, res) => {
-    console.log(req);
-    res.send("goog");
-});
-
 //Get price by location
 router.get("/distance_matrix/:origin_zip/:destination_zip", async (req, res) => {
     try {

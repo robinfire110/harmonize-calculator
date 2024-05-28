@@ -100,18 +100,6 @@ module.exports = (sequelize, Sequelize, Event) => {
     },
   });
 
-  /* Financial with Event */
-  Event.hasOne(Financial, {
-    foreignKey: "event_id", 
-    foreignKeyConstraint: true, 
-    onDelete: 'CASCADE'
-  });
-  Financial.belongsTo(Event, {
-    foreignKey: "event_id", 
-    foreignKeyConstraint: true, 
-    onDelete: 'CASCADE'
-  });
-
   Financial.getFinancialsByFinIds = async (finIds) => {
     try {
       return await Financial.findAll({

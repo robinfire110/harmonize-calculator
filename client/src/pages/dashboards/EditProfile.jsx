@@ -11,10 +11,8 @@ function EditProfile({ userData,  onUserChange }) {
 	const [formData, setFormData] = useState({
 		email: '',
 		password: '',
-		f_name: '',
-		l_name: '',
+		name: '',
 		zip: '',
-		instruments: [],
 		bio: ''
 	});
 	const [bioLength, setBioLength] = useState(maxBioLength);
@@ -41,10 +39,8 @@ function EditProfile({ userData,  onUserChange }) {
 				...prevFormData,
 				email: userData.email || '',
 				password: '', //For now, it's better to have this empty than the giant hash.
-				f_name: userData.f_name || '',
-				l_name: userData.l_name || '',
+				name: userData.name || '',
 				zip: userData.zip || '',
-				instruments: userData.Instruments || [],
 				bio: userData.bio || ''
 			}));
 			
@@ -111,7 +107,7 @@ function EditProfile({ userData,  onUserChange }) {
 
 	return (
 		<div style={{ maxWidth: '600px', margin: "auto" }}>
-			<h2>{userData?.f_name} {userData?.l_name} Profile</h2>
+			<h2>{userData?.name} Profile</h2>
 			<br />
 			<br />
 			<Form onSubmit={handleSubmit}>
@@ -154,8 +150,8 @@ function EditProfile({ userData,  onUserChange }) {
 								<Form.Control
 									type="text"
 									placeholder="Enter your name"
-									name="f_name"
-									value={formData.f_name}
+									name="name"
+									value={formData.name}
 									maxLength={maxFNameLength}
 									onChange={handleChange}
 									required

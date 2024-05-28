@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams} from "react-router-dom";
-import { Container, Form, Col, Row, InputGroup, Button, Modal, Alert, OverlayTrigger, Tooltip, Popover, Card, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Container, Form, Col, Row, InputGroup, Button, Modal, Alert, OverlayTrigger, Card, ButtonGroup, ToggleButton, Popover } from "react-bootstrap";
 import moment from "moment";
 import TooltipButton from "../components/TooltipButton";
 import FormNumber from "../components/FormNumber";
@@ -9,7 +9,7 @@ import axios from "axios";
 import {BarLoader, ClipLoader} from 'react-spinners'
 import * as ExcelJS from "exceljs"
 import {saveAs} from "file-saver"
-import {autoSizeColumn, formatCurrency, getCurrentUser, maxFinancialNameLength, metersToMiles, parseFloatZero, parseIntZero, parseStringUndefined, toastError, toastInfo, toastSuccess} from "../Utils";
+import {autoSizeColumn, formatCurrency, maxFinancialNameLength, metersToMiles, parseFloatZero, parseIntZero, parseStringUndefined, toastError, toastInfo, toastSuccess} from "../Utils";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import {getBackendURL} from "../Utils";
@@ -26,8 +26,6 @@ const Calculator = () => {
     const navigate = useNavigate();
     const [paramId, setParamId] = useState(useParams().id);
     const [finId, setFinId] = useState();
-    const [eventId, setEventId] = useState();
-    const [eventData, setEventData] = useState();
     const [isLoading, setIsLoading] = useState(true);
     const [isGettingLocation, setIsGettingLocation] = useState(false);
     const [currentState, setCurrentState] = useState("average_gas");
@@ -38,8 +36,6 @@ const Calculator = () => {
 
     //Search parameters
     const [searchParams] = useSearchParams();
-    const [isEvent, setIsEvent] = useState(searchParams.get("event") === "true");
-    const [isNewEvent, setIsNewEvent] = useState(false);
 
     //States
     //Variables
@@ -92,10 +88,6 @@ const Calculator = () => {
     /* Effect */
     //On first load
     useEffect(() => {
-        //Check for event
-        if (isEvent) setEventId(paramId);
-        else setFinId(paramId);
-
         //Get Gas Prices
         if (!gasPrices)
         {
@@ -152,13 +144,7 @@ const Calculator = () => {
         else
         {
             setIsLoading(false);
-            if (paramId)
-            {
-                loadEventData(true)
-            }
-            //setParamId(null);
-            //navigate("/calculator");
-        } 
+        }
     }, [user])
     
     //Runs when any fields related to calculation updates.
@@ -191,8 +177,6 @@ const Calculator = () => {
         if (data?.zip) setZip(data.zip);
         if (data?.hourly_wage) setHourlyWage(data.hourly_wage);
         if (data?.total_wage > 0) setGigPay(data.total_wage);
-        if (data?.event_hours > 0) setGigHours(data.event_hours);
-        if (data?.event_num > 0) setGigNum(data.event_num); 
         if (data?.total_mileage > 0) setTotalMileage(data.total_mileage); 
         if (data?.travel_hours > 0) setTravelHours(data.travel_hours); 
         if (data?.mileage_pay > 0) setMileageCovered(data.mileage_pay); 
@@ -223,101 +207,29 @@ const Calculator = () => {
         if (data?.zip) setModalDestinationZip(data?.zip);
     }
 
-    //Load from database (both fin_id and event_id)
+    //Load from database (both fin_id)
     async function loadFromDatabase(currentUser=user, finId=paramId)
     {
-        //Check if event
-        if (!isEvent)
-        {
-            //Get data
-            await axios.get(`${getBackendURL()}/financial/user_id/fin_id/${currentUser?.user_id}/${finId}`, {withCredentials: true}).then(res => {
-                const data = res.data[0];
-                if (data && data?.fin_id) setFinId(data.fin_id);
+        //Get data
+        await axios.get(`${getBackendURL()}/financial/user_id/fin_id/${currentUser?.user_id}/${finId}`, {withCredentials: true}).then(res => {
+            const data = res.data[0];
+            if (data && data?.fin_id) setFinId(data.fin_id);
 
-                //Financial exists!
-                if (data) loadData(data);
-                else //Financial does not exists, redirect to blank page.
-                {
-                    setParamId(0);
-                    navigate(`/calculator`); 
-                    toast("You do not have access to this data.", toastError)
-                }
-            });
-        }
-        else
-        {
-            //Check for already existing event financial
-            await axios.get(`${getBackendURL()}/financial/user_id/event_id/${currentUser?.user_id}/${finId}`, {withCredentials: true}).then(async res => {
-                const data = res.data[0];
-                if (data) //If financial for event exists, load that data.
-                {
-                    console.log("Event Financial exists, loading...");
-                    await loadEventData(false, currentUser); //Get event data for later use
-                    setFinId(data.fin_id);
-                    loadData(data);
-                    toast("Loaded from previously saved event data.", toastInfo);
-                } 
-                else
-                {
-                    await loadEventData(true, currentUser);
-                    setIsNewEvent(true);
-                } 
-            });
-        }
+            //Financial exists!
+            if (data) loadData(data);
+            else //Financial does not exists, redirect to blank page.
+            {
+                setParamId(0);
+                navigate(`/calculator`); 
+                toast("You do not have access to this data.", toastError)
+            }
+        });
     }
-
-    //Load event data
-    async function loadEventData(fillFields, currentUser=user)
-    {
-        console.log("Event Data", eventData);
-        if (eventData)
-        {
-            if (fillFields)
-            {
-                loadData(eventData);
-                if (currentUser?.zip && eventData.zip) await calculateBasedOnLocation(currentUser?.zip.slice(0, 5), eventData.zip.slice(0, 5));
-            }
-        } 
-        else
-        {
-            await axios.get(`${getBackendURL()}/event/id/${paramId}`).then(async res => {
-            if (res.data)
-            {
-                const data = res.data;
-                let eventData = {
-                    event_id: data?.event_id,
-                    fin_name: data?.event_name,
-                    total_wage: data?.pay,
-                    event_hours: data?.event_hours,
-                    rehearse_hours: data?.rehearse_hours,
-                    mileage_pay: data?.mileage_pay,
-                    zip: data?.Address.zip
-                };
-
-                setEventData(eventData);
-                if (fillFields)
-                {   
-                    if (currentUser?.zip && eventData?.zip) await calculateBasedOnLocation(currentUser?.zip?.slice(0, 5), eventData.zip?.slice(0, 5));
-                    loadData(eventData);
-                    setAverageGasPrice();
-                } 
-            }
-            else
-            {
-                console.log("No event found");
-            }
-            }).catch(error => {
-                console.log(error)
-            });
-        }
-        
-    }
-
+    
     async function calculateBasedOnLocation(originZip, destinationZip)
     {
         setIsGettingLocation(true);
         axios.get(`${getBackendURL()}/api/distance_matrix/${originZip}/${destinationZip}/`).then(res => {
-            console.log("Event Location Data", res.data);
             if (res.data)
             {
                 if (res.data.status == "OK" && res.data.rows[0].elements[0].status == "OK")
@@ -341,6 +253,7 @@ const Calculator = () => {
                     */
 
                     //Add to event (if event)
+                    /*
                     if (eventData && eventData.zip == destinationZip && originZip == user?.zip)
                     {
                         const newData = eventData;
@@ -348,6 +261,7 @@ const Calculator = () => {
                         newData["travel_hours"] = durationInHours;
                         setEventData(newData);
                     }
+                    */
                 }
                 else
                 {
@@ -493,7 +407,7 @@ const Calculator = () => {
                 travel_hours: parseFloatZero(travelHours),
                 total_mileage: parseFloatZero(totalMileage),
                 mileage_pay: parseFloatZero(mileageCovered),
-                zip: isEvent ? parseStringUndefined(zip) : parseStringUndefined(modalDestinationZip),
+                zip: parseStringUndefined(modalDestinationZip),
                 gas_price: parseFloatZero(gasPricePerGallon),
                 mpg: parseFloatZero(vehicleMPG),
                 tax: parseFloatZero(tax),
@@ -506,7 +420,6 @@ const Calculator = () => {
                 multiply_rehearsal: multiplyRehearsalHours,
                 multiply_other: multiplyOtherFees
             }
-            if (isNewEvent && isEvent) data["event_id"] = paramId;
             
             //Check validity (will return false if not valid, HTML will take care of the rest).
             const inputs = document.getElementById("calculatorForm").elements;
@@ -526,7 +439,7 @@ const Calculator = () => {
                 setSaveStatus(true);
 
                 //Save to database
-                if ((!isEvent && paramId) || (isEvent && !isNewEvent)) //If exists, update
+                if (paramId) //If exists, update
                 {
                     console.log(`UPDATE ${finId} ${paramId}`, data)
                     await axios.put(`${getBackendURL()}/financial/${finId}`, data, {withCredentials: true}).then(res => {
@@ -566,10 +479,9 @@ const Calculator = () => {
                         //SetID
                         setParamId(res.data.fin_id);
                         setFinId(res.data.fin_id);
-                        setIsNewEvent(false);
 
                         //Update URL
-                        if (!isEvent) navigate(`/calculator/${res.data.fin_id}`);
+                        navigate(`/calculator/${res.data.fin_id}`);
                         toast("Calculator data saved sucessfuly", toastSuccess);
                         setSaveStatus(false);
 
@@ -733,7 +645,7 @@ const Calculator = () => {
             const financials = userData.Financials.map((fin, index) =>
                 <Row className="my-1 py-1 align-text-middle" style={{backgroundColor: `rgba(100,100,100,${.15+(index % 2 * .15)}`, borderRadius: "3px", verticalAlign: "middle"}} key={fin.fin_id}>
                     <Col><h6>{fin.fin_name}</h6></Col>
-                    <Col lg={3} md={3} sm={3} xs={3}><Button variant="secondary" size="sm" disabled={isEvent ? fin.event_id==finId : fin.fin_id==finId} href={fin.event_id ? `/calculator/${fin.event_id}?event=true` : `/calculator/${fin.fin_id}`}>Load</Button></Col>
+                    <Col lg={3} md={3} sm={3} xs={3}><Button variant="secondary" size="sm" disabled={fin.fin_id==finId} href={fin.event_id ? `/calculator/${fin.event_id}?event=true` : `/calculator/${fin.fin_id}`}>Load</Button></Col>
                 </Row>
             );
             if (financials.length > 0) setUserFinancials(financials);
@@ -742,28 +654,6 @@ const Calculator = () => {
         else
         {
             setUserFinancials(<Row>No Financials</Row>);
-        }
-    }
-
-    //Add text for event
-    function getEventText(visible=true)
-    {
-        let textColor = "rgba(0,0,0,1)";
-        if (!visible) textColor="rgba(0,0,0,0)";
-        if (isEvent && eventData)
-        {
-            if (isNewEvent)
-            {
-                let text = `Data loaded from ${eventData.fin_name} event.`;
-                if (visible) return (<h6 style={{color: textColor}}><br />Data loaded from <Link to={`/event/${eventData.event_id}`} style={{color: textColor}}>{eventData.fin_name} event.</Link></h6>)
-                else return (<h6 style={{color: textColor}}><br />{text.slice(0, parseInt(text.length*.65))}</h6>)
-            }
-            else
-            {
-                let text = `Data loaded from previously saved data for ${eventData.fin_name} event.`;
-                if (visible) return (<h6 style={{color: textColor}}><br />Data loaded from previously saved data for <Link to={`/event/${eventData.event_id}`} style={{color: textColor}}>{eventData.fin_name} event.</Link></h6>)
-                else return (<h6 style={{color: textColor}}><br />{text.slice(0, parseInt(text.length*.65))}</h6>)
-            }
         }
     }
 
@@ -780,7 +670,7 @@ const Calculator = () => {
     return (
         <div>
             <Title title={"Calculator"} />
-            <h2>Calculator</h2>
+            <h2>Harmonize Calculator</h2>
             <hr />
             <Container className="" style={{textAlign: "left"}}>   
             <Form id="calculatorForm" onSubmit={e => e.preventDefault()}>
@@ -790,7 +680,6 @@ const Calculator = () => {
                         <Row>
                             <Container id="basicInfoBox">
                                 <h3>Basic Information</h3>
-                                {getEventText()}
                                 <hr />
                             </Container>
                         </Row>
@@ -1068,7 +957,6 @@ const Calculator = () => {
                         <Row>
                             <Container>
                                 <h3>Results</h3>
-                                {getEventText(false)}
                                 <hr />
                             </Container>
                         </Row>
@@ -1124,10 +1012,9 @@ const Calculator = () => {
                         <Row>
                         <Row>
                             <div>
-                                {user && <Button className="me-3" type="submit" variant="success" onClick={() => {saveFinancial(false)}} style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>{saveStatus ? <BarLoader color="#FFFFFF" height={4} width={50} /> : user && ((!isEvent && paramId) || (isEvent && !isNewEvent)) ? "Update" : "Save"}</Button>}
+                                {user && <Button className="me-3" type="submit" variant="success" onClick={() => {saveFinancial(false)}} style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>{saveStatus ? <BarLoader color="#FFFFFF" height={4} width={50} /> : user && paramId ? "Update" : "Save"}</Button>}
                                 {!user && <OverlayTrigger placement="bottom" overlay={<Popover id="popover-trigger-hover-focus" title="Tool Tip" style={{padding: "10px"}}><div dangerouslySetInnerHTML={{__html: "You must be logged in to save."}}/></Popover>}><span><Button className="me-3" type="submit" variant="success" style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>Save</Button></span></OverlayTrigger>}
                                 <Button className="me-3" type="submit" variant="secondary" onClick={() => {saveFinancial(true)}} style={{paddingLeft: "10px", paddingRight: "10px"}}>Export</Button>
-                                {isEvent ? <Button variant="secondary" onClick={() => {loadEventData(true)}} style={{paddingLeft: "10px", paddingRight: "10px"}}>Reload Data</Button> : ""}
                             </div>
                             </Row>
                         </Row>

@@ -15,21 +15,12 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    f_name: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    l_name: {
+    name: {
       type: Sequelize.STRING,
       allowNull: false,
     },
     zip: {
       type: Sequelize.STRING,
-      allowNull: false,
-    },
-    bio: {
-      type: Sequelize.TEXT,
-      defaultValue: "",
     },
     isAdmin: {
       type: Sequelize.BOOLEAN,
@@ -74,13 +65,12 @@ module.exports = (sequelize, Sequelize) => {
         where: {
           user_id: userIds
         },
-        attributes: ['user_id', 'f_name', 'l_name']
+        attributes: ['user_id', 'name']
       });
 
       return users.map(user => ({
         user_id: user.user_id,
-        f_name: user.f_name,
-        l_name: user.l_name
+        name: user.name
       }));
     } catch (error) {
       throw new Error('Error finding users by user_ids: ' + error.message);

@@ -1,6 +1,4 @@
 const {Sequelize} = require('sequelize');
-
-
 //Set up Sequelize object and connection to database
 const local_database = new Sequelize(
     'dev_db',
@@ -35,7 +33,7 @@ const remote_database = new Sequelize(
 );
 
 //Select if you want to use local_sequelize or db_sequelize
-let sequelize = remote_database;
+let sequelize = local_database;
 
 //Connect to database
 const connectToDatabase = async () => {

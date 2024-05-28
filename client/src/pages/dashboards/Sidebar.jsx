@@ -51,16 +51,6 @@ function Sidebar({ handleLinkClick, isAdmin }) {
                 <Navbar className="">
                     <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
                         <Nav.Link
-                            onClick={() => handleLinkClick('listings')}
-                            href="/account#listings"
-                            eventKey={"listings"}
-                        >Listings</Nav.Link>
-                        <Nav.Link
-                            onClick={() => handleLinkClick('gigs')}
-                            href="/account#applications"
-                            eventKey={"applications"}
-                        >Applications</Nav.Link>
-                        <Nav.Link
                             onClick={() => handleLinkClick('financials')}
                             href="/account#financials"
                             eventKey={"financials"}
@@ -86,20 +76,6 @@ function Sidebar({ handleLinkClick, isAdmin }) {
             <>
             <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
                 <Nav.Item>
-                    <Nav.Link eventKey="listings" style={{color: "black", textDecoration: "none"}}
-                        onClick={() => handleLinkClick('listings')}
-                        href="/account#listings"
-                    >Listings
-                    </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="applications" style={{color: "black", textDecoration: "none"}}
-                        onClick={() => handleLinkClick('gigs')}
-                        href="/account#applications"
-                    >Applications
-                    </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
                     <Nav.Link eventKey="financials" style={{color: "black", textDecoration: "none"}}
                         onClick={() => handleLinkClick('financials')}
                         href="/account#financials"
@@ -120,7 +96,7 @@ function Sidebar({ handleLinkClick, isAdmin }) {
                             href="account#admin"
                         >Admin
                         </Nav.Link>
-                    </Nav.Item>
+                </Nav.Item>
                 )}
             </Nav>
             <hr />

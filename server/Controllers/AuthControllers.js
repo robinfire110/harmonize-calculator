@@ -1,10 +1,8 @@
-const { instrumentArrayToIds } = require("../helpers/model-helpers");
 const { userSchema } = require("../helpers/validators");
-const { instrumentList } = require("../helpers/instrumentList")
 const db = require("../models/models");
 const jwt = require("jsonwebtoken");
 const {updateUserToAdmin, getAllUsers, demoteUserFromAdmin, removeUser, resetUserPassword,
-	getAllEvents, deletePost} = require("../Service/AdminService");
+	 deletePost} = require("../routes/AdminService");
 
 
 const maxAge = 3*24*60*60;
@@ -41,13 +39,9 @@ const handleErrors = (err) => {
 }
 
 module.exports.register = async (req, res, next) => {
-	let newInstrumentArray;
-	let newInstrument;
+
 	try {
 		const data = req.body;
-		console.log(data);
-		//Validate
-		data.instruments = await instrumentArrayToIds(data?.instruments);
         const {error} = userSchema.validate(data)
         if (error) 
         {
@@ -56,26 +50,7 @@ module.exports.register = async (req, res, next) => {
         }
 
 		//Create
-		const newUser = await db.User.create({email: data?.email, password: data?.password, f_name: data?.f_name, l_name: data?.l_name, zip: data?.zip, bio: data?.bio, is_admin: data?.is_admin});
-
-		// If instruments are provided, associate them with the new user
-		newInstrumentArray = [];
-
-		if (data.instruments)
-        {
-            for (const instrument of data.instruments) {
-                //Add if found
-                if (instrument)
-                {
-                    newInstrument = await db.UserInstrument.create({instrument_id: instrument, user_id: newUser.user_id});
-                    newInstrumentArray.push(newInstrument);
-                }
-                else
-                {
-                    console.error("Instrument not found. Possibly incorrect ID or name?. Skipping instrument");
-                }
-            }
-        }
+		const newUser = await db.User.create({email: data?.email, password: data?.password, name: data?.name, zip: data?.zip, is_admin: data?.is_admin});
 
 		// Generate JWT token for the new user
 		const token = createToken(newUser.user_id);
@@ -95,7 +70,6 @@ module.exports.register = async (req, res, next) => {
 		res.json({errors, created: false});
 	}
 };
-
 
 module.exports.login = async (req, res, next) => {
 	try {
@@ -144,26 +118,10 @@ module.exports.account = async (req, res, next) => {
 
 		if (req.user.user_id) userToSend.user_id = req.user.user_id;
 		if (req.user.email) userToSend.email = req.user.email;
-		if (req.user.f_name) userToSend.f_name = req.user.f_name;
-		if (req.user.l_name) userToSend.l_name = req.user.l_name;
+		if (req.user.name) userToSend.name = req.user.name;
 		if (req.user.zip) userToSend.zip = req.user.zip;
-		if (req.user.bio) userToSend.bio = req.user.bio;
 		if (req.user.isAdmin !== undefined) userToSend.isAdmin = req.user.isAdmin;
 		if (req.user.Events) userToSend.Events = req.user.Events;
-
-		const userInstruments = await db.UserInstrument.findAll({
-			where: {
-				user_id: req.user.user_id
-			},
-			attributes: ['instrument_id']
-		});
-
-		if (userInstruments.length > 0) {
-			userToSend.Instruments = userInstruments.map(instrument => {
-				const instrumentName = instrumentList[instrument.instrument_id] ;
-				return { id: instrument.instrument_id, name: instrumentName };
-			});
-		}
 
 		if (Object.keys(userToSend).length > 0) {
 			res.status(200).json({ user: userToSend });
@@ -179,8 +137,6 @@ module.exports.account = async (req, res, next) => {
 
 
 module.exports.update_user = async (req, res, next) => {
-	let newInstrumentArray;
-	let newInstrument;
 	try {
 		console.log("do we get to update_user?")
 		const data = req.body;
@@ -225,58 +181,6 @@ module.exports.update_user = async (req, res, next) => {
 	}
 };
 
-
-
-//Events to specific user
-module.exports.getUserEvents = async (req, res, next) => {
-	try {
-		const userId = req.user.user_id;
-		const userStatuses = await db.UserStatus.findByUserId(userId);
-		const eventIds = userStatuses.map(status => status.event_id);
-
-		const ownerEventIds = userStatuses
-			.filter(status => status.status === 'owner')
-			.map(status => status.event_id);
-
-		const userIds = await db.UserStatus.findUserIdsByEventIdsAndStatuses(ownerEventIds);
-		const userIdArray = userIds.map(user => user.user_id);
-		const users = await db.User.findApplicantsByUserIds(userIdArray);
-
-		const usersWithStatus = users.map(user => {
-			const userStatus = userIds.find(status => status.user_id === user.user_id);
-			return {
-				...user,
-				status: userStatus ? userStatus.status : null,
-				event_id: userStatus ? userStatus.event_id : null
-			};
-		});
-
-		const events = await db.Event.findByEventIds(eventIds, userStatuses);
-
-		const addresses = await db.Address.findAll({
-			where: {
-				event_id: eventIds
-			},
-			raw: true
-		});
-
-		const eventsWithAddresses = events.map(event => {
-			const eventAddresses = addresses.filter(address => address.event_id === event.event_id);
-			const eventUsers = usersWithStatus.filter(user => user.event_id === event.event_id);
-			const eventWithApplicants = { ...event, addresses: eventAddresses, Applicants: eventUsers };
-			return eventWithApplicants;
-		});
-
-		res.status(200).json({ userEvents: eventsWithAddresses });
-	} catch (error) {
-		console.error('Error fetching user events:', error);
-		throw new Error('Failed to fetch user events');
-	}
-};
-
-
-
-
 module.exports.getUserFinancials = async (req,res, next) => {
 	try {
 		const userId = req.user.user_id;
@@ -303,38 +207,6 @@ module.exports.getUsers = async (req,res,next) => {
 	}catch (error){
 		console.error('Error fetching Users:', error);
 		throw new Error('Failed to fetch users');
-	}
-}
-
-//Admin func to get all events
-module.exports.getEvents = async (req, res, next) => {
-	try {
-		if (req.user.isAdmin) {
-			const events = await getAllEvents();
-			const cleanedEvents = events.map(event => ({
-				event_id: event.dataValues.event_id,
-				event_name: event.dataValues.event_name,
-				date_posted: event.dataValues.date_posted,
-				start_time: event.dataValues.start_time,
-				end_time: event.dataValues.end_time,
-				pay: event.dataValues.pay,
-				description: event.dataValues.description,
-				event_hours: event.dataValues.event_hours,
-				rehearse_hours: event.dataValues.rehearse_hours,
-				mileage_pay: event.dataValues.mileage_pay,
-				is_listed: event.dataValues.is_listed,
-				Instruments: event.dataValues.Instruments,
-				Address: event.dataValues.Address,
-				f_name: event.dataValues.Users.length > 0 ? event.dataValues.Users[0].f_name : null,
-				l_name: event.dataValues.Users.length > 0 ? event.dataValues.Users[0].l_name : null
-			}));
-			res.status(200).json({ events: cleanedEvents });
-		} else {
-			res.status(403).json({ error: "Access denied. You are not authorized to perform this action." });
-		}
-	} catch (error) {
-		console.error('Error fetching Events:', error);
-		throw new Error('Failed to fetch events');
 	}
 }
 

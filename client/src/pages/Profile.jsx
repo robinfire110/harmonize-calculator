@@ -6,9 +6,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, Col, Container, ListGroup, Row } from "react-bootstrap";
-import EventCard from "../components/EventCard";
 import {ClipLoader} from 'react-spinners'
-import EventHorizontalScroll from "../components/EventHorizontalScroll";
 import {getBackendURL} from "../Utils"
 import Title from "../components/Title";
 
@@ -38,20 +36,6 @@ const Profile = () => {
         
         //Remove last comma
         return string.slice(0, string.length-2);
-    }
-
-    function listEvents()
-    {
-        const events = userData.Events.filter((event) => {return event.UserStatus.status === "owner" && event.is_listed == 1});
-        if (events.length > 0)
-        {
-            return (<EventHorizontalScroll data={events} />)
-        }
-        else
-        {
-            return (<Container className="text-muted">No events listed</Container>)
-        }
-        
     }
 
     //Run on first start
@@ -97,7 +81,7 @@ const Profile = () => {
     {
         return (
             <>
-            <Title title={userData?.f_name && userData?.l_name ? `${capatalize(userData?.f_name)} ${capatalize(userData?.l_name)} Profile` : "Profile"} />
+            <Title title={userData?.name ? `${capatalize(userData?.name)} Profile` : "Profile"} />
             <br />
                 <Container> 
                     <div style={{textAlign: "left"}}>
@@ -114,7 +98,7 @@ const Profile = () => {
                                         <Col>
                                             <Row>
                                                 <Col xs={colSize.xs} sm={colSize.sm} md={colSize.md} lg={colSize.lg} xl={colSize.xl}><h5>Name</h5></Col>
-                                                <Col><p>{capatalize(userData?.f_name)} {capatalize(userData?.l_name)} </p></Col>
+                                                <Col><p>{capatalize(userData?.name)} </p></Col>
                                                 <hr />
                                             </Row>
                                             <Row>
@@ -146,10 +130,6 @@ const Profile = () => {
                                     </Card.Body>
                                 </Card>
                             </Col>
-                        </Row>
-                        <Row>
-                            <h3>Listed Events</h3>
-                            {listEvents()}
                         </Row>
                     </div> 
                 </Container>

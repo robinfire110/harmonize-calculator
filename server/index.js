@@ -15,11 +15,8 @@ const {
 
 // Middleware to log request headers
 
-
 const { router: authRoutes } = require('./routes/AuthRoutes');
-const routeEvent = require('./routes/Event');
 const routeFinancial = require('./routes/Financial');
-const routeInstrument = require('./routes/Instrument');
 const routeUser = require('./routes/User');
 const routeGas = require('./routes/GasPrice');
 const routeAPI = require('./routes/API');
@@ -64,22 +61,12 @@ app.listen(port, async () => {
     await sequelize.sync({ alter: false });
 
     //Run Scripts
-    //importInstruments();
     //fixData();
     console.log(`Server is running at http://localhost:${port}`);
 });
 
-//Test route
-const testRouter = express.Router();
-testRouter.get("/", async (req, res) => {
-    res.send("Got");
-});
-app.use("/", testRouter);
-
 // Routes setup
-app.use("/event", routeEvent.router);
 app.use("/financial", routeFinancial.router);
-app.use("/instrument", routeInstrument.router);
 app.use("/user", routeUser.router);
 app.use("/gas", routeGas.router);
 app.use("/api", routeAPI.router);

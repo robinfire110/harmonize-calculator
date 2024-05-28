@@ -33,8 +33,7 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
         setCurrentPage(1);
 
         const filtered = userData.filter(user =>
-            user.f_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.l_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             user.email.toLowerCase().includes(searchQuery.toLowerCase())
         );
         setFilteredUsers(filtered);
@@ -93,7 +92,7 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
     const handleDeletePost = (post) => {
         setPostToDelete(post);
         setActionToConfirm(() => () => onDeletePost(post));
-        setConfirmationMessage(`Are you sure you want to delete ${post.event_name} by ${post.f_name}?`);
+        setConfirmationMessage(`Are you sure you want to delete ${post.event_name} by ${post.name}?`);
         setShowConfirmationModal(true);
     }
 
@@ -158,7 +157,7 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
                         {currentUsers.map(user => (
                             <tr key={user.user_id} style={{ cursor: 'pointer' }} onClick={() => handleUserClick(user.user_id)}>
                                 <td>{user.user_id}</td>
-                                <td>{user.f_name} {user.l_name}</td>
+                                <td>{user.name}</td>
                                 <td>{user.email}</td>
                                 <td><td>{user.isAdmin ? 'Admin' : 'User'}</td></td>
                                 <td>
@@ -222,7 +221,7 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
                                 <td>{post.event_id}</td>
                                 <td>{new Date(post.date_posted).toLocaleDateString()}</td>
                                 <td>{post.event_name}</td>
-                                <td>{post.f_name} {post.l_name}</td>
+                                <td>{post.name}</td>
                                 <td>
                                     <Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDeletePost(post); }}>Delete</Button>
                                 </td>

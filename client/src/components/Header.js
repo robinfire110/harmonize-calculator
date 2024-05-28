@@ -24,10 +24,7 @@ function Header() {
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
-                        <Nav className="justify-content-end">
-                            {isLoggedIn && <Nav.Item><Nav.Link href="/form">List Event</Nav.Link></Nav.Item>}
-                            <Nav.Item><Nav.Link href="/eventsearch">Events</Nav.Link></Nav.Item>
-                            <Nav.Item><Nav.Link href="/calculator">Calculator</Nav.Link></Nav.Item>
+                        <Nav className="justify-content-end" style={{width: "100%"}}>
                             {!isLoggedIn && <Nav.Item><Nav.Link href="/login">Login/Register</Nav.Link></Nav.Item>}
                             {isLoggedIn && <Nav.Item><Nav.Link href="/account#listings">Account</Nav.Link></Nav.Item>}
                             {isLoggedIn && <LogoutButton />}

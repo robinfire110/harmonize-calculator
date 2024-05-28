@@ -19,7 +19,7 @@ router.get("/", checkUser, async (req, res) => {
         //Check for admin
         if (req.user.isAdmin == 1)
         {
-            const users = await db.User.findAll({include: [db.Instrument, db.Event], attributes: {exclude: userSensitiveAttributes}});
+            const users = await db.User.findAll({attributes: {exclude: userSensitiveAttributes}});
             res.json(users);
         }
         else throw new Error("Unauthorized access.");
@@ -34,12 +34,11 @@ router.get("/id/:id", checkUserOptional, async (req, res) => {
     try {
         const id = req.params.id;
         //Check user to change attributes returned (if not user or admin, only return non-sensitive attributes); 
-        let include = [db.Instrument, {model: db.Event, where: {$status$: "owner"}}];
         let attributes = {exclude: userSensitiveAttributes}
         if (req.user && (req.user.user_id == id || req.user.isAdmin == 1))
         {
             attributes = {exclude: ['password']}
-            include = [db.Instrument, db.Event, db.Financial];
+            include = [db.Financial];
         } 
         const user = await db.User.findOne({where: {user_id: id}, attributes: attributes, include: include});
         res.json(user);
@@ -65,7 +64,7 @@ router.get("/email/:email", async (req, res) => {
 
 /* POST */
 //Add new user
-//Required - email, password, f_name, l_name, zip
+//Required - email, password, name, zip
 //Optional - Bio, is_admin (default: false), instrument(s)
 //Instrument can be either name or ID. Can mix and match.
 router.post("/", async (req, res) => {
@@ -83,7 +82,7 @@ router.post("/", async (req, res) => {
         }
 
         //Add to User
-        const newUser = await db.User.create({email: data?.email, password: data?.password, f_name: data?.f_name, l_name: data?.l_name, zip: data?.zip, bio: data?.bio, is_admin: data?.is_admin});
+        const newUser = await db.User.create({email: data?.email, password: data?.password, name: data?.name, zip: data?.zip, bio: data?.bio, is_admin: data?.is_admin});
 
         //Add instrument (adds relation to UserInstrument table)
         newInstrumentArray = [];
