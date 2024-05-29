@@ -19,7 +19,7 @@ router.get("/", checkUser, async (req, res) => {
         //Check for admin
         if (req.user.isAdmin == 1)
         {
-            const users = await db.User.findAll({attributes: {exclude: userSensitiveAttributes}});
+            const users = await db.User.findAll({attributes: ["user_id", "email"]});
             res.json(users);
         }
         else throw new Error("Unauthorized access.");
@@ -41,6 +41,18 @@ router.get("/id/:id", checkUserOptional, async (req, res) => {
             include = [db.Financial];
         } 
         const user = await db.User.findOne({where: {user_id: id}, attributes: attributes, include: include});
+        res.json(user);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
+//Check email
+//Returns true if email exists, false otherwise
+router.get("/email/:email", async (req, res) => {
+    try {
+        const email = req.params.email;
+        const user = await db.User.findOne({where: {email: email}, attributes: ["user_id", "email"]});
         res.json(user);
     } catch (error) {
         res.status(500).send(error.message);

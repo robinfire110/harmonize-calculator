@@ -34,7 +34,6 @@ const financialSchema = Joi.object({
 const userSchema = Joi.object({
     email: Joi.string().email().required().max(320),
     password: Joi.string().required().max(256),
-    name: Joi.string().pattern(/^[a-zA-Z0-9\s']+$/).max(maxFNameLength).required(),
     zip: Joi.string().pattern(/^[0-9]+$/).min(5).max(5),
     is_admin: Joi.boolean().truthy(1).falsy(0),
 });

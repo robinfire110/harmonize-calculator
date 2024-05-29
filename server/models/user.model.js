@@ -15,12 +15,68 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    name: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
     zip: {
       type: Sequelize.STRING,
+    },
+    defaultGas: {
+      type: Sequelize.STRING,
+      defaultValue: "Average"
+    },
+    defaultVehicle: {
+      type: Sequelize.STRING,
+      defaultValue: "Average"
+    },
+    defaultMPG: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
+    defaultMilesCovered: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
+    defaultPractice: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
+    defaultRehearsal: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
+    defaultTax: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
+    defaultFees: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
+    round_trip: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true
+    },
+    multiply_pay: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true
+    },
+    multiply_hours: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true
+    },
+    multiply_travel: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true
+    },
+    multiply_practice: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
+    multiply_rehearsal: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
+    multiply_other: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
     },
     isAdmin: {
       type: Sequelize.BOOLEAN,

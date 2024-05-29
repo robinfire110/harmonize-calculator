@@ -6,6 +6,7 @@ import {getBackendURL, maxBioLength, maxFNameLength, maxLNameLength} from "../..
 import UserPasswordResetModal from "../dashboards/UserPasswordResetModal";
 import Select from "react-select";
 import FormNumber from '../../components/FormNumber';
+import TooltipButton from '../../components/TooltipButton';
 
 function EditProfile({ userData,  onUserChange }) {
 	const [formData, setFormData] = useState({
@@ -18,20 +19,10 @@ function EditProfile({ userData,  onUserChange }) {
 	const [bioLength, setBioLength] = useState(maxBioLength);
 
 	const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
-	const [instruments, setInstruments] = useState([])
-	const [selectedInstruments, setSelectedInstruments] = useState([])
 
 	const generateError = (err) => toast.error(err, {
 		position: "bottom-right",
 	})
-
-	useEffect(() => {
-		axios.get(`${getBackendURL()}/instrument/`).then(async (res) => {
-			setInstruments(res.data);
-		}).catch(error => {
-			console.error(error);
-		});
-	}, []);
 
 	useEffect(() => {
 		if (userData) {
@@ -43,13 +34,6 @@ function EditProfile({ userData,  onUserChange }) {
 				zip: userData.zip || '',
 				bio: userData.bio || ''
 			}));
-			
-			//Set instruments
-			const instrumentList = [];
-			userData.Instruments.forEach(instrument => {
-				instrumentList.push({ value: instrument.instrument_id, label: instrument.name });
-			});
-			if (instrumentList.length > 0) setSelectedInstruments(instrumentList);
 		}
 	}, [userData]);
 
@@ -62,17 +46,6 @@ function EditProfile({ userData,  onUserChange }) {
 		} 
 	}, [formData]);
 
-	const configureInstrumentList = (data) => {
-		const instrumentOptionList = [];
-		data.forEach(instrument => {
-			instrumentOptionList.push({ value: instrument.instrument_id, label: instrument.name });
-		});
-		console.log("InstrumetnOptionList")
-		console.log(instrumentOptionList)
-		return instrumentOptionList;
-	}
-
-
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		setFormData({ ...formData, [name]: value });
@@ -81,11 +54,9 @@ function EditProfile({ userData,  onUserChange }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		console.log(userData);
-		console.log("Selected instrument IDs:", selectedInstruments.map(instrument => instrument.value));
 		try {
 			const response = await axios.post(`${getBackendURL()}/account/update_user`, {
-				...formData,
-				instruments: selectedInstruments.map(instrument => instrument.value)
+				...formData
 			}, {
 				withCredentials: true
 			});
@@ -106,9 +77,10 @@ function EditProfile({ userData,  onUserChange }) {
 	};
 
 	return (
-		<div style={{ maxWidth: '600px', margin: "auto" }}>
-			<h2>{userData?.name} Profile</h2>
-			<br />
+		<div className='text-start' style={{ maxWidth: '600px', margin: "auto" }}>
+			<h2>Profile</h2>
+			<hr />
+			<h3>Account Information</h3>
 			<br />
 			<Form onSubmit={handleSubmit}>
 				<Col>
@@ -146,7 +118,7 @@ function EditProfile({ userData,  onUserChange }) {
 					<Row>
 						<Col lg={6} sm={6} xs={12}>
 							<Form.Group className="text-start mb-3" controlId="formBasicName">
-								<Form.Label>First Name<span style={{color: "red"}}>*</span></Form.Label>
+								<Form.Label>Name<span style={{color: "red"}}>*</span></Form.Label>
 								<Form.Control
 									type="text"
 									placeholder="Enter your name"
@@ -158,75 +130,39 @@ function EditProfile({ userData,  onUserChange }) {
 								/>
 							</Form.Group>
 						</Col>
-						<Col>
-							<Form.Group className="text-start mb-3" controlId="formBasicLastName">
-								<Form.Label>Last Name<span style={{color: "red"}}>*</span></Form.Label>
-								<Form.Control
-									type="text"
-									placeholder="Enter your last name"
-									name="l_name"
-									value={formData.l_name}
-									maxLength={maxLNameLength}
-									onChange={handleChange}
-									required
-								/>
-							</Form.Group>
-						</Col>
 					</Row>
-
-					<Row>
-						<Col lg={4}>
-							<Form.Group className="text-start mb-3" controlId="formBasicLocation">
-								<Form.Label>Location<span style={{color: "red"}}>*</span></Form.Label>
-								<FormNumber
-									placeholder="Ex. 27412"
-									name="zip"
-									min={5}
-									max={5}
-									integer={true}
-									value={formData.zip}
-									onChange={handleChange}
-									required
-								/>
-							</Form.Group>
-						</Col>
-
-						<Col>
-							<Form.Group className="text-start mb-3" controlId="formBasicInstruments">
-								<Form.Label>Instruments</Form.Label>
-								<Select
-									options={configureInstrumentList(instruments)}
-									name="instruments"
-									isMulti
-									onChange={(selectedOptions) => setSelectedInstruments(selectedOptions)}
-									value={selectedInstruments}
-								/>
-							</Form.Group>
-						</Col>
-					</Row>
-
-					<Form.Group className="text-start mb-3">
-						<Form.Label style={{width: '100%'}}>
-							<Row>
-								<Col lg={10}>Bio</Col>
-								<Col className="text-end">{bioLength}/{maxBioLength}</Col>
-							</Row>
-						</Form.Label>
-						<Form.Control
-							as="textarea"
-							rows={3}
-							placeholder="Enter a short bio"
-							maxLength={maxBioLength}
-							name="bio"
-							id="bio"
-							value={formData.bio}
-							onChange={handleChange}
-						/>
-					</Form.Group>
 				</Col>
+				<br />
+				<h3>Calculator Defaults</h3>
+				<br />
+				<Col>
+					<Row>
+					<Col>
+						<Form.Group className="text-start mb-3" controlId="formBasicLocation">
+							<Form.Label>Default Location</Form.Label>
+							<InputGroup>
+							<FormNumber
+								placeholder="Ex. 27412"
+								name="zip"
+								min={5}
+								max={5}
+								integer={true}
+								value={formData.zip}
+								onChange={handleChange}
+								required
+							/>
+							<TooltipButton text="Default location used for distance calculations."/>
+							</InputGroup>
+						</Form.Group>
+					</Col>
+					</Row>
+				</Col>
+				<hr />
+				<div className='text-center'>
 				<Button className="btn btn-dark" variant="primary" type="submit">
 					Update Profile
 				</Button>
+				</div>
 			</Form>
 			<UserPasswordResetModal
 				show={showPasswordResetModal}

@@ -31,7 +31,7 @@ function Account() {
     const [showUnlistModal, setShowUnlistModal] = useState(false);
     const [eventToUnlist, setEventToUnlist] = useState(null);
 
-    const verifyUser = async (refresh = false) => {
+    const verifyUser = async () => {
         if (!cookies.jwt) {
             navigate('/login');
         } else {
@@ -42,7 +42,6 @@ function Account() {
                     setUserData(data);
                     setFinancials(data.Financials);
                     setIsAdmin(data.isAdmin);
-                    if (!refresh) toast(`Hi ${data.name}`, { theme: 'dark', autoClose: 2000 });
                 });
             } catch (error) {
                 removeCookie('jwt');
@@ -61,7 +60,7 @@ function Account() {
         try {
             if(isAdmin){
                 const { data } = await axios.get(`${getBackendURL()}/user`, { withCredentials: true });
-                setUsers(data.users);
+                setUsers(data);
             }
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -185,7 +184,7 @@ function Account() {
                 });
             if (response.data.success) {
                 toast.success(`Successfully deleted ${financial.fin_name}`, { theme: 'dark' });
-                verifyUser(false);
+                verifyUser();
             } else {
                 console.error('Failed to delete financial:', response.data.message);
             }

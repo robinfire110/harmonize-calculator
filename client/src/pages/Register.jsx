@@ -15,24 +15,18 @@ const Register = () => {
 	const navigate = useNavigate();
 	const [values, setValues] = useState({
 		email: '',
-		password: '',
-		name: '',
-		zip: ''
+		password: ''
 	});
-	const [bioLength, setBioLength] = useState(maxBioLength);
-
-	//Update bio length
-    useEffect(() => {
-        const bioBox = document.getElementById("bio");
-        if (bioBox)
-        {
-            setBioLength(maxBioLength-bioBox.value.length);
-        } 
-    }, [values]);
-
+	const [confirmPassword, setConfirmPassword] = useState("");
+	
+	useEffect(() => {
+	  	console.log(values.password === confirmPassword);
+	}, [values.password, confirmPassword])
+	
 	const generateError = (err) => toast(err, toastError)
 
 	const handleChange = (event) => {
+		event.target.setCustomValidity("");
 		const { name, value } = event.target;
 		setValues({
 			...values,
@@ -43,24 +37,52 @@ const Register = () => {
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		try {
-			//Set up data
-			const registerData = {...values};
-			const {data} = await axios.post(`${getBackendURL()}/register`, registerData, {
-				withCredentials:true,
-			});
-			if(data){
-				if(data.errors){
-					const {email,password} = data.errors;
-					if(email){
-						generateError(email)
-					}else if(password){
-						generateError(password)
+			//Check Email
+			await axios.get(`${getBackendURL()}/user/email/${values.email}`).then(async (res) => {
+				console.log("Email", res.data);
+				if (res.data == null)
+				{
+					//Check Password
+					if (values.password === confirmPassword)
+					{
+						//Set up data
+						const registerData = {...values};
+						const {data} = await axios.post(`${getBackendURL()}/register`, registerData, {
+							withCredentials:true,
+						});
+						if (data){
+							if (data.errors){
+								const {email,password} = data.errors;
+								if(email){
+									generateError(email)
+								}else if(password){
+									generateError(password)
+								}
+							}
+							else {
+								navigate("/");
+							}
+						}
 					}
-				}else{
-					navigate("/");
+					else
+					{
+						//Passwords don't match
+						const passwordField = document.getElementById("password");
+						passwordField.setCustomValidity("Passwords do not match.");
+						passwordField.reportValidity();
+						console.error("Password Invalid");
+					}
 				}
-			}
-		}catch (err){
+				else
+				{
+					//Email already exists
+					const emailField = document.getElementById("email");
+					emailField.setCustomValidity("User with provided email already exists.");
+					emailField.reportValidity();
+					console.error("Email Invalid");
+				}
+			});		
+		} catch (err){
 			console.error(err);
 		}
 	};
@@ -70,74 +92,52 @@ const Register = () => {
 			<Title title="Register"/>
 			<h2>Register Account</h2>
 			<br />
-			<br />
 			<Form onSubmit={handleSubmit}>
-				<Col>
+				<Col className="m-auto" lg={6}>
 					<Row>
-						<Col>
-							<Form.Group className="text-start mb-3" controlId="formBasicEmail">
-								<Form.Label>Email Address<span style={{color: "red"}}>*</span></Form.Label>
-								<Form.Control
-									type="email"
-									placeholder="Enter email"
-									name="email"
-									value={values.email}
-									onChange={handleChange}
-									required
-								/>
-							</Form.Group>
-						</Col>
-
-						<Col>
-							<Form.Group className="text-start mb-3" controlId="formBasicPassword">
-								<Form.Label>Password<span style={{color: "red"}}>*</span></Form.Label>
-								<Form.Control
-									type="password"
-									placeholder="Password"
-									name="password"
-									value={values.password}
-									onChange={handleChange}
-									required
-								/>
-							</Form.Group>
-						</Col>
+						<Form.Group className="text-start mb-3">
+							<Form.Label>Email Address<span style={{color: "red"}}>*</span></Form.Label>
+							<Form.Control
+								type="email"
+								placeholder="Enter email"
+								id="email"
+								name="email"
+								value={values.email}
+								onChange={handleChange}
+								required
+							/>
+						</Form.Group>
 					</Row>
-
 					<Row>
-						<Col>
-							<Form.Group className="text-start mb-3" controlId="formBasicName">
-								<Form.Label>Name<span style={{color: "red"}}>*</span></Form.Label>
-								<Form.Control
-									type="text"
-									placeholder="Enter your name"
-									name="name"
-									value={values.name}
-									maxLength={maxFNameLength}
-									onChange={handleChange}
-									required
-								/>
-							</Form.Group>
-						</Col>
-						<Col>
-							<Form.Group className="text-start mb-3" controlId="formBasicLocation">
-								<Form.Label>Default Location</Form.Label>
-								<InputGroup>
-								<FormNumber
-									placeholder="Ex. 27412"
-									name="zip"
-									min={5}
-									max={5}
-									integer={true}
-									value={values.zip}
-									onChange={handleChange}
-									required
-								/>
-								<TooltipButton text="Default location used for distance calculations."/>
-								</InputGroup>
-							</Form.Group>
-						</Col>
+						<Form.Group className="text-start mb-3">
+							<Form.Label>Password<span style={{color: "red"}}>*</span></Form.Label>
+							<Form.Control
+								type="password"
+								placeholder="Enter Password"
+								id="password"
+								name="password"
+								value={values.password}
+								onChange={handleChange}
+								required
+							/>
+						</Form.Group>
+					</Row>
+					<Row>
+						<Form.Group className="text-start mb-3">
+							<Form.Label>Confirm Password<span style={{color: "red"}}>*</span></Form.Label>
+							<Form.Control
+								type="password"
+								placeholder="Re-enter Password"
+								id="confirmPassword"
+								name="password"
+								value={confirmPassword}
+								onChange={e => {setConfirmPassword(e.target.value); e.target.setCustomValidity("")}}
+								required
+							/>
+						</Form.Group>
 					</Row>
 				</Col>
+				<br />
 				<Button className="btn btn-dark" variant="primary" type="submit">Submit</Button>
 				<br />
 				<br />
