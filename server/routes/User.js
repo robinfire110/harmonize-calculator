@@ -19,7 +19,7 @@ router.get("/", checkUser, async (req, res) => {
         //Check for admin
         if (req.user.isAdmin == 1)
         {
-            const users = await db.User.findAll({attributes: ["user_id", "email"]});
+            const users = await db.User.findAll({attributes: ["user_id", "email", "is_admin"]});
             res.json(users);
         }
         else throw new Error("Unauthorized access.");
@@ -189,39 +189,10 @@ router.put("/:id", checkUser, async (req, res) => {
         const user = await db.User.findOne({where: {user_id: id}, attributes: {exclude: userSensitiveAttributes}});
         if (user)
         {
-            //Validate
-            data.instruments = await instrumentArrayToIds(data?.instruments);
-            const {error, value} = userSchema.fork(['email', 'password'], (schema) => schema.optional()).validate(data);
-            if (error) 
-            {
-                console.log(error);
-                return res.status(403).send(error.details);;
-            }
-
             //Update user
             user.set(data);
+            console.log("Updated user")
             await user.save();
-
-            //Update instrument (if exists)
-            newInstrumentArray = [];
-            if (data.instruments)
-            {
-                await db.UserInstrument.destroy({where: {user_id: id}});
-                for (const instrument of data.instruments) {
-                    //Add if found
-                    if (instrumentId)
-                    {
-                        newInstrument = await db.UserInstrument.findOrCreate({where: {instrument_id: instrumentId, user_id: id}});
-                        newInstrumentArray.push(newInstrument);
-                    }
-                    else
-                    {
-                        console.log("Instrument not found. Possibly incorrect ID or name?. Skipping instrument");
-                    }
-                }
-            }
-
-            res.send({user, newInstrumentArray});
         }
         else
         {

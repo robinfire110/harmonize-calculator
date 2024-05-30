@@ -71,27 +71,11 @@ function Account() {
         fetchUsers();
     }, [isAdmin]);
 
-    const fetchPosts = async () => {
-        try {
-            if(isAdmin){
-                const { data } = await axios.get(`${getBackendURL()}/account/admin/all-events`, { withCredentials: true });
-                setPosts(data.events);
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
-
-    useEffect(() => {
-        fetchPosts();
-    }, [isAdmin]);
-
-
     const handleLinkClick = (content) => {
         //Filter
+        if (content === "financials") content = "financials";
         if (content === "admin") content = "adminActions";
         if (content === "profile") content = "editProfile";
-        if (content === "applications") content = "gigs";
         setSelectedContent(content);
     };
 
@@ -225,10 +209,9 @@ function Account() {
         switch(selectedContent) {       
             case 'editProfile':
                 return <EditProfile userData={userData}
-                                    onUserChange={setUserData} />            
+                                    onUserChange={setUserData} />
             case 'adminActions':
-                return <
-                    AdminActions userData={ users }
+                return <AdminActions userData={ users }
                                  postData={ posts }
                                  onPasswordReset={handlePasswordReset}
                                  onPromoteUser={handlePromoteUser}

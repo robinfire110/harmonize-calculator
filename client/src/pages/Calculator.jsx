@@ -9,7 +9,7 @@ import axios from "axios";
 import {BarLoader, ClipLoader} from 'react-spinners'
 import * as ExcelJS from "exceljs"
 import {saveAs} from "file-saver"
-import {autoSizeColumn, formatCurrency, maxFinancialNameLength, metersToMiles, parseFloatZero, parseIntZero, parseStringUndefined, toastError, toastInfo, toastSuccess} from "../Utils";
+import {autoSizeColumn, formatCurrency, maxFinancialNameLength, metersToMiles, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, toastError, toastInfo, toastSuccess} from "../Utils";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import {getBackendURL} from "../Utils";
@@ -99,9 +99,15 @@ const Calculator = () => {
                 }   
                 setGasPrices(map);
                 setAverageGasPrice(map);
+            }).catch((error) => {
+                console.log(error);
+                setGasPrices(undefined);
             });
         }
+    }, []);
 
+    //Load user (after gas price load)
+    useEffect(() => {
         //Get user
         if (cookies.jwt)
         {
@@ -111,7 +117,34 @@ const Calculator = () => {
                     console.log(res.data.user.user_id);
                     axios.get(`${getBackendURL()}/user/id/${res.data.user.user_id}`, { withCredentials: true }).then(res => {
                         const userData = res.data;
-                        setModalOriginZip(userData.zip);
+
+                        //Set User Defaults
+                        setModalOriginZip(userData.zip || '');
+                        setCurrentState(userData.default_state || '');
+                        setCurrentVehicle(userData.default_vehicle || '');
+                        setMileageCovered(userData.default_miles_covered || null);
+                        setIsRoundTrip(parseBool(userData.round_trip));
+                        setPracticeHours(userData.default_practice || null);
+                        setRehearsalHours(userData.default_rehearsal || null);
+                        setTax(userData.default_tax || null);
+                        setOtherFees(userData.default_fees || null);
+                        setMultiplyPay(userData.multiply_pay);
+                        setMultiplyGigHours(userData.multiply_hours);
+                        setMultiplyTravel(userData.multiply_travel);
+                        setMultiplyPracticeHours(userData.multiply_practice);
+                        setMultiplyRehearsalHours(userData.multiply_rehearsal);
+                        setMultiplyOtherFees(userData.multiply_other);
+
+                        //Set gas prices
+                        setAverageGasPrice(undefined, userData.default_state, userData.default_vehicle);
+
+                        //Set Switches
+                        setMileageCoveredEnabled(userData.default_miles_covered > 0);
+                        setPracticeHoursEnabled(userData.default_practice > 0);
+                        setRehearsalHoursEnabled(userData.default_rehearsal > 0);
+                        setTaxEnabled(userData.default_tax > 0);
+                        setOtherFeesEnabled(userData.default_fees > 0);
+                        
                         setUser(userData);
                     });  
                 }
@@ -122,8 +155,7 @@ const Calculator = () => {
                 //console.log("User Data", res.data);
             });
         }
-        
-    }, []);
+    }, [gasPrices]);
 
     //Load from database
     useEffect(() => {
@@ -149,7 +181,11 @@ const Calculator = () => {
     
     //Runs when any fields related to calculation updates.
     useEffect(() => {
-      calculateHourlyWage();
+        //Calculate Wage
+        calculateHourlyWage();
+
+        //Set switches
+        
     }, [gigPay, gigHours, gigNum, totalMileage, mileageCovered, gasPricePerMile, travelHours, practiceHours, rehearsalHours, tax, otherFees,
         gigNumEnabled, totalMileageEnabled, mileageCoveredEnabled, travelHoursEnabled, practiceHoursEnabled, rehearsalHoursEnabled, taxEnabled, otherFeesEnabled,
         isRoundTrip, multiplyPay, multiplyGigHours, multiplyTravel, multiplyPracticeHours, multiplyRehearsalHours, multiplyOtherFees])
@@ -893,12 +929,13 @@ const Calculator = () => {
                                         </Col>
 
                                         <Row className="mt-3">
-                                        <Form.Label>Mileage Covered (in $ per mile)</Form.Label>
-                                                <InputGroup>
-                                                    <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setMileageCoveredEnabled(!mileageCoveredEnabled)}} checked={mileageCoveredEnabled}></Form.Check>
-                                                    <FormNumber id="mileageCovered" maxValue={999.99} value={mileageCovered} placeholder="Ex. 0.21" integer={false} disabled={!mileageCoveredEnabled} onChange={e => setMileageCovered(e.target.value)} />
-                                                    <TooltipButton text="Number of miles that will be covered by organizers. Will subtract from total mileage for final result."/>
-                                                </InputGroup>
+                                            <Form.Label>Mileage Covered (in $ per mile)</Form.Label>
+                                            <InputGroup>
+                                                <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setMileageCoveredEnabled(!mileageCoveredEnabled)}} checked={mileageCoveredEnabled}></Form.Check>
+                                                <InputGroup.Text>$</InputGroup.Text>
+                                                <FormNumber id="mileageCovered" maxValue={999.99} value={mileageCovered} placeholder="Ex. 0.21" integer={false} disabled={!mileageCoveredEnabled} onChange={e => setMileageCovered(e.target.value)} />
+                                                <TooltipButton text="Number of miles that will be covered by organizers. Will subtract from total mileage for final result."/>
+                                            </InputGroup>
                                         </Row>
                                         
                                     </Col>

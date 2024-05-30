@@ -51,6 +51,14 @@ function parseIntZero(value)
     else return 0
 }
 
+//Parse Bool
+//Returns 1/0 for true or false.
+function parseBool(value)
+{
+    if (value) return 1;
+    return 0;
+}
+
 //Auto fit column width (for spreadsheet)
 function autoSizeColumn(worksheet)
 {
@@ -205,4 +213,4 @@ async function saveSpreadsheetAll(data, filename = 'Harmonize_Export')
     saveAs(new Blob([buf]), `${filename}.xlsx`);
 }
 
-module.exports = {formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseStringUndefined, getBackendURL, getEventOwner, autoSizeColumn, sendEmail, getTotalFinHours, maxDescriptionLength, maxFNameLength, maxLNameLength, maxBioLength, maxEventNameLength, maxFinancialNameLength, statesList, toastSuccess, toastError, toastInfo, saveSpreadsheetAll};
+module.exports = {formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, getEventOwner, autoSizeColumn, sendEmail, getTotalFinHours, maxDescriptionLength, maxFNameLength, maxLNameLength, maxBioLength, maxEventNameLength, maxFinancialNameLength, statesList, toastSuccess, toastError, toastInfo, saveSpreadsheetAll};

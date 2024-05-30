@@ -18,35 +18,39 @@ module.exports = (sequelize, Sequelize) => {
     zip: {
       type: Sequelize.STRING,
     },
-    defaultGas: {
+    default_state: {
       type: Sequelize.STRING,
-      defaultValue: "Average"
+      defaultValue: "average_gas"
     },
-    defaultVehicle: {
+    default_gas_price: {
+      type: Sequelize.FLOAT,
+      defaultValue: 0
+    },
+    default_vehicle: {
       type: Sequelize.STRING,
-      defaultValue: "Average"
+      defaultValue: "average_mpg"
     },
-    defaultMPG: {
+    default_mpg: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    defaultMilesCovered: {
+    default_miles_covered: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    defaultPractice: {
+    default_practice: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    defaultRehearsal: {
+    default_rehearsal: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    defaultTax: {
+    default_tax: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    defaultFees: {
+    default_fees: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },

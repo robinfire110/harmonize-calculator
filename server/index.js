@@ -58,7 +58,7 @@ const gasPricePull = schedule.scheduleJob({tz: "America/New_York", hour: 8, minu
 // Database setup
 app.listen(port, async () => {
     await connectToDatabase();
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
 
     //Run Scripts
     //fixData();
