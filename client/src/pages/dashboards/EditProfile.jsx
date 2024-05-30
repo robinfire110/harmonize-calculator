@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Form, Button, Container, Col, Row, InputGroup, Modal, Card, ButtonGroup, ToggleButton} from 'react-bootstrap';
 import {toast, ToastContainer} from 'react-toastify';
 import axios from 'axios';
-import {getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero} from "../../Utils";
+import {getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero, toastError, toastSuccess} from "../../Utils";
 import UserPasswordResetModal from "../dashboards/UserPasswordResetModal";
 import FormNumber from '../../components/FormNumber';
 import TooltipButton from '../../components/TooltipButton';
@@ -74,26 +74,19 @@ function EditProfile({ userData,  onUserChange }) {
 		console.log("FormData", formData);
 	}, [formData]);
 
-	const handleSubmit = async (e) => {
+	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(userData);
-		try {
-			const response = await axios.put(`${getBackendURL()}/user/${userData.user_id}`, {
-				...formData
-			}, {
-				withCredentials: true
-			});
-			if (response.data.success) {
-				onUserChange(userData);
-				toast.success('Profile updated successfully' , { theme: 'dark' });
-			} else {
-				toast.error('Failed to update profile', { theme: 'dark' });
-			}
-		} catch (error) {
+		
+		axios.put(`${getBackendURL()}/user/${userData.user_id}`, {...formData}, {withCredentials: true}).then((res) => {
+			console.log(userData);
+			console.log(res.data);
+			toast.success('Profile updated successfully', toastSuccess);
+			onUserChange(userData);
+		}).catch(error => {
 			console.error('Error updating profile:', error);
-			toast.error('Failed to update profile');
-		}
-	};
+			toast.error('Failed to update profile', toastError);
+		});
+	}
 
 	const togglePasswordResetModal = () => {
 		setShowPasswordResetModal(!showPasswordResetModal);

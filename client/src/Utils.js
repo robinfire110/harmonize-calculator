@@ -10,11 +10,6 @@ function getBackendURL()
 }
 
 //Constant Variables
-const maxDescriptionLength = 750; //Max length for event descriptions
-const maxFNameLength = 50;
-const maxLNameLength = 50;
-const maxBioLength = 500; //Max length for user bios
-const maxEventNameLength = 50;
 const maxFinancialNameLength = 50;
 const statesList = [ 'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' ];
 
@@ -79,21 +74,6 @@ function parseStringUndefined(value)
 {
     if (!value || value == "") return undefined;
     else return value;
-}
-
-//Get event owner
-//Data can either be straight event data or event.Users
-function getEventOwner(data)
-{
-    if (data)
-    {
-        const userData = data?.Users ? data.Users : data;
-        for (let i = 0; i < userData.length; i++)
-        {
-            if (userData[i].UserStatus.status === "owner") return userData[i];
-        }
-    }   
-    return null;
 }
 
 //Send email
@@ -213,4 +193,4 @@ async function saveSpreadsheetAll(data, filename = 'Harmonize_Export')
     saveAs(new Blob([buf]), `${filename}.xlsx`);
 }
 
-module.exports = {formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, getEventOwner, autoSizeColumn, sendEmail, getTotalFinHours, maxDescriptionLength, maxFNameLength, maxLNameLength, maxBioLength, maxEventNameLength, maxFinancialNameLength, statesList, toastSuccess, toastError, toastInfo, saveSpreadsheetAll};
+module.exports = {formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, toastSuccess, toastError, toastInfo, saveSpreadsheetAll};

@@ -287,17 +287,6 @@ const Calculator = () => {
                     let string = res.data.origin_addresses[0]
                     setCurrentState(string.substring(string.indexOf(",")+2, string.indexOf(",")+4))
                     */
-
-                    //Add to event (if event)
-                    /*
-                    if (eventData && eventData.zip == destinationZip && originZip == user?.zip)
-                    {
-                        const newData = eventData;
-                        newData["total_mileage"] = distanceInMiles;
-                        newData["travel_hours"] = durationInHours;
-                        setEventData(newData);
-                    }
-                    */
                 }
                 else
                 {

@@ -20,16 +20,10 @@ function Account() {
     const [cookies, removeCookie] = useCookies([]);
     const [userData, setUserData] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [gigs, setGigs] = useState([]);
     const [users, setUsers] = useState([]);
     const [financials, setFinancials] = useState([]);
-    const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedContent, setSelectedContent] = useState('listings');
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [eventToDelete, setEventToDelete] = useState(null);
-    const [showUnlistModal, setShowUnlistModal] = useState(false);
-    const [eventToUnlist, setEventToUnlist] = useState(null);
 
     const verifyUser = async () => {
         if (!cookies.jwt) {
@@ -162,7 +156,7 @@ function Account() {
     const handleDeleteFinancial = async (financial) => {
         try {
             console.log(financial.fin_id)
-            const response = await axios.delete(`${getBackendURL()}/account/delete-financial/${financial.fin_id}`
+            const response = await axios.delete(`${getBackendURL()}/financial/${financial.fin_id}`
                 , {
                     withCredentials: true
                 });
@@ -180,30 +174,6 @@ function Account() {
             handleCloseUnlistModal();
         }
     };
-
-
-
-    const handleShowUnlistModal = (event) => {
-        setEventToUnlist(event);
-        setShowUnlistModal(true);
-    }
-
-    const handleCloseUnlistModal = () => {
-        setShowUnlistModal(false);
-        setEventToUnlist(null);
-    };
-
-    const handleShowDeleteModal = (event) => {
-        setEventToDelete(event);
-        setShowDeleteModal(true);
-    };
-
-    const handleCloseDeleteModal = () => {
-        setShowDeleteModal(false);
-        setEventToDelete(null);
-    };
-
-    
 
     const renderContent = () => {
         switch(selectedContent) {       

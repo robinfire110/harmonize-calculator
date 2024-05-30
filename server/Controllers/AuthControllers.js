@@ -1,8 +1,7 @@
 const { userSchema } = require("../helpers/validators");
 const db = require("../models/models");
 const jwt = require("jsonwebtoken");
-const {updateUserToAdmin, getAllUsers, demoteUserFromAdmin, removeUser, resetUserPassword,
-	 deletePost} = require("../routes/AdminService");
+const {updateUserToAdmin, demoteUserFromAdmin, removeUser, resetUserPassword} = require("../routes/AdminService");
 
 
 const maxAge = 3*24*60*60;
@@ -39,7 +38,6 @@ const handleErrors = (err) => {
 }
 
 module.exports.register = async (req, res, next) => {
-
 	try {
 		const data = req.body;
         const {error} = userSchema.validate(data)
@@ -135,82 +133,6 @@ module.exports.account = async (req, res, next) => {
 	}
 };
 
-
-module.exports.update_user = async (req, res, next) => {
-	try {
-		console.log("do we get to update_user?")
-		const data = req.body;
-		const userId = req.user.user_id;
-		console.log(data.instruments)
-		//Validate
-		data.instruments = await instrumentArrayToIds(data?.instruments);
-		delete data.password;
-		const {error} = userSchema.fork(['email', 'password'], (schema) => schema.optional()).validate(data)
-		if (error) {
-			console.error(error);
-			return res.status(403).send(error.details);
-			;
-		}
-
-		await db.User.updateUser(userId, data);
-
-		//Instruments
-		newInstrumentArray = [];
-
-		if (data.instruments) {
-			await db.UserInstrument.destroy({ where: { user_id: userId } });
-			for (const instrumentId of data.instruments) {
-				try {
-					newInstrument = await db.UserInstrument.findOrCreate({
-						where: {
-							instrument_id: instrumentId,
-							user_id: userId
-						}
-					});
-					newInstrumentArray.push(newInstrument);
-				} catch (err) {
-					console.error(`Error adding instrument with ID ${instrumentId}:`, err);
-				}
-			}
-		}
-
-		res.status(200).json({success: true});
-	} catch (err) {
-		console.error(err);
-		res.status(500).json({error: "Internal server error"});
-	}
-};
-
-module.exports.getUserFinancials = async (req,res, next) => {
-	try {
-		const userId = req.user.user_id;
-		const finIds = await  db.FinStatus.getFinIdsByUserId(userId);
-		const financials = await db.Financial.getFinancialsByFinIds(finIds);
-		const cleanedFinancials = financials.map(financial => financial.dataValues);
-
-		res.status(200).json({ userFinancials: cleanedFinancials });
-	}catch (error){
-		console.error('Error fetching user financials:', error);
-		throw new Error('Failed to fetch user financails');
-	}
-}
-
-//Admin func to get all users
-module.exports.getUsers = async (req,res,next) => {
-	try{
-		if (req.user.isAdmin) {
-			const users = await getAllUsers();
-			res.status(200).json({users : users});
-		} else {
-			res.status(403).json({ error: "Access denied. You are not authorized to perform this action." });
-		}
-	}catch (error){
-		console.error('Error fetching Users:', error);
-		throw new Error('Failed to fetch users');
-	}
-}
-
-
 module.exports.giveUserAdmin = async (req, res, next) => {
 	try {
 		const userIdToUpdate = req.params.userId;
@@ -281,121 +203,6 @@ module.exports.resetUserPassword = async (req, res, next) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
-
-
-//admin to delete user posts
-module.exports.deleteUserPost = async  (req,res,next) => {
-	try {
-		if (!req.user.isAdmin) {
-			return res.status(403).json({ error: "Access denied. Only admins can reset passwords." });
-		}
-		const eventId = req.params.eventId;
-		const result = await deletePost(eventId);
-
-		const eventExists = await db.Event.findOne({where: {event_id: eventId}});
-		if (!eventExists) {
-			res.status(200).json({ success: true, message: "User has been successfully removed from the database" });
-		} else {
-			res.status(500).json({ error: 'Failed to remove user from the database' });
-		}
-
-	}catch (error){
-		console.error("Error deleting a users post:", error);
-		res.status(500).json({ error: "Internal server error" });
-	}
-}
-
-
-//user to delete their own events
-module.exports.deleteEvent = async (req, res, next) => {
-	try {
-		const eventId = req.params.eventId;
-		const userId = req.user.user_id;
-
-		// Make sure it is their event to delete
-		const userStatus = await db.UserStatus.findOne({
-			where: {
-				user_id: userId,
-				event_id: eventId
-			}
-		});
-
-		if (!userStatus || userStatus.status !== 'owner') {
-			return res.status(403).json({ error: 'Forbidden: You are not authorized to delete this event' });
-		}
-
-		const result = await db.Event.deleteByEventId(eventId);
-
-		if (result) {
-			res.status(200).json({ success: true, message: "Event deleted successfully" });
-		} else {
-			res.status(404).json({ error: 'Event not found' });
-		}
-	} catch (error) {
-		console.error("Error deleting event:", error);
-		res.status(500).json({ error: "Internal server error" });
-	}
-}
-
-//owner can also unlist their own events
-module.exports.unlistEvent = async (req, res, next) => {
-	try {
-		const eventId = req.params.eventId;
-		const userId = req.user.user_id;
-
-		const userStatus = await db.UserStatus.findOne({
-			where: {
-				user_id: userId,
-				event_id: eventId
-			}
-		});
-
-		if (!userStatus || userStatus.status !== 'owner') {
-			return res.status(403).json({ error: 'Forbidden: You are not authorized to unlist this event' });
-		}
-
-		const result = await db.Event.unlistByEventId(eventId);
-
-		if (result) {
-			res.status(200).json({ success: true, message: "Event unlisted successfully" });
-		} else {
-			res.status(404).json({ error: 'Event not found' });
-		}
-	} catch (error) {
-		console.error("Error unlisting event:", error);
-		res.status(500).json({ error: "Internal server error" });
-	}
-};
-
-module.exports.deleteFinancial = async (req, res, next) => {
-	try {
-		const finId = req.params.finId;
-		const userId = req.user.user_id;
-
-		const finStatus = await db.FinStatus.findOne({
-			where: {
-				user_id: userId,
-				fin_id: finId
-			}
-		});
-
-		if (!finStatus) {
-			return res.status(403).json({ error: 'Forbidden: You are not authorized to delete this financial object' });
-		}
-
-		const result = await db.Financial.deleteFinancialByFinId(finId);
-
-		if (result) {
-			res.status(200).json({ success: true, message: "Financial object deleted successfully" });
-		} else {
-			res.status(404).json({ error: 'Financial object not found' });
-		}
-	} catch (error) {
-		console.error("Error deleting financial object:", error);
-		res.status(500).json({ error: "Internal server error" });
-	}
-};
-
 
 
 

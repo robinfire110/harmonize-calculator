@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const {getInstrumentId, instrumentArrayToIds, checkValidUserId} = require("../helpers/model-helpers");
+const {checkValidUserId} = require("../helpers/model-helpers");
 const db = require('../models/models');
-const { userSchema, instrumentSchema } = require('../helpers/validators');
+const { userSchema } = require('../helpers/validators');
 const Joi = require('joi');
 const {checkUser, checkUserOptional} = require("../Middleware/AuthMiddleWare");
 const { Op } = require('sequelize');
@@ -59,21 +59,6 @@ router.get("/email/:email", async (req, res) => {
     }
 });
 
-//Get single by email
-//Returns JSON of user with given email. Will be empty if does not exist.
-//Commented out because we never use it and securing it is more difficult
-/*
-router.get("/email/:email", async (req, res) => {
-    try {
-        const email = req.params.email;
-        const user = await db.User.findOne({where: {email: email}, include: [db.Instrument, db.Event]});
-        res.json(user);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-*/
-
 /* POST */
 //Add new user
 //Required - email, password, name, zip
@@ -84,89 +69,10 @@ router.post("/", async (req, res) => {
         //Get data
         const data = req.body;
 
-        //Validate
-        data.instruments = await instrumentArrayToIds(data?.instruments);
-        const {error} = userSchema.validate(data)
-        if (error) 
-        {
-            console.log(error);
-            return res.status(403).send(error.details);;
-        }
-
         //Add to User
         const newUser = await db.User.create({email: data?.email, password: data?.password, name: data?.name, zip: data?.zip, bio: data?.bio, is_admin: data?.is_admin});
 
-        //Add instrument (adds relation to UserInstrument table)
-        newInstrumentArray = [];
-        if (data.instruments)
-        {
-            for (const instrument of data.instruments) {
-                //Add if found
-                if (instrumentId)
-                {
-                    newInstrument = await db.UserInstrument.create({instrument_id: instrumentId, user_id: newUser.user_id});
-                    newInstrumentArray.push(newInstrument);
-                }
-                else
-                {
-                    console.log("Instrument not found. Possibly incorrect ID or name?. Skipping instrument");
-                }
-            }
-        }
-        res.send({newUser, newInstrumentArray});
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-//Add instrument
-//Adds instrumet(s) to user with associated user_id
-router.post("/instrument/:id", checkUser, async (req, res) => {
-    try {
-        //Get data
-        const data = req.body;
-        const id = req.params.id;
-
-        //Check User
-        if (!(req.user && (req.user.user_id == id || req.user.isAdmin == 1)))
-        {
-            throw new Error("Unauthorized access.");
-        }
-
-        //Validation
-        if (data?.instruments)
-        {
-            data.instruments = await instrumentArrayToIds(data?.instruments);        
-            const validUserId = await checkValidUserId(id);
-            const {error, value} = (Joi.object({instruments: instrumentSchema})).validate(data);
-            if (error || !validUserId) 
-            {
-                if (!validUserId) throw new Error("Not valid user id");
-                console.log(error);
-                return res.status(403).send(error.details);;
-            }
-            
-            //Add instrument (adds relation to UserInstrument table)
-            newInstrumentArray = [];
-            if (data.instruments)
-            {
-                for (const instrument of data.instruments) {
-                    //Add if found
-                    if (instrumentId)
-                    {
-                        newInstrument = await db.UserInstrument.findOrCreate({where: {instrument_id: instrumentId, user_id: id}});
-                        newInstrumentArray.push(newInstrument);
-                    }
-                    else
-                    {
-                        console.log("Instrument not found. Possibly incorrect ID or name?. Skipping instrument");
-                    }
-                    
-                }
-            }
-            res.send({newInstrumentArray});
-        }
-        
+        res.send({newUser});
     } catch (error) {
         res.status(500).send(error.message);
     }
@@ -191,61 +97,13 @@ router.put("/:id", checkUser, async (req, res) => {
         {
             //Update user
             user.set(data);
-            console.log("Updated user")
             await user.save();
+            res.status(200).send("User Updated");
         }
         else
         {
             res.status(404).send(`No user of user_id ${id} found.`);
         }
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-//Update instrument
-//Updates instrumet(s) to user with associated user_id
-//WILL DELETE OLD ENTIRES AND UPDATE ENTIRELY WITH NEW ONES. If you need to only add or delete one instrument, use the POST and DELETE requests instead.
-router.put("/instrument/:id", checkUser, async (req, res) => {
-    try {
-        //Get data
-        const data = req.body;
-        const id = req.params.id;
-
-        //Check User
-        if (!(req.user && (req.user.user_id == id || req.user.isAdmin == 1)))
-        {
-            throw new Error("Unauthorized access.");
-        }
-
-        //Add instrument (adds relation to UserInstrument table)
-        newInstrumentArray = [];
-        if (data.instruments)
-        {
-             //Delete old entries
-            await db.UserInstrument.destroy({where: {user_id: id}});
-            
-            for (const instrument of data.instruments) {
-                //Get instrumentId
-                let instrumentId = await getInstrumentId(instrument);
-                
-                //Add if found
-                if (instrumentId)
-                {
-                    newInstrument = await db.UserInstrument.findOrCreate({where: {instrument_id: instrumentId, user_id: id}});
-                    newInstrumentArray.push(newInstrument);
-                }
-                else
-                {
-                    console.log("Instrument not found. Possibly incorrect ID or name?. Skipping instrument");
-                }
-            }
-        }
-        else
-        {
-            throw {message: "No instrument object given."};
-        }
-        res.send({newInstrumentArray});
     } catch (error) {
         res.status(500).send(error.message);
     }
@@ -266,15 +124,6 @@ router.delete("/:id", checkUser, async (req, res) => {
 
         if (user)
         {
-            //Destroy events
-            user.Events.forEach(async event => {
-                //If owner, delete
-                if (event.UserStatus.status == "owner")
-                {
-                    await event.destroy();
-                }
-            });
-
             //Destroy Financial
             user.Financials.forEach(async financial => {
                 //If financial exists, delete
@@ -282,37 +131,11 @@ router.delete("/:id", checkUser, async (req, res) => {
             });
 
             await user.destroy();
-            res.send(user);
+            res.status(200).send(user);
         }
         else
         {
             res.status(404).send(`No user of user_id ${id} found.`);
-        }
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-//Delete instrument
-router.delete("/instrument/:user_id/:instrument_id?", checkUser, async (req, res) => {
-    try {
-        const {user_id, instrument_id} = req.params;
-        const instrument = await db.UserInstrument.findOne({where: {user_id: user_id, instrument_id: instrument_id}});
-
-        //Check User
-        if (!(req.user && (req.user.user_id == id || req.user.isAdmin == 1)))
-        {
-            throw new Error("Unauthorized access.");
-        }
-
-        if (instrument)
-        {
-            await instrument.destroy();
-            res.send(instrument);
-        }
-        else
-        {
-            res.status(404).send(`No instrument of user_id ${user_id} and instrument_id ${instrument_id} found.`);
         }
     } catch (error) {
         res.status(500).send(error.message);
