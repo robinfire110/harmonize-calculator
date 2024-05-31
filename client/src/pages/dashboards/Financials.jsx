@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 
 function Financials({ financials, refreshData }) {
 	const [searchQuery, setSearchQuery] = useState('');
+	const [sort, setSort] = useState(0);
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
 	const [filteredFinancials, setFilteredFinancials] = useState([]);
@@ -41,11 +42,56 @@ function Financials({ financials, refreshData }) {
 				if (endDate) date = moment(financial.date).isBetween(moment(startDate).subtract(1, "day"), moment(endDate).add(1, "day"));
 				else date = moment(financial.date).isSameOrAfter(moment(startDate));
 			} 
-			
 			return search && date;
 		});
+
+		//Sort
+
+		filtered.sort((a, b) => {
+			console.log(sort);
+			switch (sort)
+			{
+				//Date Ascending
+				case "0":
+					if (moment(a.date).isSameOrBefore(moment(b.date))) return 1;
+					return -1;
+				break;
+
+				//Date Descending
+				case "1":
+					if (moment(a.date).isSameOrAfter(moment(b.date))) return 1;
+					return -1;
+				break;
+
+				//Name A->Z
+				case "2":
+					if (a.fin_name > b.fin_name) return 1;
+					return -1;
+				break;
+
+				//Name A<-Z
+				case "3":
+					if (a.fin_name < b.fin_name) return 1;
+					return -1;
+				break;
+
+				//Wage $$$<-$
+				case "4":
+					if (a.hourly_wage < b.hourly_wage) return 1;
+					return -1;
+				break;
+
+				//Wage $->$$$
+				case "5":
+					if (a.hourly_wage > b.hourly_wage) return 1;
+					return -1;
+				break;
+			}
+			
+		});
+
 		setFilteredFinancials(filtered);
-	}, [searchQuery, startDate, endDate, financials]);
+	}, [searchQuery, startDate, endDate, financials, sort]);
 
 	//Handle page change
 	useEffect(() => {
@@ -137,10 +183,10 @@ function Financials({ financials, refreshData }) {
 				</Col>
 			</Row>
 			<Row style={{ marginTop: '20px', marginBottom: '10px', width: '100%'}}>
-				<Col className="mb-1 text-start" lg={{order: 0, span: 3}} xs={{order: 3, span: 6}}>
+				<Col className="mb-1 text-start" lg={{order: 0, span: 2}} xs={{order: 3, span: 6}}>
 					<Button onClick={handleRowSelectAll}>Select All </Button>
 				</Col>
-				<Col className="mb-1" lg={5} xs={12}>
+				<Col className="mb-1" lg={4} xs={12}>
 					<input
 						type="text"
 						placeholder="Search financials..."
@@ -154,6 +200,16 @@ function Financials({ financials, refreshData }) {
 							border: '1px solid #ced4da',
 						}}
 					/>
+				</Col>
+				<Col className="mb-1" lg={2} xs={6}>
+					<Form.Select placeholder="Sort" value={sort} onChange={(e) => setSort(e.target.value)}>
+						<option value={0}>Date ↑</option>
+						<option value={1}>Date ↓</option> 
+						<option value={2}>Name A→Z</option>
+						<option value={3}>Name Z→A</option>
+						<option value={4}>Wage $$$→$</option>  
+						<option value={5}>Wage $→$$$</option>
+					</Form.Select>
 				</Col>
 				<Col className="mb-1" lg={2} xs={6}>
 					<Form.Control type="date" placeholder="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
