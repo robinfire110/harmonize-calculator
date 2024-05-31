@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Sidebar from './dashboards/Sidebar';
+import Sidebar from '../components/Sidebar';
 import Spinner from 'react-bootstrap/Spinner';
-import {Button, Card, Col, Container, Row, Tab, Tabs} from "react-bootstrap";
+import {Col, Container, Row} from "react-bootstrap";
 import "../App.css";
 import EditProfile from "./dashboards/EditProfile";
 import Financials from "./dashboards/Financials";
 import AdminActions from "./dashboards/AdminActions";
 import { getBackendURL } from "../Utils"
 import Title from '../components/Title';
-import ConfirmationModal from './dashboards/ConfirmationModal';
 
 
 function Account() {

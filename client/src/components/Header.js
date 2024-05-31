@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navbar, Nav, Container, Col } from 'react-bootstrap';
-import LogoutButton from '../auth/LogoutButton';
+import LogoutButton from './LogoutButton';
 import { useCookies } from 'react-cookie';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';

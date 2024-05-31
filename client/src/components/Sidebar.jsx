@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Container from 'react-bootstrap/Container';
-import { Col, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap';
-import '../../App.css';
-import { Link } from 'react-router-dom';
+import { Nav, Navbar } from 'react-bootstrap';
+import '../App.css';
 
 function Sidebar({ handleLinkClick, isAdmin }) {
     //States

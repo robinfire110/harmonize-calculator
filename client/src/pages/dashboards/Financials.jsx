@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Col, Container, Form, Row, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getBackendURL, getTotalFinHours, saveSpreadsheetAll, toastError, toastSuccess } from '../../Utils';
-import ConfirmationModal from './ConfirmationModal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import { PaginationControl } from 'react-bootstrap-pagination-control';
 import moment from 'moment';
 import axios from 'axios';
@@ -91,7 +91,7 @@ function Financials({ financials, refreshData }) {
 
 	const handleDeleteFinancial = (financial) => {
 		setFinancialToDelete(financial);
-		setDeleteMessage(`Are you sure you want to delete '${financial.fin_name}' record?`);
+		setDeleteMessage(`Are you sure you want to delete '${financial.fin_name}'?`);
 		setShowConfirmationModal(true);
 	};
 

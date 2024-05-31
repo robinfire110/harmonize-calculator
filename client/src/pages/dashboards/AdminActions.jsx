@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {useNavigate} from "react-router-dom";
 import {Button, Tab, Tabs, Table, Row, Col, Form} from "react-bootstrap";
-import ConfirmationModal from './ConfirmationModal';
-import PasswordResetModal from "./PasswordResetModal";
+import ConfirmationModal from '../../components/ConfirmationModal';
 import { PaginationControl } from 'react-bootstrap-pagination-control';
-import DeleteAccountModal from './DeleteAccountModal';
+import DeleteAccountModal from '../../components/DeleteAccountModal';
 import axios from 'axios';
 import { getBackendURL } from '../../Utils';
 

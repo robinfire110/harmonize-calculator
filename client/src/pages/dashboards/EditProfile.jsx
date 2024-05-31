@@ -5,7 +5,7 @@ import axios from 'axios';
 import {getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero, toastError, toastSuccess} from "../../Utils";
 import FormNumber from '../../components/FormNumber';
 import TooltipButton from '../../components/TooltipButton';
-import DeleteAccountModal from './DeleteAccountModal';
+import DeleteAccountModal from '../../components/DeleteAccountModal';
 
 function EditProfile({ userData, onUserChange }) {
 	const [formData, setFormData] = useState({

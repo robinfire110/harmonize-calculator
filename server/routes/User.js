@@ -47,18 +47,6 @@ router.get("/id/:id", checkUserOptional, async (req, res) => {
     }
 });
 
-//Check email
-//Returns true if email exists, false otherwise
-router.get("/email/:email", async (req, res) => {
-    try {
-        const email = req.params.email;
-        const user = await db.User.findOne({where: {email: email}, attributes: ["user_id", "email"]});
-        res.json(user);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
 /* POST */
 //Add new user
 //Required - email, password, name, zip

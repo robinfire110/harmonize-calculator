@@ -185,8 +185,6 @@ const Calculator = () => {
     useEffect(() => {
         //Calculate Wage
         calculateHourlyWage();
-
-        //Set switches
         
     }, [gigPay, gigHours, gigNum, totalMileage, mileageCovered, gasPricePerMile, travelHours, practiceHours, rehearsalHours, tax, otherFees,
         gigNumEnabled, totalMileageEnabled, mileageCoveredEnabled, travelHoursEnabled, practiceHoursEnabled, rehearsalHoursEnabled, taxEnabled, otherFeesEnabled,
@@ -259,7 +257,7 @@ const Calculator = () => {
             if (data) loadData(data);
             else //Financial does not exists, redirect to blank page.
             {
-                setParamId(0);
+                setParamId(null);
                 navigate(`/calculator`); 
                 toast("You do not have access to this data.", toastError)
             }
@@ -284,13 +282,6 @@ const Calculator = () => {
                     setTravelHours(durationInHours);
                     setLocationModalOpen(false);
                     setIsGettingLocation(false);
-
-                    //Set state
-                    //This works, but I'm debating if we want it or not. It may be a bit disorienting. I tried to add a setting, but I couldn't find a good place to put it.
-                    /*
-                    let string = res.data.origin_addresses[0]
-                    setCurrentState(string.substring(string.indexOf(",")+2, string.indexOf(",")+4))
-                    */
                 }
                 else
                 {

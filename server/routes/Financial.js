@@ -63,23 +63,6 @@ router.get("/user_id/fin_id/:user_id/:fin_id", checkUser, async (req, res) => {
     }
 });
 
-//Get Financial by user and event id
-router.get("/user_id/event_id/:user_id/:event_id", checkUser, async (req, res) => {
-    try {
-        const {user_id, event_id} = req.params;
-        //Check User
-        if (!(req.user && (req.user.user_id == user_id || req.user.isAdmin == 1)))
-        {
-            throw new Error("Unauthorized access.");
-        }
-
-        const financials = await db.Financial.findAll({where: {event_id: event_id}, include: {model: db.User, where: {user_id: user_id}, attributes: {exclude: ['password', 'isAdmin']}}});
-        res.json(financials);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
 /* POST */
 //Add new financial
 //Required - fin_name, total_wage, event_hours, date

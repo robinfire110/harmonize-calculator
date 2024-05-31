@@ -106,6 +106,5 @@ async function sendEmail()
     }
 }
 
-
 //Export
 module.exports = {router};

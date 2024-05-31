@@ -8,8 +8,6 @@ const { sequelize, connectToDatabase } = require('./config/database_config');
 const db = require('./models/models');
 const {
     getGasPrices,
-    createFakerData,
-    fixData
 } = require("./helpers/model-helpers");
 
 // Middleware to log request headers
@@ -57,10 +55,9 @@ const gasPricePull = schedule.scheduleJob({tz: "America/New_York", hour: 8, minu
 // Database setup
 app.listen(port, async () => {
     await connectToDatabase();
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
 
     //Run Scripts
-    //fixData();
     console.log(`Server is running at http://localhost:${port}`);
 });
 

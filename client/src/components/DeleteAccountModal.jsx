@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { toast } from "react-toastify";
 import axios from 'axios';
-import { getBackendURL, toastError, toastSuccess } from "../../Utils";
+import { getBackendURL, toastError, toastSuccess } from "../Utils";
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 
