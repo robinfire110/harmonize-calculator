@@ -2,9 +2,9 @@ module.exports = (sequelize, Sequelize, Event) => {
   const Financial = sequelize.define('Financial', {
     // Model attributes are defined here
     fin_id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false
     },
     fin_name: {
       type: Sequelize.STRING,

@@ -96,7 +96,7 @@ async function createFakerData(userNum, eventNum, financialNum) {
 async function checkValidUserId(id)
 {
     let user = await db.User.findOne({where: {user_id: id}});
-    if (parseInt(id) == parseInt(user?.user_id)) return true;
+    if (id === user?.user_id) return true;
     return false;
 }
 
@@ -104,7 +104,7 @@ async function checkValidUserId(id)
 async function checkValidFinancialId(id)
 {
     let financial = await db.Financial.findOne({where: {fin_id: id}});
-    if (parseInt(id) == parseInt(financial?.fin_id)) return true;
+    if (id === financial?.fin_id) return true;
     return false;
 }
 

@@ -1,5 +1,16 @@
 const {checkUser} = require("../Middleware/AuthMiddleWare");
+const db = require("../models/models");
+const jwt = require('jsonwebtoken');
+const {jwtDecode} = require('jwt-decode');
 const router = require("express").Router();
+
+//Create token
+const maxAge = 3*24*60*60;
+const createToken = (id) => {
+	return jwt.sign({ id }, process.env.SECRET, {
+		expiresIn: maxAge,
+	});
+}
 
 //Login
 router.post("/login", async (req, res) => {
@@ -21,8 +32,7 @@ router.post("/login", async (req, res) => {
 		}
 	} catch (err) {
 		console.error(err);
-		const errors = handleErrors(err);
-		res.json({errors, created: false});
+		res.json({err, created: false});
 	}
 });
 
@@ -41,8 +51,7 @@ router.get("/account", checkUser, async (req, res) => {
 		}
 	} catch (err) {
 		console.error(err);
-		const errors = handleErrors(err);
-		res.json({ errors, created: false });
+		res.json({ err, created: false });
 	}
 });
 

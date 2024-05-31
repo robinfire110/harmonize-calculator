@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const ShortUniqueId = require('short-unique-id');
 const db = require('../models/models');
 const { financialSchema } = require('../helpers/validators');
 const { checkValidEventId, checkValidUserId, checkValidFinancialId } = require('../helpers/model-helpers');
 const {checkUser, checkUserOptional} = require("../Middleware/AuthMiddleWare");
+
+const uid = new ShortUniqueId({ length: 16 });
 
 /* GET */
 //Get User Financial
@@ -85,6 +88,7 @@ router.post("/:id", checkUser, async (req, res) => {
     try {
         //Get data
         const id = req.params.id;
+        console.log(id);
         const data = req.body;
 
         //Check User
@@ -109,7 +113,7 @@ router.post("/:id", checkUser, async (req, res) => {
         }
 
         //Add to User
-        const newFinancial = await db.Financial.create({fin_name: data?.fin_name, date: data?.date, total_wage: data?.total_wage, hourly_wage: data?.hourly_wage, event_num: data?.event_num, event_hours: data?.event_hours, rehearse_hours: data?.rehearse_hours, practice_hours: data?.practice_hours, travel_hours: data?.travel_hours, total_mileage: data?.total_mileage, mileage_pay: data?.mileage_pay, zip: data?.zip, gas_price: data?.gas_price, mpg: data?.mpg, tax: data?.tax, fees: data?.fees, event_id: data?.event_id, round_trip: data?.round_trip, multiply_pay: data?.multiply_pay, multiply_hours: data?.multiply_hours, multiply_travel: data?.multiply_travel, multiply_practice: data?.multiply_practice, multiply_rehearsal: data?.multiply_rehearsal, multiply_other: data?.multiply_other});
+        const newFinancial = await db.Financial.create({fin_id: uid.rnd(), fin_name: data?.fin_name, date: data?.date, total_wage: data?.total_wage, hourly_wage: data?.hourly_wage, event_num: data?.event_num, event_hours: data?.event_hours, rehearse_hours: data?.rehearse_hours, practice_hours: data?.practice_hours, travel_hours: data?.travel_hours, total_mileage: data?.total_mileage, mileage_pay: data?.mileage_pay, zip: data?.zip, gas_price: data?.gas_price, mpg: data?.mpg, tax: data?.tax, fees: data?.fees, event_id: data?.event_id, round_trip: data?.round_trip, multiply_pay: data?.multiply_pay, multiply_hours: data?.multiply_hours, multiply_travel: data?.multiply_travel, multiply_practice: data?.multiply_practice, multiply_rehearsal: data?.multiply_rehearsal, multiply_other: data?.multiply_other});
         const newFinStatus = await db.FinStatus.create({user_id: id, fin_id: newFinancial.fin_id});
         res.send(newFinancial);
     } catch (error) {
