@@ -11,10 +11,6 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
-    password: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
     zip: {
       type: Sequelize.STRING,
     },
@@ -87,25 +83,6 @@ module.exports = (sequelize, Sequelize) => {
       defaultValue: false,
     },
   });
-
-  //User Model functions
-  User.beforeCreate(async (user, options) => {
-    const saltRounds = 10;
-    user.password = await bcrypt.hash(user.password, saltRounds);
-  });
-
-
-  User.login = async function (email, password) {
-    const user = await this.findOne({ where: { email } });
-    if (user) {
-      const auth = await bcrypt.compare(password, user.password);
-      if (auth) {
-        return user;
-      }
-      throw new Error("Incorrect Password");
-    }
-    throw new Error("Incorrect Email");
-  };
 
   User.updateUser = async function (userId, newData) {
     try {

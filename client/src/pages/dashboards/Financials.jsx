@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Col, Container, Form, Row, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { getTotalFinHours, saveSpreadsheetAll } from '../../Utils';
+import { getBackendURL, getTotalFinHours, saveSpreadsheetAll, toastError, toastSuccess } from '../../Utils';
 import ConfirmationModal from './ConfirmationModal';
 import { PaginationControl } from 'react-bootstrap-pagination-control';
 import moment from 'moment';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
-function Financials({ financials, onDeleteFinancial }) {
+function Financials({ financials, refreshData }) {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
@@ -87,13 +89,6 @@ function Financials({ financials, onDeleteFinancial }) {
 		}
 	};
 
-	const handleExportToSpreadsheet = () => {
-		selectedRows.forEach(index => {
-			const selectedData = [filteredFinancials[index]];
-			saveSpreadsheetAll(selectedData, selectedData[0].fin_name);
-		});
-	};
-
 	const handleDeleteFinancial = (financial) => {
 		setFinancialToDelete(financial);
 		setDeleteMessage(`Are you sure you want to delete '${financial.fin_name}' record?`);
@@ -102,7 +97,14 @@ function Financials({ financials, onDeleteFinancial }) {
 
 	const handleConfirmDeleteFinancial = () => {
 		if (financialToDelete) {
-			onDeleteFinancial(financialToDelete);
+			//Delete
+			axios.delete(`${getBackendURL()}/financial/${financialToDelete.fin_id}`, {withCredentials: true}).then((res) => {
+				toast.success(`Successfully deleted ${financialToDelete.fin_name}`, toastSuccess);
+                refreshData();
+			}).catch((error) => {
+				console.error('Error deleting financial.:', error);
+            	toast.error('Failed to delete financial.', toastError);
+			});
 			setFinancialToDelete(null);
 			setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== financialToDelete.index));
 		}
@@ -116,7 +118,6 @@ function Financials({ financials, onDeleteFinancial }) {
 	const indexOfLastFinancial = currentPage * financialsPerPage;
 	const indexOfFirstFinancial = indexOfLastFinancial - financialsPerPage;
 	const currentFinancials = filteredFinancials.slice(indexOfFirstFinancial, indexOfLastFinancial);
-
 
 	return (
 		<div>
@@ -190,7 +191,8 @@ function Financials({ financials, onDeleteFinancial }) {
 			</Table>
 			) : (
 				<div className="no-financials-message">
-					<p>No financial records to show.</p>
+					<br />
+					<h4>No financial records to show.</h4>
 				</div>
 			)}
 			<Row className="justify-content-center">

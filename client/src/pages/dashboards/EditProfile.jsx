@@ -3,11 +3,11 @@ import {Form, Button, Container, Col, Row, InputGroup, Modal, Card, ButtonGroup,
 import {toast, ToastContainer} from 'react-toastify';
 import axios from 'axios';
 import {getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero, toastError, toastSuccess} from "../../Utils";
-import UserPasswordResetModal from "../dashboards/UserPasswordResetModal";
 import FormNumber from '../../components/FormNumber';
 import TooltipButton from '../../components/TooltipButton';
+import DeleteAccountModal from './DeleteAccountModal';
 
-function EditProfile({ userData,  onUserChange }) {
+function EditProfile({ userData, onUserChange }) {
 	const [formData, setFormData] = useState({
 		email: userData.email,
 		zip: userData.zip || "",
@@ -25,7 +25,7 @@ function EditProfile({ userData,  onUserChange }) {
 		multiply_hours: userData.multiply_hours,
 		multiply_travel: userData.multiply_travel,
 		multiply_practice: userData.multiply_practice,
-		multiply_rehersal: userData.multiply_rehearsal,
+		multiply_rehearsal: userData.multiply_rehearsal,
 		multiply_other: userData.multiply_other
 	});
 
@@ -36,7 +36,7 @@ function EditProfile({ userData,  onUserChange }) {
 	const [gasPrices, setGasPrices] = useState();
 
 	//Modal
-	const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
+	const [deleteAccountModal, setDeleteAccountModal] = useState(false);
 	const [gigNumModalOpen, setGigNumModalOpen] = useState(false);
 
 	//Get Gas Prices
@@ -65,21 +65,15 @@ function EditProfile({ userData,  onUserChange }) {
 	}, [isRoundTrip])
 
 	const handleChange = (e) => {
-		const { name, value } = e.target;
+		const name = e.target.name;
+		let value = e.target.value;
+		if (value === "") value = null;
 		setFormData({ ...formData, [name]: value });
 	};
 
-	useEffect(() => {
-		console.log("userData", userData);
-		console.log("FormData", formData);
-	}, [formData]);
-
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		
 		axios.put(`${getBackendURL()}/user/${userData.user_id}`, {...formData}, {withCredentials: true}).then((res) => {
-			console.log(userData);
-			console.log(res.data);
 			toast.success('Profile updated successfully', toastSuccess);
 			onUserChange(userData);
 		}).catch(error => {
@@ -87,10 +81,6 @@ function EditProfile({ userData,  onUserChange }) {
 			toast.error('Failed to update profile', toastError);
 		});
 	}
-
-	const togglePasswordResetModal = () => {
-		setShowPasswordResetModal(!showPasswordResetModal);
-	};
 
 	return (
 		<div className='text-start' style={{ maxWidth: '650px', margin: "auto" }}>
@@ -101,19 +91,20 @@ function EditProfile({ userData,  onUserChange }) {
 			<Form onSubmit={handleSubmit}>
 				<Col>
 					<Row>
-						<Col lg={6} sm={12}>
-							<Form.Group className="text-start mb-3">
-								<Form.Label>Email Address<span style={{color: "red"}}>*</span></Form.Label>
-								<Form.Control type="email" placeholder="Enter email" name="email" value={formData.email} onChange={handleChange} required />
+						<Col lg={9} sm={8} xs={12}>
+							<Form.Group className="text-start mb-lg-3">
+								<Form.Label>Email Address</Form.Label>
+								<Form.Control type="email" placeholder="Enter email" name="email" value={formData.email} disabled={true} />
 							</Form.Group>
 						</Col>
 						<Col className="text-start mb-3">
-							<Form.Label>Password<span style={{color: "red"}}>*</span></Form.Label>
-							<InputGroup>
-								<Form.Control type="password" placeholder="Password" name="password" value={"greatpassword"} onChange={handleChange} disabled={true} />
-								<Button className="btn btn-dark" variant="secondary" onClick={togglePasswordResetModal}>Update Password</Button>
-							</InputGroup>
+							<Form.Group>
+							<Form.Label></Form.Label>
+							<br />
+							<Button className="mt-lg-2 mt-md-2 mt-sm-2 btn" variant="danger" onClick={() => setDeleteAccountModal(true)}>Delete Account</Button>
+							</Form.Group>
 						</Col>
+						<DeleteAccountModal show={deleteAccountModal} handleClose={() => setDeleteAccountModal(!deleteAccountModal)} user={userData} />
 					</Row>
 				</Col>
 				<hr />
@@ -122,7 +113,7 @@ function EditProfile({ userData,  onUserChange }) {
 				<p>Set default values for blank calculator.</p>
 				</div>
 				<Row>
-					<Col lg={6}>
+					<Col className="mb-3" lg={6}>
 						<h4>Travel</h4>
 						<Row>
 							<Form.Group className="text-start mb-3">
@@ -142,7 +133,7 @@ function EditProfile({ userData,  onUserChange }) {
 										<option key={"average_gas"} value={"average_gas"}>Average</option>
 										{gasPrices ? Object.keys(gasPrices).map((element) => {if (element.length == 2) return <option key={element} value={element}>{element}</option>}) : ""}
 									</Form.Select>
-									<FormNumber id='gasPricePerGallon' maxValue={9.99} value={gasPricePerGallon} placeholder="Ex. 0.14" integer={false} disabled={formData.default_state != "custom"} onChange={e => setGasPricePerGallon(e.target.value)} />
+									<FormNumber id='gasPricePerGallon' maxValue={9.99} value={gasPricePerGallon} placeholder="Ex. 0.14" integer={false} disabled={formData.default_state !== "custom"} onChange={e => setGasPricePerGallon(e.target.value)} required={formData.default_state === "custom"} />
 									<TooltipButton text="Default location used for distance calculations. Select Custom to input value instead."/>
 								</InputGroup>
 							</Form.Group>
@@ -163,7 +154,7 @@ function EditProfile({ userData,  onUserChange }) {
 											} 
 										}) : ""}
 									</Form.Select>
-									<FormNumber id="vehicleMPG" max={99.9} value={vehicleMPG} placeholder="Ex. 20" integer={false} disabled={formData.default_vehicle != "custom"} onChange={e => setVehicleMPG(e.target.value)} />
+									<FormNumber id="vehicleMPG" max={99.9} value={vehicleMPG} placeholder="Ex. 20" integer={false} disabled={formData.default_vehicle !== "custom"} onChange={e => setVehicleMPG(e.target.value)} required={formData.default_vehicle === "custom"}/>
 									<TooltipButton text='Default Vehicle Type, will determine MPG values used. Choose <i>Average</i> for average MPG value. Select Custom to input your own value (i.e. if you know the exact MPG of your vehicle).'/>
 								</InputGroup>
 							</Form.Group>
@@ -185,7 +176,7 @@ function EditProfile({ userData,  onUserChange }) {
 							</ButtonGroup>
 						</Row>
 					</Col>
-					<Col lg={6}>
+					<Col className="mb-3" lg={6}>
 						<h4>Basic Information</h4>
 						<Row>
 							<InputGroup>
@@ -193,49 +184,49 @@ function EditProfile({ userData,  onUserChange }) {
 								<TooltipButton text='Number of gigs. Used if you have multiple of the same gig or service. Will multiply any activated fields in the options by number of gigs.'/>
 							</InputGroup>
 							<Modal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false);}} centered={true}>
-									<Modal.Header closeButton>
-										<Modal.Title>Number of Services Options</Modal.Title>
-									</Modal.Header>
-									<Modal.Body>
-										<p>
-											Choose which attributes get multiplied by number of gigs.
-											<br />
-											<small>Note - If all options are enabled, number of gigs will make no difference because all fields are multiplied by the same amount.</small>
-										</p>
-											<Card style={{display:'flex'}}>
-												<Container>
-													<Col>
-														<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-															<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_pay"]: parseBool(e.target.checked) })} checked={formData.multiply_pay}></Form.Check></Col>
-															<Col><div>Multiply Pay</div></Col>
-														</Row>
-														<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-															<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_hours"]: parseBool(e.target.checked) })} checked={formData.multiply_hours}></Form.Check></Col>
-															<Col><div>Multiply Gig Hours</div></Col>
-														</Row>
-														<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-															<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_travel"]: parseBool(e.target.checked) })} checked={formData.multiply_travel}></Form.Check></Col>
-															<Col><div>Multiply Travel</div></Col>
-														</Row>
-														<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-															<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_practice"]: parseBool(e.target.checked) })} checked={formData.multiply_practice}></Form.Check></Col>
-															<Col><div>Multiply Individual Practice Hours</div></Col>
-														</Row>
-														<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-															<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_rehearsal"]: parseBool(e.target.checked) })} checked={formData.multiply_rehersal}></Form.Check></Col>
-															<Col><div>Multiply Rehearsal Hours</div></Col>  
-														</Row>
-														<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-															<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_other"]: parseBool(e.target.checked) })} checked={formData.multiply_other}></Form.Check></Col>
-															<Col><div>Multiply Other Fees</div></Col>  
-														</Row>
-													</Col>
-												</Container>
-											</Card>
-									</Modal.Body>
-									<Modal.Footer>
+								<Modal.Header closeButton>
+									<Modal.Title>Number of Services Options</Modal.Title>
+								</Modal.Header>
+								<Modal.Body>
+									<p>
+										Choose which attributes get multiplied by number of gigs.
+										<br />
+										<small>Note - If all options are enabled, number of gigs will make no difference because all fields are multiplied by the same amount.</small>
+									</p>
+									<Card style={{display:'flex'}}>
+										<Container>
+											<Col>
+												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
+													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_pay"]: parseBool(e.target.checked) })} checked={formData.multiply_pay}></Form.Check></Col>
+													<Col><div>Multiply Pay</div></Col>
+												</Row>
+												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
+													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_hours"]: parseBool(e.target.checked) })} checked={formData.multiply_hours}></Form.Check></Col>
+													<Col><div>Multiply Gig Hours</div></Col>
+												</Row>
+												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
+													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_travel"]: parseBool(e.target.checked) })} checked={formData.multiply_travel}></Form.Check></Col>
+													<Col><div>Multiply Travel</div></Col>
+												</Row>
+												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
+													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_practice"]: parseBool(e.target.checked) })} checked={formData.multiply_practice}></Form.Check></Col>
+													<Col><div>Multiply Individual Practice Hours</div></Col>
+												</Row>
+												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
+													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_rehearsal"]: parseBool(e.target.checked) })} checked={formData.multiply_rehearsal}></Form.Check></Col>
+													<Col><div>Multiply Rehearsal Hours</div></Col>  
+												</Row>
+												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
+													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_other"]: parseBool(e.target.checked) })} checked={formData.multiply_other}></Form.Check></Col>
+													<Col><div>Multiply Other Fees</div></Col>  
+												</Row>
+											</Col>
+										</Container>
+									</Card>
+								</Modal.Body>
+								<Modal.Footer>
 									<Button variant="primary" onClick={() => {setGigNumModalOpen(false)}}>Close</Button>
-									</Modal.Footer>
+								</Modal.Footer>
 							</Modal>
 						</Row>
 						<br />
@@ -274,19 +265,11 @@ function EditProfile({ userData,  onUserChange }) {
 						</Row>
 					</Col>
 				</Row>
-
 				<hr />
 				<div className='text-center'>
-				<Button className="btn btn-dark" variant="primary" type="submit">
-					Update Profile
-				</Button>
+				<Button className="btn btn-dark" size='lg' variant="primary" type="submit">Update Profile</Button>
 				</div>
 			</Form>
-			<UserPasswordResetModal
-				show={showPasswordResetModal}
-				handleClose={togglePasswordResetModal}
-				isAdmin={false}
-			/>
 		</div>
 	);
 }

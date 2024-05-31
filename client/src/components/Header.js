@@ -2,17 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { Navbar, Nav, Container, Col } from 'react-bootstrap';
 import LogoutButton from '../auth/LogoutButton';
 import { useCookies } from 'react-cookie';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { GoogleLogin } from '@react-oauth/google';
+import { getBackendURL } from '../Utils';
+import axios from 'axios';
 
 function Header() {
     const [cookies] = useCookies(['jwt']);
     const location = useLocation();
     const [isLoggedIn, setIsLoggedIn] = useState(cookies.jwt)
+    const navigate = useNavigate();
 
     useEffect(() => {
       setIsLoggedIn(cookies.jwt);
-    }, [cookies])
+    }, [])
 
     return (
         <div>
@@ -25,7 +29,18 @@ function Header() {
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="justify-content-end" style={{width: "100%"}}>
-                            {!isLoggedIn && <Nav.Item><Nav.Link href="/login">Login/Register</Nav.Link></Nav.Item>}
+                            {!isLoggedIn && <GoogleLogin
+                                onSuccess={credentialResponse => {
+                                    axios.post(`${getBackendURL()}/login`, {"credential": credentialResponse.credential}, { withCredentials: true}).then(() => {
+                                        if (location.pathname != "/") navigate("/");
+                                        else navigate(0);
+                                    });
+                                }}
+                                onError={() => {
+                                    console.log('Login Failed');
+                                }}
+                                />}
+                            {/*!isLoggedIn && <Nav.Item><Nav.Link href="/login">Login/Register</Nav.Link></Nav.Item>*/}
                             {isLoggedIn && <Nav.Item><Nav.Link href="/account#listings">Account</Nav.Link></Nav.Item>}
                             {isLoggedIn && <LogoutButton />}
                         </Nav>

@@ -12,6 +12,7 @@ function getBackendURL()
 //Constant Variables
 const maxFinancialNameLength = 50;
 const statesList = [ 'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' ];
+const clientId = "60061594536-k5ll1e4hv1ft1pliuftsiubpt9ed6lj4.apps.googleusercontent.com";
 
 //Default toast settings
 const toastTheme = 'dark';
@@ -193,4 +194,4 @@ async function saveSpreadsheetAll(data, filename = 'Harmonize_Export')
     saveAs(new Blob([buf]), `${filename}.xlsx`);
 }
 
-module.exports = {formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, toastSuccess, toastError, toastInfo, saveSpreadsheetAll};
+module.exports = {formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll};

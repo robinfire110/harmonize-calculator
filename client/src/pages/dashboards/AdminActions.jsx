@@ -4,17 +4,18 @@ import {Button, Tab, Tabs, Table, Row, Col, Form} from "react-bootstrap";
 import ConfirmationModal from './ConfirmationModal';
 import PasswordResetModal from "./PasswordResetModal";
 import { PaginationControl } from 'react-bootstrap-pagination-control';
+import DeleteAccountModal from './DeleteAccountModal';
+import axios from 'axios';
+import { getBackendURL } from '../../Utils';
 
-function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onDemoteUser, onDeleteUser, onDeletePost }) {
+function AdminActions({  userData, refreshData }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const [filteredPosts, setFilteredPosts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
-    const [resetPassMessage, setResetPassMessage] = useState('');
-    const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
     const [actionToConfirm, setActionToConfirm] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
     const [userToResetPass, setUserToResetPass] = useState(null);
@@ -36,29 +37,22 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
         setFilteredUsers(filtered);
     }, [searchQuery, userData]);
 
-    const handleUserClick = (userId) => {
-        navigate(`../profile/${userId}`);
-    };
-
     const handleSearchInputChange = (event) => {
         setSearchQuery(event.target.value);
     };
 
-    const handlePasswordReset = (user) => {
-        setUserToResetPass(user);
-        setResetPassMessage(`Are you sure you want to reset the password for ${user.email}?`)
-        setShowPasswordResetModal(true);
-    };
-
     const handlePromoteUser = (user) => {
         setUserToPromote(user);
-        setActionToConfirm(() => () => {
-            onPromoteUser(user);
-        });
+        setActionToConfirm(() => () => onPromoteUser(user));
         setConfirmationMessage(`Are you sure you want to promote ${user.email} to Admin?`);
         setShowConfirmationModal(true);
     };
 
+    const onPromoteUser = (user) => {
+        axios.put(`${getBackendURL()}/user/${user.user_id}`, {isAdmin: 1}, { withCredentials: true }).then((res) => {
+            refreshData();
+        })
+    }
 
     const handleDemoteUser = (user) => {
         setUserToDemote(user);
@@ -67,12 +61,11 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
         setShowConfirmationModal(true);
     };
 
-    const handleDeleteUser = (user) => {
-        setUserToDelete(user);
-        setActionToConfirm(() => () => onDeleteUser(user));
-        setConfirmationMessage(`Are you sure you want to delete ${user.email}?`);
-        setShowConfirmationModal(true);
-    };
+    const onDemoteUser = (user) => {
+        axios.put(`${getBackendURL()}/user/${user.user_id}`, {isAdmin: 0}, { withCredentials: true }).then((res) => {
+            refreshData();
+        })
+    }
 
     const handleConfirmation = () => {
         if (actionToConfirm) {
@@ -82,20 +75,10 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
         setShowConfirmationModal(false);
     };
 
-    const handlePasswordResetConfirm = (newPassword) => {
-        onPasswordReset(userToResetPass, newPassword);
-        setShowPasswordResetModal(false);
-    };
-
     const indexOfLastUser = currentPage * itemsPerPage;
     const indexOfFirstUser = indexOfLastUser - itemsPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
     //const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-    const indexOfLastPost = currentPage * itemsPerPage;
-    const indexOfFirstPost = indexOfLastPost - itemsPerPage;
-    const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
-    //const paginatePosts = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
         <div>
@@ -117,7 +100,7 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
                         }}
                         />
                     </div>
-                    <Table striped bordered hover responsive>
+                    <Table className='text-center' striped bordered hover responsive>
                         <thead>
                         <tr>
                             <th>ID</th>
@@ -128,18 +111,17 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
                         </thead>
                         <tbody>
                         {currentUsers.map(user => (
-                            <tr key={user.user_id} style={{ cursor: 'pointer' }} onClick={() => handleUserClick(user.user_id)}>
+                            <tr key={user.user_id} style={{ cursor: 'pointer' }}>
                                 <td>{user.user_id}</td>
                                 <td>{user.email}</td>
-                                <td><td>{user.isAdmin ? 'Admin' : 'User'}</td></td>
+                                <td>{user.is_admin ? 'Admin' : 'User'}</td>
                                 <td>
-                                    {user.isAdmin ? (
+                                    {user.is_admin ? (
                                         <Button variant="warning" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDemoteUser(user); }}>Demote</Button>
                                     ) : (
                                         <Button variant="primary" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handlePromoteUser(user); }}>Promote</Button>
                                     )}
-                                    <Button variant="secondary" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handlePasswordReset(user); }}>Reset Password</Button>
-                                    <Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDeleteUser(user); }}>Delete</Button>
+                                    <Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); setUserToDelete(user); setShowDeleteModal(true); }}>Delete</Button>
 
                                 </td>
                             </tr>
@@ -168,12 +150,7 @@ function AdminActions({  userData, postData, onPasswordReset, onPromoteUser, onD
                 message={confirmationMessage}
                 onConfirm={handleConfirmation}
             />
-            <PasswordResetModal
-                show={showPasswordResetModal}
-                handleClose={() => setShowPasswordResetModal(false)}
-                message={resetPassMessage}
-                onConfirm={handlePasswordResetConfirm}
-            />
+            <DeleteAccountModal show={showDeleteModal} handleClose={() => {setShowDeleteModal(!showDeleteModal); setUserToDelete(null);}} user={userToDelete} />
         </div>
     );
 }

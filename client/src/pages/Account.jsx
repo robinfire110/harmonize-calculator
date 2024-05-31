@@ -26,9 +26,11 @@ function Account() {
     const [selectedContent, setSelectedContent] = useState('listings');
 
     const verifyUser = async () => {
-        if (!cookies.jwt) {
+        if (!cookies.jwt) 
+        {
             navigate('/login');
-        } else {
+        } 
+        else {
             try {
                 const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true });
                 axios.get(`${getBackendURL()}/user/id/${data.user.user_id}`, { withCredentials: true }).then(res => {
@@ -68,28 +70,9 @@ function Account() {
     const handleLinkClick = (content) => {
         //Filter
         if (content === "financials") content = "financials";
-        if (content === "admin") content = "adminActions";
         if (content === "profile") content = "editProfile";
+        if (content === "admin") content = "adminActions";
         setSelectedContent(content);
-    };
-
-    const handlePasswordReset = async (user, newPassword) => {
-        try {
-            if(isAdmin){
-                const response = await axios.post(`${getBackendURL()}/account/admin/reset-user-password`,
-                    { user, newPassword }, {
-                        withCredentials: true
-                    });
-                if (response.data.success) {
-                    toast.success("Password reset successfully", { theme: 'dark' });
-                    fetchUsers();
-                } else {
-                    console.error('Failed to reset password:', response.data.message);
-                }
-            }
-        } catch (error) {
-            console.error('Error resetting password:', error);
-        }
     };
 
     const handlePromoteUser = async (user) => {
@@ -153,28 +136,6 @@ function Account() {
         }
     };
 
-    const handleDeleteFinancial = async (financial) => {
-        try {
-            console.log(financial.fin_id)
-            const response = await axios.delete(`${getBackendURL()}/financial/${financial.fin_id}`
-                , {
-                    withCredentials: true
-                });
-            if (response.data.success) {
-                toast.success(`Successfully deleted ${financial.fin_name}`, { theme: 'dark' });
-                verifyUser();
-            } else {
-                console.error('Failed to delete financial:', response.data.message);
-            }
-
-        } catch (error) {
-            console.error('Error deleting financial record:', error);
-            toast.error('Failed to delete financial record', { theme: 'dark' });
-        } finally {
-            handleCloseUnlistModal();
-        }
-    };
-
     const renderContent = () => {
         switch(selectedContent) {       
             case 'editProfile':
@@ -182,16 +143,10 @@ function Account() {
                                     onUserChange={setUserData} />
             case 'adminActions':
                 return <AdminActions userData={ users }
-                                 postData={ posts }
-                                 onPasswordReset={handlePasswordReset}
-                                 onPromoteUser={handlePromoteUser}
-                                 onDemoteUser={handleDemoteUser}
-                                 onDeleteUser={handleDeleteUser}/>;
+                                 refreshData={fetchUsers}/>;
             default:
                 if (window.location.hash != "financials") window.location.hash = "financials";
-                return <Financials userData={userData}
-                                   financials={financials}
-                                   onDeleteFinancial={handleDeleteFinancial}/>;
+                return <Financials financials={financials} refreshData={verifyUser}/>;
 
         }
     };

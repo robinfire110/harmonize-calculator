@@ -109,12 +109,11 @@ const Calculator = () => {
     //Load user (after gas price load)
     useEffect(() => {
         //Get user
-        if (cookies.jwt)
+        if (cookies.jwt && gasPrices)
         {
             axios.get(`${getBackendURL()}/account`, {withCredentials: true}).then(res => {
                 if (res.data?.user)
                 {
-                    console.log(res.data.user.user_id);
                     axios.get(`${getBackendURL()}/user/id/${res.data.user.user_id}`, { withCredentials: true }).then(res => {
                         const userData = res.data;
 
@@ -136,7 +135,10 @@ const Calculator = () => {
                         setMultiplyOtherFees(userData.multiply_other);
 
                         //Set gas prices
-                        setAverageGasPrice(undefined, userData.default_state, userData.default_vehicle);
+                        if (userData.default_state !== "custom") setGasPricePerGallon(Math.round(gasPrices[userData.default_state] * 100) / 100);
+                        else setGasPricePerGallon(userData.default_gas_price);
+                        if (userData.default_vehicle !== "custom") setVehicleMPG(gasPrices[userData.default_vehicle]);
+                        else setVehicleMPG(userData.default_mpg);
 
                         //Set Switches
                         setMileageCoveredEnabled(userData.default_miles_covered > 0);
@@ -213,6 +215,8 @@ const Calculator = () => {
         if (data?.zip) setZip(data.zip);
         if (data?.hourly_wage) setHourlyWage(data.hourly_wage);
         if (data?.total_wage > 0) setGigPay(data.total_wage);
+        if (data?.event_hours > 0) setGigHours(data.event_hours);
+        if (data?.event_num > 0) setGigNum(data.event_num); 
         if (data?.total_mileage > 0) setTotalMileage(data.total_mileage); 
         if (data?.travel_hours > 0) setTravelHours(data.travel_hours); 
         if (data?.mileage_pay > 0) setMileageCovered(data.mileage_pay); 
@@ -229,7 +233,7 @@ const Calculator = () => {
         if (data?.multiply_practice != undefined) setMultiplyPracticeHours(data.multiply_practice);
         if (data?.multiply_rehearsal != undefined) setMultiplyRehearsalHours(data.multiply_rehearsal);
         if (data?.multiply_other != undefined) setMultiplyOtherFees(data.multiply_other);
-        console.log(data);
+        //console.log(data);
 
         //Set switches
         setGigNumEnabled(data?.event_num > 0);

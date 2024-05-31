@@ -98,6 +98,7 @@ router.put("/:id", checkUser, async (req, res) => {
             //Update user
             user.set(data);
             await user.save();
+            console.log(user);
             res.status(200).send("User Updated");
         }
         else
@@ -114,7 +115,7 @@ router.put("/:id", checkUser, async (req, res) => {
 router.delete("/:id", checkUser, async (req, res) => {
     try {
         const id = req.params.id;
-        const user = await db.User.findOne({where: {user_id: id}, include: [db.Event, db.Financial], attributes: {exclude: userSensitiveAttributes}});
+        const user = await db.User.findOne({where: {user_id: id}, include: [db.Financial], attributes: {exclude: userSensitiveAttributes}});
 
         //Check User
         if (!(req.user && (req.user.user_id == id || req.user.isAdmin == 1)))

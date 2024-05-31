@@ -7,7 +7,6 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const { sequelize, connectToDatabase } = require('./config/database_config');
 const db = require('./models/models');
 const {
-    importInstruments,
     getGasPrices,
     createFakerData,
     fixData
