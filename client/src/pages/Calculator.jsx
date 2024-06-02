@@ -494,7 +494,6 @@ const Calculator = () => {
                 }
                 else //If new, post.
                 {
-                    console.log("ADD");
                     await axios.post(`${getBackendURL()}/financial/${user?.user_id}`, data, {withCredentials: true}).then(res => {
                         //SetID
                         setParamId(res.data.fin_id);

@@ -46,9 +46,7 @@ function Financials({ financials, refreshData }) {
 		});
 
 		//Sort
-
 		filtered.sort((a, b) => {
-			console.log(sort);
 			switch (sort)
 			{
 				//Date Ascending

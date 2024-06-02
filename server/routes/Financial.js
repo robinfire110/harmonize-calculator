@@ -71,7 +71,6 @@ router.post("/:id", checkUser, async (req, res) => {
     try {
         //Get data
         const id = req.params.id;
-        console.log(id);
         const data = req.body;
 
         //Check User
