@@ -23,11 +23,14 @@ function Header() {
             <ToastContainer />
             <Navbar bg="light" expand="lg">
                 <Container>
-                    <Navbar.Brand href="/">
+                    <Navbar.Brand className="ml-5" href="/">
                         <img src={require('../img/logo-2.png')} height={50} className="d-inline-block align-top"></img>
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
+                        <Nav style={{width: "100%"}}>
+                            <Nav.Item><Nav.Link href='/calculator'>Calculator</Nav.Link></Nav.Item>
+                        </Nav>
                         <Nav className="justify-content-end" style={{width: "100%"}}>
                             {!isLoggedIn && <GoogleLogin
                                 onSuccess={credentialResponse => {
