@@ -21,6 +21,7 @@ const Calculator = () => {
     const [cookies, , removeCookie] = useCookies([]);
     const [user, setUser] = useState();
     const [userFinancials, setUserFinancials] = useState();
+    const [searchQuery, setSearchQuery] = useState("");
 
     //Params
     const navigate = useNavigate();
@@ -208,6 +209,11 @@ const Calculator = () => {
             setNameLength(maxFinancialNameLength-nameBox.value.length);
         } 
     }, [calcName]);
+
+    //Search
+    useEffect(() => {
+        getSavedFinancials();
+    }, [searchQuery]);
     
     /* Functions */
     //Load data
@@ -666,7 +672,13 @@ const Calculator = () => {
     {
         if (userData)
         {
-            const financials = userData.Financials.map((fin, index) =>
+            //Search
+            const filtered = userData.Financials.filter(financial => {
+                return financial.fin_name.toLowerCase().includes(searchQuery.toLowerCase());
+            });
+
+            //Apply
+            const financials = filtered.map((fin, index) =>
                 <Row className="my-1 py-1" style={{backgroundColor: `rgba(100,100,100,${.15+(index % 2 * .15)}`, borderRadius: "3px", verticalAlign: "middle"}} key={fin.fin_id}>
                     <Col className="mt-1"><h6>{fin.fin_name}</h6></Col>
                     <Col className='text-center' lg={3} md={3} sm={3} xs={3}><Button variant={fin.fin_id==finId ? "dark" : "secondary"} size="sm" disabled={fin.fin_id==finId} href={`/calculator/${fin.fin_id}`}>{fin.fin_id==finId ? "Loaded" : "Load"}</Button></Col>
@@ -1042,16 +1054,24 @@ const Calculator = () => {
                                 <Button className="float-end" variant="primary" href="/calculator">New Calculation</Button>
                             </div>
                         </Row>
-                            {user && <Row className="mt-4">
-                                <Col><h4>Saved Calculations</h4></Col>
-                                </Row>}
-                            <Row>
-                                <Col style={{maxHeight: "300px", overflowY: "auto", overflowX: "hidden"}}>
-                                <Container>
-                                        {userFinancials}
-                                </Container>
-                                </Col>
-                            </Row>   
+                        {user && <Row className="mt-4">
+                            <Col><h4>Saved Calculations</h4></Col>
+                            </Row>}
+                        <Row>
+                        <input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mx-2 mb-2 py-2" style={{width: '95%', borderRadius: "20px", border: '1px solid #ced4da'}}/>
+                        </Row>
+                        <Row>
+                            <Col style={{maxHeight: "300px", overflowY: "auto", overflowX: "hidden"}}>
+                            <Container>
+                                    {userFinancials}
+                            </Container>
+                            </Col>
+                        </Row>  
+                        <Row>
+                            <div>
+                            <Button className="mt-2 float-end" variant="secondary" style={{width: "auto"}} onClick={() => {navigate("/account#calculations")}}>Manage</Button>
+                            </div>
+                        </Row> 
                         </Container>
                     </Col>
                 </Row>

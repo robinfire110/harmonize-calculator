@@ -44,7 +44,7 @@ function Header() {
                                 }}
                                 /></Nav.Item>}
                             {/*!isLoggedIn && <Nav.Item><Nav.Link href="/login">Login/Register</Nav.Link></Nav.Item>*/}
-                            {isLoggedIn && <Nav.Item><Nav.Link href="/account#listings">Account</Nav.Link></Nav.Item>}
+                            {isLoggedIn && <Nav.Item><Nav.Link href="/account">Account</Nav.Link></Nav.Item>}
                             {isLoggedIn && <LogoutButton />}
                         </Nav>
                     </Navbar.Collapse>

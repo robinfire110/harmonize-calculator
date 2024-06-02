@@ -68,7 +68,7 @@ function Account() {
 
     const handleLinkClick = (content) => {
         //Filter
-        if (content === "financials") content = "financials";
+        if (content === "calculations") content = "calculations";
         if (content === "profile") content = "profile";
         if (content === "admin") content = "admin";
         setSelectedContent(content);
@@ -137,7 +137,7 @@ function Account() {
 
     const renderContent = () => {
         switch(window.location.hash) {       
-            case '#financials':
+            case '#calculations':
                 return <Financials financials={financials} refreshData={verifyUser}/>;
             
             case '#profile':
@@ -147,7 +147,7 @@ function Account() {
                 return <AdminActions userData={ users }
                                  refreshData={fetchUsers}/>;
             default:
-                if (window.location.hash != "financials") window.location.hash = "financials";
+                if (window.location.hash != "#calculations") window.location.hash = "calculations";
                 
 
         }
