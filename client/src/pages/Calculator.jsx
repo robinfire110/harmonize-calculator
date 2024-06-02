@@ -513,7 +513,7 @@ const Calculator = () => {
                         let newUser = user;
                         newUser.Financials.push(res.data);
                         setUser(newUser);
-                        getSavedFinancials(newUser); 
+                        getSavedFinancials(newUser, res.data.fin_id); 
                     }).catch(error => {
                         toast("An error occured while saving. Please ensure all fields are filled out correctly and try again.", toastError);
                         setSaveStatus(false);
@@ -667,9 +667,9 @@ const Calculator = () => {
         if (userData)
         {
             const financials = userData.Financials.map((fin, index) =>
-                <Row className="my-1 py-1 align-text-middle" style={{backgroundColor: `rgba(100,100,100,${.15+(index % 2 * .15)}`, borderRadius: "3px", verticalAlign: "middle"}} key={fin.fin_id}>
-                    <Col><h6>{fin.fin_name}</h6></Col>
-                    <Col lg={3} md={3} sm={3} xs={3}><Button variant="secondary" size="sm" disabled={fin.fin_id==finId} href={fin.event_id ? `/calculator/${fin.event_id}?event=true` : `/calculator/${fin.fin_id}`}>Load</Button></Col>
+                <Row className="my-1 py-1" style={{backgroundColor: `rgba(100,100,100,${.15+(index % 2 * .15)}`, borderRadius: "3px", verticalAlign: "middle"}} key={fin.fin_id}>
+                    <Col className="mt-1"><h6>{fin.fin_name}</h6></Col>
+                    <Col className='text-center' lg={3} md={3} sm={3} xs={3}><Button variant={fin.fin_id==finId ? "dark" : "secondary"} size="sm" disabled={fin.fin_id==finId} href={`/calculator/${fin.fin_id}`}>{fin.fin_id==finId ? "Loaded" : "Load"}</Button></Col>
                 </Row>
             );
             if (financials.length > 0) setUserFinancials(financials);
