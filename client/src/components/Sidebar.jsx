@@ -55,13 +55,13 @@ function Sidebar({ handleLinkClick, isAdmin }) {
                             eventKey={"financials"}
                             >Financials</Nav.Link>
                         <Nav.Link
-                            onClick={() => handleLinkClick('editProfile')}
+                            onClick={() => handleLinkClick('profile')}
                             href="/account#profile"
                             eventKey={"profile"}
                             >Profile</Nav.Link>
                         {isAdmin && (
                             <Nav.Link
-                                onClick={() => handleLinkClick('adminActions')}
+                                onClick={() => handleLinkClick('admin')}
                                 href="/account#admin"
                                 eventKey={"admin"}
                             >
@@ -83,7 +83,7 @@ function Sidebar({ handleLinkClick, isAdmin }) {
                 </Nav.Item>
                 <Nav.Item>
                     <Nav.Link eventKey="profile" style={{color: "black", textDecoration: "none"}}
-                        onClick={() => handleLinkClick('editProfile')}
+                        onClick={() => handleLinkClick('profile')}
                         href="/account#profile"
                     >Profile
                     </Nav.Link>
@@ -91,7 +91,7 @@ function Sidebar({ handleLinkClick, isAdmin }) {
                 {isAdmin && (
                     <Nav.Item>
                         <Nav.Link eventKey="admin" style={{color: "black", textDecoration: "none"}}
-                            onClick={() => handleLinkClick('adminActions')}
+                            onClick={() => handleLinkClick('admin')}
                             href="account#admin"
                         >Admin
                         </Nav.Link>

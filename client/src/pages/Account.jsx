@@ -21,8 +21,8 @@ function Account() {
     const [isAdmin, setIsAdmin] = useState(false);
     const [users, setUsers] = useState([]);
     const [financials, setFinancials] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedContent, setSelectedContent] = useState('listings');
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedContent, setSelectedContent] = useState(window.location.hash);
 
     const verifyUser = async () => {
         if (!cookies.jwt) 
@@ -30,20 +30,19 @@ function Account() {
             navigate('/login');
         } 
         else {
-            try {
-                const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true });
-                axios.get(`${getBackendURL()}/user/id/${data.user.user_id}`, { withCredentials: true }).then(res => {
-                    const data = res.data;
-                    setUserData(data);
-                    setFinancials(data.Financials);
-                    setIsAdmin(data.isAdmin);
-                });
-            } catch (error) {
+            const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true });
+            axios.get(`${getBackendURL()}/user/id/${data.user.user_id}`, { withCredentials: true }).then(res => {
+                const data = res.data;
+                setUserData(data);
+                setFinancials(data.Financials);
+                setIsAdmin(data.isAdmin);
+                setIsLoading(false);
+            }).catch((error) => {
                 removeCookie('jwt');
+                console.log(error);
                 navigate('/login');
-            } finally {
-                setLoading(false);
-            }
+                setIsLoading(false);
+            });
         }
     };
 
@@ -69,8 +68,8 @@ function Account() {
     const handleLinkClick = (content) => {
         //Filter
         if (content === "financials") content = "financials";
-        if (content === "profile") content = "editProfile";
-        if (content === "admin") content = "adminActions";
+        if (content === "profile") content = "profile";
+        if (content === "admin") content = "admin";
         setSelectedContent(content);
     };
 
@@ -136,44 +135,51 @@ function Account() {
     };
 
     const renderContent = () => {
-        switch(selectedContent) {       
-            case 'editProfile':
+        switch(window.location.hash) {       
+            case '#financials':
+                return <Financials financials={financials} refreshData={verifyUser}/>;
+            
+            case '#profile':
                 return <EditProfile userData={userData}
                                     onUserChange={setUserData} />
-            case 'adminActions':
+            case '#admin':
                 return <AdminActions userData={ users }
                                  refreshData={fetchUsers}/>;
             default:
                 if (window.location.hash != "financials") window.location.hash = "financials";
-                return <Financials financials={financials} refreshData={verifyUser}/>;
+                
 
         }
     };
 
-    if (loading) {
-        return <Spinner />;
-    }
-
     const dashboardTitle = isAdmin ? 'Admin Dashboard' : 'User Dashboard';
 
-    return (
-        <Container>
-        <Row>
-            <Col lg={2}>
-                <div>
-                    <Sidebar handleLinkClick={handleLinkClick} isAdmin={isAdmin} />
-                </div>
-            </Col>
-            <Col>
-                <Title title={"Account"} />
-                <Container className='justify-content-center'>
-                    {selectedContent && renderContent()}
-                </Container>
-            </Col>
-            
-        </Row>
-        </Container>
-    );
+    if (isLoading) {
+        return <Spinner />;
+    }
+    else
+    {
+        return (
+            <Container>
+            <Row>
+                <Col lg={2}>
+                    <div>
+                        <Sidebar handleLinkClick={handleLinkClick} isAdmin={isAdmin} />
+                    </div>
+                </Col>
+                <Col>
+                    <Title title={"Account"} />
+                    <Container className='justify-content-center'>
+                        {!isLoading && selectedContent && renderContent()}
+                    </Container>
+                </Col>
+                
+            </Row>
+            </Container>
+        );
+    }
+
+    
 }
 
 export default Account;
