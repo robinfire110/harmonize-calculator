@@ -50,10 +50,10 @@ function Sidebar({ handleLinkClick, isAdmin }) {
                 <Navbar className="">
                     <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
                         <Nav.Link
-                            onClick={() => handleLinkClick('financials')}
-                            href="/account#financials"
-                            eventKey={"financials"}
-                            >Financials</Nav.Link>
+                            onClick={() => handleLinkClick('calculations')}
+                            href="/account#calculations"
+                            eventKey={"calculations"}
+                            >Calculations</Nav.Link>
                         <Nav.Link
                             onClick={() => handleLinkClick('profile')}
                             href="/account#profile"
@@ -75,10 +75,10 @@ function Sidebar({ handleLinkClick, isAdmin }) {
             <>
             <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
                 <Nav.Item>
-                    <Nav.Link className='px-3' eventKey="financials" style={{color: "black", textDecoration: "none"}}
-                        onClick={() => handleLinkClick('financials')}
-                        href="/account#financials"
-                        >Financials
+                    <Nav.Link className='px-3' eventKey="calculations" style={{color: "black", textDecoration: "none"}}
+                        onClick={() => handleLinkClick('calculations')}
+                        href="/account#calculations"
+                        >Calculations
                     </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>

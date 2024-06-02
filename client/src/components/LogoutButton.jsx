@@ -12,8 +12,7 @@ const LogoutButton = () => {
 
     const logOut = () => {
         removeCookie("jwt");
-        if (location.pathname != "/") navigate("/");
-        else navigate(0);
+        window.location.replace("/");
     };
 
     return (

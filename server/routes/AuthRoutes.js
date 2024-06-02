@@ -26,7 +26,7 @@ router.post("/login", async (req, res) => {
 				httpOnly: false,
 				maxAge: maxAge * 1000,
 			});
-			res.status(200).json({ user: userData.user_id });
+			res.status(200).json({ isNewUser: user[1]});
 		} else {
 			res.status(404).json({ error: "User not found" });
 		}

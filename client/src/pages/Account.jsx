@@ -10,7 +10,7 @@ import "../App.css";
 import EditProfile from "./dashboards/EditProfile";
 import Financials from "./dashboards/Financials";
 import AdminActions from "./dashboards/AdminActions";
-import { getBackendURL } from "../Utils"
+import { getBackendURL, toastInfo } from "../Utils"
 import Title from '../components/Title';
 
 
@@ -27,10 +27,11 @@ function Account() {
     const verifyUser = async () => {
         if (!cookies.jwt) 
         {
-            navigate('/login');
+            navigate('/');
+            toast("Please sign in to view this page", toastInfo);
         } 
         else {
-            const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true });
+            const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true }).catch((error) => {console.log(error); removeCookie("jwt")});
             axios.get(`${getBackendURL()}/user/id/${data.user.user_id}`, { withCredentials: true }).then(res => {
                 const data = res.data;
                 setUserData(data);
@@ -40,8 +41,8 @@ function Account() {
             }).catch((error) => {
                 removeCookie('jwt');
                 console.log(error);
-                navigate('/login');
-                setIsLoading(false);
+                navigate('/');
+                toast("Please sign in to view this page", toastInfo);
             });
         }
     };

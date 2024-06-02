@@ -88,6 +88,9 @@ const Calculator = () => {
     /* Effect */
     //On first load
     useEffect(() => {
+        //Check for paramId
+        if (paramId && !cookies.jwt) navigate("/");
+
         //Get Gas Prices
         if (!gasPrices)
         {
@@ -154,7 +157,9 @@ const Calculator = () => {
                 {
                     setUser(undefined);
                 }
-                //console.log("User Data", res.data);
+            }).catch((error) => {
+                console.log(error);
+                removeCookie("jwt");
             });
         }
     }, [gasPrices]);
@@ -258,7 +263,7 @@ const Calculator = () => {
             else //Financial does not exists, redirect to blank page.
             {
                 setParamId(null);
-                navigate(`/calculator`); 
+                navigate(`/`); 
                 toast("You do not have access to this data.", toastError)
             }
         });
@@ -1038,7 +1043,7 @@ const Calculator = () => {
                             </div>
                         </Row>
                             {user && <Row className="mt-4">
-                                <Col><h4>Saved Financials</h4></Col>
+                                <Col><h4>Saved Calculations</h4></Col>
                                 </Row>}
                             <Row>
                                 <Col style={{maxHeight: "300px", overflowY: "auto", overflowX: "hidden"}}>
@@ -1050,7 +1055,7 @@ const Calculator = () => {
                         </Container>
                     </Col>
                 </Row>
-                </Form>
+                </Form>                                             
             </Container>
         </div>
     )

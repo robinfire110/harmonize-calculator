@@ -32,17 +32,17 @@ function Header() {
                             <Nav.Item><Nav.Link href='/calculator'>Calculator</Nav.Link></Nav.Item>
                         </Nav>
                         <Nav className="justify-content-end" style={{width: "100%"}}>
-                            {!isLoggedIn && <GoogleLogin
+                            {!isLoggedIn && <Nav.Item className='m-lg-0 m-sm-auto m-auto'><GoogleLogin
                                 onSuccess={credentialResponse => {
-                                    axios.post(`${getBackendURL()}/login`, {"credential": credentialResponse.credential}, { withCredentials: true}).then(() => {
-                                        if (location.pathname != "/") navigate("/");
-                                        else navigate(0);
+                                    axios.post(`${getBackendURL()}/login`, {"credential": credentialResponse.credential}, { withCredentials: true}).then((res) => {
+                                        sessionStorage.setItem("isNewUser", res.data.isNewUser);
+                                        window.location.replace("/");
                                     });
                                 }}
                                 onError={() => {
                                     console.log('Login Failed');
                                 }}
-                                />}
+                                /></Nav.Item>}
                             {/*!isLoggedIn && <Nav.Item><Nav.Link href="/login">Login/Register</Nav.Link></Nav.Item>*/}
                             {isLoggedIn && <Nav.Item><Nav.Link href="/account#listings">Account</Nav.Link></Nav.Item>}
                             {isLoggedIn && <LogoutButton />}

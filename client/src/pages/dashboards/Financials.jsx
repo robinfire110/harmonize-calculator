@@ -168,14 +168,14 @@ function Financials({ financials, refreshData }) {
 			<Row>
 				<Col lg={4} sm={12} xs={12}>
 					<div className='text-start'>
-						<h2>Financials</h2>
+						<h2>Calculations</h2>
 						<br />
-						<h5>Select records to export</h5>
+						<h5>Select calculations to export</h5>
 					</div>
 				</Col>
 				<Col>
 					<div className="text-lg-end text-md-start text-sm-start text-xs-start" style={{textAlign: "left"}}>
-						<Button className="my-1 me-2 btn btn-dark" variant="primary" onClick={handleCreateNewCalc}>Create New Financial</Button>
+						<Button className="my-1 me-2 btn btn-dark" variant="primary" onClick={handleCreateNewCalc}>Create New Calculation</Button>
 						<Button className="my-2" variant="success" onClick={handleExportAllToSpreadsheet} disabled={selectedRows.length === 0}>Export Selected to Spreadsheet</Button>
 					</div>
 				</Col>
@@ -187,7 +187,7 @@ function Financials({ financials, refreshData }) {
 				<Col className="mb-1" lg={4} xs={12}>
 					<input
 						type="text"
-						placeholder="Search financials..."
+						placeholder="Search calculations..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						style={{

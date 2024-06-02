@@ -16,12 +16,11 @@ const DeleteAccountModal = ({ show, handleClose, user}) => {
 		if (confirmText === "delete")
 		{
 			axios.delete(`${getBackendURL()}/user/${user.user_id}`, { withCredentials: true }).then((res) => {
-				removeCookie("jwt");
 				if (window.location.hash !== "#admin")
 				{
-					navigate("/");
+					removeCookie("jwt");
+					window.location.replace("/");
 				}
-				window.location.reload();
 				
 			});
 		}
