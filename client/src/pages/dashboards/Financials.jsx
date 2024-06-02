@@ -217,39 +217,41 @@ function Financials({ financials, refreshData }) {
 				</Col>
 			</Row>
 			{filteredFinancials.length > 0 ? (
-			<Table striped bordered hover responsive>
-				<thead>
-				<tr>
-					<th>Select</th>
-					<th>Date</th>
-					<th>Name</th>
-					<th>Total Hours</th>
-					<th>Hourly Wage</th>
-					<th>Action</th>
-				</tr>
-				</thead>
-				<tbody>
-				{currentFinancials.map((financial, index) => (
-					<tr key={index} style={{ cursor: 'pointer' }}>
-						<td onClick={() => handleRowSelect(index)}><input type="checkbox" checked={selectedRows.includes(index)} onChange={() => handleRowSelect(index)} /></td>
-						<td onClick={() => handleRowClick(financial)}>{moment(financial.date).format("M/DD/YYYY")}</td>
-						<td onClick={() => handleRowClick(financial)}>{financial.fin_name}</td>
-						<td onClick={() => handleRowClick(financial)}>{getTotalFinHours(financial).toFixed(2)}</td>
-						<td onClick={() => handleRowClick(financial)}>${financial.hourly_wage.toFixed(2)}</td>
-						<td>
-							<Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDeleteFinancial(financial); }}>Delete</Button>
-						</td>
+			<div style={{overflow: "auto", maxHeight: "610px"}}>
+				<Table striped bordered hover responsive>
+					<thead>
+					<tr>
+						<th>Select</th>
+						<th>Date</th>
+						<th>Name</th>
+						<th>Total Hours</th>
+						<th>Hourly Wage</th>
+						<th>Action</th>
 					</tr>
-				))}
-				</tbody>
-			</Table>
+					</thead>
+					<tbody>
+					{currentFinancials.map((financial, index) => (
+						<tr key={index} style={{ cursor: 'pointer' }}>
+							<td onClick={() => handleRowSelect(index)}><input type="checkbox" checked={selectedRows.includes(index)} onChange={() => handleRowSelect(index)} /></td>
+							<td onClick={() => handleRowClick(financial)}>{moment(financial.date).format("M/DD/YYYY")}</td>
+							<td onClick={() => handleRowClick(financial)}>{financial.fin_name}</td>
+							<td onClick={() => handleRowClick(financial)}>{getTotalFinHours(financial).toFixed(2)}</td>
+							<td onClick={() => handleRowClick(financial)}>${financial.hourly_wage.toFixed(2)}</td>
+							<td>
+								<Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDeleteFinancial(financial); }}>Delete</Button>
+							</td>
+						</tr>
+					))}
+					</tbody>
+				</Table>
+			</div>
 			) : (
 				<div className="no-financials-message">
 					<br />
 					<h4>No financial records to show.</h4>
 				</div>
 			)}
-			<Row className="justify-content-center">
+			<Row className="mt-1 justify-content-center">
 				<Col lg={{offset: 1}} md={{offset: 1}} sm={{offset: 4}} xs={{offset: 3}}>
 					<PaginationControl page={currentPage} total={filteredFinancials.length} limit={financialsPerPage} changePage={(page) => {setCurrentPage(page)}} ellipsis={1}/>
 				</Col>

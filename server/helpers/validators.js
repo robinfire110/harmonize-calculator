@@ -4,7 +4,7 @@ const normalTextRegex = /^[a-zA-Z0-9\s.,!:'"\/()]+$/;
 
 /* Financials */
 const financialSchema = Joi.object({
-    fin_name: Joi.string().pattern(/^[a-zA-Z0-9\s.'"-]+$/).max(maxFinancialNameLength).required(),
+    fin_name: Joi.string().pattern(/^[a-zA-Z0-9\s.'"!,-]+$/).max(maxFinancialNameLength).required(),
     date: Joi.date().format("YYYY-MM-DD").required(),
     total_wage: Joi.number().min(0).max(9999.99).required(),
     hourly_wage: Joi.number().min(0).max(9999.99).required(),

@@ -716,7 +716,7 @@ const Calculator = () => {
                                                     <Col className="text-end">{nameLength}/{maxFinancialNameLength}</Col>
                                                 </Row>
                                             </Form.Label>
-                                            <Form.Control id="financialName" value={calcName || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculator Name" onChange={e => setCalcName(e.target.value)} pattern={`[a-zA-Z0-9\\s.'"-]+`}></Form.Control>
+                                            <Form.Control id="financialName" value={calcName || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculation Name" onChange={e => setCalcName(e.target.value)} pattern={`[a-zA-Z0-9\\s.'"-!,]+`}></Form.Control>
                                         </Col>
                                         <Col lg="4">
                                             <Form.Label>Date<span style={{color: "red"}}>*</span></Form.Label>
@@ -735,7 +735,7 @@ const Calculator = () => {
                                         <Col lg={3}>
                                             <Form.Label>Hours per gig<span style={{color: "red"}}>*</span></Form.Label>
                                             <InputGroup>
-                                                <FormNumber id="gigHours" maxValue={100} value={gigHours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setGigHours(e.target.value)}/>
+                                                <FormNumber id="gigHours" maxValue={999} value={gigHours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setGigHours(e.target.value)}/>
                                                 <TooltipButton text="Number of hours for event. Does not include rehearsal or practice hours."/>
                                             </InputGroup>
                                         </Col>
