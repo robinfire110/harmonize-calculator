@@ -185,8 +185,8 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 						<h4>Basic Information</h4>
 						<Row>
 							<InputGroup>
-								<Button variant='outline-dark' onClick={() => {setGigNumModalOpen(!gigNumModalOpen)}}>Number of Gig Options</Button>
-								<TooltipButton text='Default settings for Number of Gigs Options. Used if you have multiple of the same gig or service.'/>
+								<Button style={{width: "91%"}} variant='outline-dark' onClick={() => {setGigNumModalOpen(!gigNumModalOpen)}}>Number of Gig Options</Button>
+								<TooltipButton style={{width: "9%"}} text='Default settings for Number of Gigs Options. Used if you have multiple of the same gig or service.'/>
 							</InputGroup>
 							<Modal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false);}} centered={true}>
 								<Modal.Header closeButton>

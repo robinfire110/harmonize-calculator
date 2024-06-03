@@ -726,7 +726,7 @@ const Calculator = () => {
     {
     return (
         <div>
-            <Title title={"Calculator"} />
+            <Title/>
             <h2>Harmonize Calculator</h2>
             <hr />
             <Container className="" style={{textAlign: "left"}}>   
@@ -903,7 +903,7 @@ const Calculator = () => {
                                                             <Modal.Title>Use Average Gas $ Per Mile</Modal.Title>
                                                         </Modal.Header>
                                                         <Modal.Body>
-                                                        <p>Select state to use for average gas price. Average gas price obtained from <a href="https://gasprices.aaa.com/state-gas-price-averages/" target="_blank">AAA daily average</a>. Select vehicle type to use average MPG.</p>
+                                                        <p>Select state to use for average gas price. Average gas price obtained from <a href="https://gasprices.aaa.com/state-gas-price-averages/" target="_blank" style={{color: "black"}}>AAA Daily Average</a>. Select vehicle type to use average MPG.</p>
                                                         <InputGroup className="mb-2">
                                                             <InputGroup.Text>Select State</InputGroup.Text>
                                                             <Form.Select id="selectState" value={currentState} onChange={(e) => {setCurrentState(e.target.value)}}>

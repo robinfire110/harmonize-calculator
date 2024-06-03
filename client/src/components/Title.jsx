@@ -2,12 +2,9 @@ import React, { useEffect } from 'react'
 
 function Title({title}) {
     useEffect(() => {
-        document.title = `Harmonize Calculator - ${title}`;
+        if (title) document.title = `Harmonize Calculator - ${title}`;
+        else document.title = `Harmonize Calculator`;
     }, []);
-    return (
-        <>
-        </>
-    )
 }
 
 export default Title
