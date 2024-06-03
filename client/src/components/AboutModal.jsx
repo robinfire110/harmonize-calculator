@@ -21,7 +21,7 @@ function AboutModal({aboutModalOpen, setAboutModalOpen, isNewUser=false}) {
             <h5>Tips</h5>
             <ul>
                 <li>You can turn individual fields on/off to see how they affect your final result.</li>
-                <li>Have multiple gigs or services? Use the <b>Number of Gigs</b> option to account for several gigs and use the <b>Options</b> button to change what gets multiplied depending on your needs.</li>
+                <li>Have multiple gigs or services? Use the <b>Number of Gigs</b> option to multiply your values. Use the <b>Options</b> button to change which fields get multiplied depending on your needs.</li>
                 <li>Don't know the exact distance of the gig? Click the <b>Use Location</b> button to automatically calculate your travel mileage and hours using zip codes.</li>
                 <li>Don't know your exact gas price per mile? Click the <b>Use Average</b> button to use average gas prices and vehicle MPG values.</li>
             </ul>

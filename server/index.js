@@ -29,9 +29,9 @@ if (process.env.NODE_ENV === "development")
 }
 else if (process.env.NODE_ENV === "production")
 {
-    allowedOrigins.push("https://harmonize.rocks");
-    allowedOrigins.push("http://harmonize.rocks");
-    allowedOrigins.push("http://http://152.70.204.132/");
+    allowedOrigins.push(`https://${process.env.SITE_URL}`);
+    allowedOrigins.push(`http://${process.env.SITE_URL}`);
+    allowedOrigins.push(`http://${process.env.SERVER_IP}`);
 }
 
 // Middleware setup
