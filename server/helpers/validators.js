@@ -20,7 +20,7 @@ const financialSchema = Joi.object({
     mpg: Joi.number().min(0).max(99),
     tax: Joi.number().min(0).max(100),
     fees: Joi.number().min(0).max(9999.99),
-    round_trip: Joi.boolean().truthy(1).falsy(0),
+    trip_num: Joi.number().integer().min(0).max(999),
     multiply_pay: Joi.boolean().truthy(1).falsy(0),
     multiply_hours: Joi.boolean().truthy(1).falsy(0),
     multiply_travel: Joi.boolean().truthy(1).falsy(0),

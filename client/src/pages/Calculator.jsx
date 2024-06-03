@@ -55,7 +55,9 @@ const Calculator = () => {
     const [totalMileage, setTotalMileage] = useState();
     const [mileageCovered, setMileageCovered] = useState();
     const [travelHours, setTravelHours] = useState();
-    const [isRoundTrip, setIsRoundTrip] = useState(1);
+    const [tripNumSelect, setTripNumSelect] = useState(0);
+    const [customTripNum, setCustomTripNum] = useState();
+    const [tripNum, setTripNum] = useState(1);
     const [gasPricePerMile, setGasPricePerMile] = useState();
     const [gasPricePerGallon, setGasPricePerGallon] = useState();
     const [vehicleMPG, setVehicleMPG] = useState();
@@ -126,7 +128,7 @@ const Calculator = () => {
                         setCurrentState(userData.default_state || '');
                         setCurrentVehicle(userData.default_vehicle || '');
                         setMileageCovered(userData.default_miles_covered || null);
-                        setIsRoundTrip(parseBool(userData.round_trip));
+                        setTripNum(parseIntZero(userData.trip_num));
                         setPracticeHours(userData.default_practice || null);
                         setRehearsalHours(userData.default_rehearsal || null);
                         setTax(userData.default_tax || null);
@@ -150,6 +152,15 @@ const Calculator = () => {
                         setRehearsalHoursEnabled(userData.default_rehearsal > 0);
                         setTaxEnabled(userData.default_tax > 0);
                         setOtherFeesEnabled(userData.default_fees > 0);
+
+                        //Set Trip Num
+                        if (userData.default_trip_num == 1) setTripNumSelect(0);
+                        else if (userData.default_trip_num == 2) setTripNumSelect(1);
+                        else
+                        {
+                            setTripNumSelect(2);
+                            setCustomTripNum(userData.default_trip_num);
+                        } 
                         
                         setUser(userData);
                     });  
@@ -194,7 +205,7 @@ const Calculator = () => {
         
     }, [gigPay, gigHours, gigNum, totalMileage, mileageCovered, gasPricePerMile, travelHours, practiceHours, rehearsalHours, tax, otherFees,
         gigNumEnabled, totalMileageEnabled, mileageCoveredEnabled, travelHoursEnabled, practiceHoursEnabled, rehearsalHoursEnabled, taxEnabled, otherFeesEnabled,
-        isRoundTrip, multiplyPay, multiplyGigHours, multiplyTravel, multiplyPracticeHours, multiplyRehearsalHours, multiplyOtherFees])
+        tripNum, multiplyPay, multiplyGigHours, multiplyTravel, multiplyPracticeHours, multiplyRehearsalHours, multiplyOtherFees])
 
     //Runs when any fields related to gas price calcuation updates.
     useEffect(() => {
@@ -231,11 +242,11 @@ const Calculator = () => {
         if (data?.mileage_pay > 0) setMileageCovered(data.mileage_pay); 
         if (data?.gas_price > 0) setGasPricePerGallon(data.gas_price);
         if (data?.mpg > 0) setVehicleMPG(data.mpg);
+        if (data?.trip_num > 0) setTripNum(data?.trip_num);
         if (data?.practice_hours > 0) setPracticeHours(data.practice_hours); 
         if (data?.rehearse_hours > 0) setRehearsalHours(data.rehearse_hours); 
         if (data?.tax > 0) setTax(data.tax); 
         if (data?.fees > 0) setOtherFees(data.fees);
-        if (data?.round_trip != undefined) setIsRoundTrip(data.round_trip);
         if (data?.multiply_pay != undefined) setMultiplyPay(data.multiply_pay);
         if (data?.multiply_hours != undefined) setMultiplyGigHours(data.multiply_hours);
         if (data?.multiply_travel != undefined) setMultiplyTravel(data.multiply_travel);
@@ -254,6 +265,17 @@ const Calculator = () => {
         setTaxEnabled(data?.tax > 0);
         setOtherFeesEnabled(data?.fees > 0);
         if (data?.zip) setModalDestinationZip(data?.zip);
+
+        //Set Trip Num
+        if (data?.trip_num == 1) setTripNumSelect(0);
+        else if (data?.trip_num == 2) setTripNumSelect(1);
+        else
+        {
+            setTripNumSelect(2);
+            setCustomTripNum(data?.trip_num);
+        } 
+        
+
     }
 
     //Load from database (both fin_id)
@@ -338,7 +360,6 @@ const Calculator = () => {
         let rehearsalHoursNum = gigNumEnabled && gigNum && multiplyRehearsalHours ? parseFloat(gigNum) : 1;
         let travelNum = gigNumEnabled && gigNum && multiplyTravel? parseFloat(gigNum) : 1;
         let otherFeesNum = gigNumEnabled && gigNum && multiplyOtherFees? parseFloat(gigNum) : 1;
-        let roundTrip = isRoundTrip == 1 ? 2 : 1;
 
         //Calculate possible income
         if (gigPay) wage = parseFloat(gigPay);
@@ -359,7 +380,7 @@ const Calculator = () => {
             let gasPrice = parseFloat(gasPricePerMile);
             //Subtract mileage covered
             if (mileageCoveredEnabled && mileageCovered) gasPrice -= parseFloat(mileageCovered);
-            gasPrice = parseFloat(totalMileage) * roundTrip * travelNum * gasPrice;
+            gasPrice = parseFloat(totalMileage) * tripNum * travelNum * gasPrice;
             setTotalGas(gasPrice);
             wage -= gasPrice;
         }
@@ -378,7 +399,7 @@ const Calculator = () => {
         if (gigHours) hours = parseFloat(gigHours) * gigHoursNum;
         if (practiceHoursEnabled && practiceHours) hours += parseFloat(practiceHours) * practiceHoursNum;
         if (rehearsalHoursEnabled && rehearsalHours) hours += parseFloat(rehearsalHours) * rehearsalHoursNum;
-        if (travelHoursEnabled && travelHours) hours += parseFloat(travelHours) * travelNum * roundTrip;
+        if (travelHoursEnabled && travelHours) hours += parseFloat(travelHours) * travelNum * tripNum;
         setTotalHours(hours.toFixed(2));
 
         //Final division
@@ -443,7 +464,7 @@ const Calculator = () => {
                 mpg: parseFloatZero(vehicleMPG),
                 tax: parseFloatZero(tax),
                 fees: parseFloatZero(otherFees),
-                round_trip: isRoundTrip,
+                trip_num: tripNum,
                 multiply_pay: multiplyPay,
                 multiply_hours: multiplyGigHours,
                 multiply_travel: multiplyTravel,
@@ -461,6 +482,14 @@ const Calculator = () => {
                     console.log("NOT VALID");
                     return false
                 } 
+            }
+
+            //Check other validity
+            //Trip Number
+            if (tripNum <= 0)
+            {
+                let tripNumBox = document.getElementById('tripNum');
+                tripNumBox.setCustomValidity("Value must be greater than 0.");
             }
 
             //Save (in correct place)
@@ -556,8 +585,8 @@ const Calculator = () => {
             rows.push(worksheet.addRow(["Event Hours", "Individual Practice Hours", "Rehearsal Hours", "", "", "Travel Cost", parseFloatZero(totalGas)]));
             rows.push(worksheet.addRow([parseFloatZero(gigHours), parseFloatZero(practiceHours), parseFloatZero(rehearsalHours), "", "", "Other Fees", parseFloatZero(otherFees)]));
             rows.push(worksheet.addRow([""])); //Results row
-            rows.push(worksheet.addRow(["Total Mileage", "Travel Hours", "Mileage Covered", "Trip Type", "", "Total Hours", parseFloatZero(totalHours)]));
-            rows.push(worksheet.addRow([parseFloatZero(totalMileage), parseFloatZero(travelHours), parseFloatZero(mileageCovered), "", "", "Total Hourly Wage", parseFloatZero(hourlyWage)]));
+            rows.push(worksheet.addRow(["Total Mileage", "Travel Hours", "Mileage Covered", "Trip Number", "", "Total Hours", parseFloatZero(totalHours)]));
+            rows.push(worksheet.addRow([parseFloatZero(totalMileage), parseFloatZero(travelHours), parseFloatZero(mileageCovered), parseIntZero(tripNum), "", "Total Hourly Wage", parseFloatZero(hourlyWage)]));
             rows[7].getCell(3).numFmt = '$#,##0.00'; //Format cell as currency
             rows.push(worksheet.addRow([""])); //Results row
             rows.push(worksheet.addRow(["Gas Price per Gallon", "Vehicle MPG", "Gas Price per Mile"]));
@@ -591,14 +620,6 @@ const Calculator = () => {
             //Format
             worksheet.getColumn("G").numFmt = '$#,##0.00';
             worksheet.getCell('G7').numFmt = "0.00";
-
-            //Trip Type Select
-            worksheet.getCell('D8').dataValidation = {
-                type: "list",
-                allowBlank: "false",
-                formulae: ['"One-Way,Round Trip"']
-            }
-            worksheet.getCell('D8').value = isRoundTrip == 1 ? "Round Trip" : "One-Way";
 
             //Options
             const enabledDataValidation = {
@@ -646,10 +667,10 @@ const Calculator = () => {
             //Set formulas
             worksheet.getCell("G2").value = {formula: 'C2*IF(G11="Enabled", D2, 1)'}; //Payment
             worksheet.getCell("G3").value = {formula: 'G2*(0.01*A14)'}; //Tax Cut
-            worksheet.getCell("G4").value = {formula: '(A8*IF(D8="Round Trip", 2, 1)*(ROUND(C11, 2)-C8))*IF(G13="Enabled", D2, 1)'}; //Travel Cost
+            worksheet.getCell("G4").value = {formula: '(A8*D8*(ROUND(C11, 2)-C8))*IF(G13="Enabled", D2, 1)'}; //Travel Cost
             worksheet.getCell("G5").value = {formula: 'B14*IF(G16="Enabled", D2, 1)'}; //Other Fees 
             worksheet.getCell("G6").value = {formula: 'G2-G3-G4-G5'}; //Total Income
-            worksheet.getCell("G7").value = {formula: '=(A5*IF(G12="Enabled", D2, 1))+(B5*IF(G14="Enabled", D2, 1))+(C5*IF(G15="Enabled", D2, 1))+(B8*IF(G13="Enabled", D2, 1)*IF(D8="Round Trip", 2, 1))'}; //Total Hours
+            worksheet.getCell("G7").value = {formula: '=(A5*IF(G12="Enabled", D2, 1))+(B5*IF(G14="Enabled", D2, 1))+(C5*IF(G15="Enabled", D2, 1))+(B8*IF(G13="Enabled", D2, 1)*D8)'}; //Total Hours
             worksheet.getCell("G8").value = {formula: 'IFERROR(G6/G7, 0)'}; //Total Hourly Wage
             worksheet.getCell("C11").value = {formula: 'IFERROR(A11/B11, 0)'}; //Gas Price per Mile
 
@@ -857,13 +878,16 @@ const Calculator = () => {
                                             </InputGroup>
                                         </Row>
                                         <Row className="mb-3">
-                                            <Form.Label>Trip Type</Form.Label>
+                                            <Form.Label>Trip Number</Form.Label>
+                                            <InputGroup>
                                                 <ButtonGroup>
-                                                    <ToggleButton type="radio" variant="outline-primary" value={0} checked={isRoundTrip === 0} onClick={(e) => setIsRoundTrip(0)} disabled={!travelHoursEnabled && !totalMileageEnabled}>One-Way</ToggleButton>
-                                                    <ToggleButton type="radio"variant="outline-primary" value={1} checked={isRoundTrip === 1} onClick={(e) => setIsRoundTrip(1)} disabled={!travelHoursEnabled && !totalMileageEnabled}>Round Trip</ToggleButton>
-                                                    <TooltipButton text="Detemines whether mileage is counted as one-way or a round trip. Selecting round trip will muliply travel hours and cost by 2."/>
+                                                    <ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setTripNum(1)}} disabled={!travelHoursEnabled && !totalMileageEnabled}>One-Way</ToggleButton>
+                                                    <ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setTripNum(2)}} disabled={!travelHoursEnabled && !totalMileageEnabled}>Round Trip</ToggleButton>
+                                                    <ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setTripNum(customTripNum)}} disabled={!travelHoursEnabled && !totalMileageEnabled}>Custom</ToggleButton>
                                                 </ButtonGroup>
-                                                
+                                                <FormNumber id="tripNum" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setCustomTripNum(e.target.value); setTripNum(parseIntZero(e.target.value))}} disabled={tripNumSelect != 2} required/>
+                                                <TooltipButton text="Determines how many trips taken. One-Way will multiply travel mileage and hours by 1, Round-Trip by 2 and custom by whatever value is set."/>
+                                            </InputGroup>
                                         </Row>
                                     </Col>
                                     <Col>

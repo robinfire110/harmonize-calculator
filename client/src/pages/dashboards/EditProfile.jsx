@@ -20,7 +20,7 @@ function EditProfile({ userData, onUserChange }) {
 		default_rehearsal: userData.default_rehearsal || null,
 		default_tax: userData.default_tax || null,
 		default_fees: userData.default_fees || null,
-		round_trip: userData.round_trip,
+		trip_num: userData.default_trip_num,
 		multiply_pay: userData.multiply_pay,
 		multiply_hours: userData.multiply_hours,
 		multiply_travel: userData.multiply_travel,
@@ -30,7 +30,8 @@ function EditProfile({ userData, onUserChange }) {
 	});
 
 	//States
-    const [isRoundTrip, setIsRoundTrip] = useState(parseBool(userData.round_trip));
+	const [customTripNum, setCustomTripNum] = useState(parseIntZero(userData.default_trip_num) > 2 ? parseIntZero(userData.default_trip_num) : "");
+	const [tripNumSelect, setTripNumSelect] = useState(parseIntZero(userData.default_trip_num) <= 2 ? parseIntZero(userData.default_trip_num) == 1 ? 0 : 1 : 2);
     const [gasPricePerGallon, setGasPricePerGallon] = useState(userData.default_gas_price || null);
     const [vehicleMPG, setVehicleMPG] = useState(userData.default_mpg || null);
 	const [gasPrices, setGasPrices] = useState();
@@ -61,8 +62,8 @@ function EditProfile({ userData, onUserChange }) {
 	}, [vehicleMPG])
 
 	useEffect(() => {
-		setFormData({ ...formData, ["round_trip"]: parseIntZero(isRoundTrip) });
-	}, [isRoundTrip])
+		console.log(formData.default_trip_num);
+	}, [formData]);
 
 	const handleChange = (e) => {
 		const name = e.target.name;
@@ -73,17 +74,33 @@ function EditProfile({ userData, onUserChange }) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axios.put(`${getBackendURL()}/user/${userData.user_id}`, {...formData}, {withCredentials: true}).then((res) => {
-			toast.success('Profile updated successfully', toastSuccess);
-			onUserChange(userData);
-		}).catch(error => {
-			console.error('Error updating profile:', error);
-			toast.error('Failed to update profile', toastError);
-		});
+
+		//Check validity
+		let valid = true;
+		//Trip Number
+		if (formData.default_trip_num <= 0)
+		{
+			let tripNumBox = document.getElementById('tripNum');
+			tripNumBox.setCustomValidity("Value must be greater than 0.");
+			tripNumBox.reportValidity();
+			valid = false;
+		}
+
+		if (valid)
+		{
+			axios.put(`${getBackendURL()}/user/${userData.user_id}`, {...formData}, {withCredentials: true}).then((res) => {
+				toast.success('Profile updated successfully', toastSuccess);
+				onUserChange(userData);
+			}).catch(error => {
+				console.error('Error updating profile:', error);
+				toast.error('Failed to update profile', toastError);
+			});
+		}
+		
 	}
 
 	return (
-		<div className='text-start' style={{ maxWidth: '650px', margin: "auto" }}>
+		<div className='text-start' style={{ maxWidth: '750px', margin: "auto" }}>
 			<h2>Profile</h2>
 			<hr />
 			<h3>Account Information</h3>
@@ -168,20 +185,24 @@ function EditProfile({ userData, onUserChange }) {
 							</InputGroup>
 						</Row>
 						<Row className='mt-3'>
-							<Form.Label>Trip Type</Form.Label>
-							<ButtonGroup>
-								<ToggleButton type="radio" variant="outline-primary" name='round_trip' value={0} checked={formData.round_trip === 0} onClick={() => setIsRoundTrip(0)}>One-Way</ToggleButton>
-								<ToggleButton type="radio" variant="outline-primary" name='round_trip' value={1} checked={formData.round_trip === 1} onClick={() => setIsRoundTrip(1)}>Round Trip</ToggleButton>
-								<TooltipButton text="Default value that detemines whether mileage is counted as one-way or a round trip. Selecting round trip will muliply travel hours and cost by 2."/>
-							</ButtonGroup>
+							<Form.Label>Trip Number</Form.Label>
+							<InputGroup>
+								<ButtonGroup>
+									<ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setFormData({ ...formData, ['default_trip_num']: 1})}}>One-Way</ToggleButton>
+									<ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setFormData({ ...formData, ['default_trip_num']: 2})}}>Round Trip</ToggleButton>
+									<ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setFormData({ ...formData, ['default_trip_num']: customTripNum})}}>Custom</ToggleButton>
+								</ButtonGroup>
+								<FormNumber id="tripNum" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setFormData({ ...formData, ['default_trip_num']: parseIntZero(e.target.value)}); setCustomTripNum(e.target.value)}} disabled={tripNumSelect != 2} required/>
+								<TooltipButton text="Default number of trips taken. One-Way will multiply travel mileage and hours by 1, Round-Trip by 2 and custom by whatever value is set."/>
+							</InputGroup>
 						</Row>
 					</Col>
 					<Col className="mb-3" lg={6}>
 						<h4>Basic Information</h4>
 						<Row>
 							<InputGroup>
-								<Button variant='light' onClick={() => {setGigNumModalOpen(!gigNumModalOpen)}}>Number of Gig Options</Button>
-								<TooltipButton text='Number of gigs. Used if you have multiple of the same gig or service. Will multiply any activated fields in the options by number of gigs.'/>
+								<Button variant='outline-dark' onClick={() => {setGigNumModalOpen(!gigNumModalOpen)}}>Number of Gig Options</Button>
+								<TooltipButton text='Default settings for Number of Gigs Options. Used if you have multiple of the same gig or service.'/>
 							</InputGroup>
 							<Modal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false);}} centered={true}>
 								<Modal.Header closeButton>
@@ -235,14 +256,14 @@ function EditProfile({ userData, onUserChange }) {
 							<Form.Label>Individual Practice Hours</Form.Label>
 							<InputGroup>
 							<FormNumber id="practiceHours" name="default_practice" max={999.9} value={formData.default_practice} placeholder="Ex. 3" integer={false} onChange={handleChange} />
-							<TooltipButton text="The total hours spent practicing for event (individually, not including group rehearsal)."/>
+							<TooltipButton text="Default practice hours for event (individually, not including group rehearsal)."/>
 							</InputGroup>
 						</Row>
 						<Row>
 							<Form.Label>Rehearsal Hours</Form.Label>
 							<InputGroup>
 							<FormNumber id="rehearsalHours" name='default_rehearsal' max={999.9} value={formData.default_rehearsal} placeholder="Ex. 2" integer={false} onChange={handleChange} />
-							<TooltipButton text="The total hours spent in rehearsal for event (not including individual practice)."/>
+							<TooltipButton text="Default rehearsal hours for event (not including individual practice)."/>
 							</InputGroup>
 						</Row>
 						<br />
@@ -252,7 +273,7 @@ function EditProfile({ userData, onUserChange }) {
 							<InputGroup>
 								<InputGroup.Text>%</InputGroup.Text>
 								<FormNumber id="tax" name='default_tax' value={formData.default_tax} maxValue={100} placeholder="Ex. 17.5" integer={false} onChange={handleChange} />
-							<TooltipButton text='Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses.'/>
+							<TooltipButton text='Default percentage of income tax.'/>
 							</InputGroup>
 						</Row>
 						<Row>
@@ -260,7 +281,7 @@ function EditProfile({ userData, onUserChange }) {
 							<InputGroup>
 								<InputGroup.Text>$</InputGroup.Text>
 								<FormNumber id="otherFees" name='default_fees' maxValue={9999.99} value={formData.default_fees} placeholder="Ex. 15.00" integer={false} onChange={handleChange} />
-								<TooltipButton text="Any other additional fees (i.e. food, parking, instrument wear etc.) Will be subtracted at the end of the calculation."/>
+								<TooltipButton text="Default additional fees (i.e. food, parking, instrument wear etc.)"/>
 							</InputGroup>
 						</Row>
 					</Col>

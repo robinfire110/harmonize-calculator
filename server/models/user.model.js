@@ -51,9 +51,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    round_trip: {
-      type: Sequelize.BOOLEAN,
-      defaultValue: true
+    default_trip_num: {
+      type: Sequelize.INTEGER,
+      defaultValue: 2
     },
     multiply_pay: {
       type: Sequelize.BOOLEAN,

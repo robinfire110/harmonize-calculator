@@ -70,9 +70,9 @@ module.exports = (sequelize, Sequelize, Event) => {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
-    round_trip: {
-      type: Sequelize.FLOAT,
-      defaultValue: true
+    trip_num: {
+      type: Sequelize.INTEGER,
+      defaultValue: 2
     },
     multiply_pay: {
       type: Sequelize.FLOAT,
