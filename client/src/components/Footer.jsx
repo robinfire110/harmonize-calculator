@@ -10,7 +10,6 @@ function Footer() {
     //Effect
     useEffect(() => {
         //Check for new user
-        console.log(sessionStorage.getItem("isNewUser"));
         if (sessionStorage.getItem("isNewUser") === "true")
         {
             setAboutModalOpen(true);

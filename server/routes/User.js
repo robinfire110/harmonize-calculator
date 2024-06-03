@@ -28,6 +28,26 @@ router.get("/", checkUser, async (req, res) => {
     }
 });
 
+//Get stats
+//Must be admin to use
+//Get number of financials
+//Must be admin to use
+router.get("/stats", checkUser, async (req, res) => {
+    try {
+        //Check User
+        if (!(req.user && req.user.isAdmin == 1))
+        {
+            throw new Error("Unauthorized access.");
+        }
+
+        const userCount = await db.User.count();
+        const finCount = await db.Financial.count();
+        res.json({user_count: userCount, fin_count: finCount, average_fin: finCount/userCount});
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
 //Get single by ID
 //Returns JSON of user with given user_id. Will be empty if does not exist.
 router.get("/id/:id", checkUserOptional, async (req, res) => {

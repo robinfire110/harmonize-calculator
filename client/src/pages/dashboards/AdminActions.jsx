@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {useNavigate} from "react-router-dom";
-import {Button, Tab, Tabs, Table, Row, Col, Form} from "react-bootstrap";
+import {Button, Tab, Tabs, Table, Row, Col, Form, Container} from "react-bootstrap";
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { PaginationControl } from 'react-bootstrap-pagination-control';
 import DeleteAccountModal from '../../components/DeleteAccountModal';
 import axios from 'axios';
 import { getBackendURL } from '../../Utils';
 
-function AdminActions({  userData, refreshData }) {
+function AdminActions({ userData, refreshData }) {
+    const [stats, setStats] = useState();
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,7 +21,28 @@ function AdminActions({  userData, refreshData }) {
     const [userToResetPass, setUserToResetPass] = useState(null);
     const [userToDemote, setUserToDemote] = useState(null);
     const [userToPromote, setUserToPromote] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        //Check for status
+        axios.get(`${getBackendURL()}/account`, { withCredentials: true }).then(res => {
+            if (res.data.user.isAdmin)
+            {
+                //Get Stats
+                axios.get(`${getBackendURL()}/user/stats`, { withCredentials: true }).then(res => {
+                    setStats(res.data);
+                    setIsLoading(false);
+                }).catch((error) => {
+                    navigate('/account');
+                });
+            }
+            else
+            {
+                navigate('/account');
+            }
+        });      
+    }, [])
 
     useEffect(() => {
         setFilteredUsers(userData);
@@ -79,6 +101,8 @@ function AdminActions({  userData, refreshData }) {
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
     //const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+    if (!isLoading)
+    {
     return (
         <div>
             <Tabs defaultActiveKey="users" id="admin-actions-tabs" onSelect={() => {setCurrentPage(1)}}>
@@ -142,6 +166,27 @@ function AdminActions({  userData, refreshData }) {
                         </Col>
                     </Row>
                 </Tab>
+                <Tab eventKey="stats" title="Stats">
+                    <Container className='text-start'>
+                    <br />
+                    <h3>Harmonize Stats</h3>
+                    <hr />
+                    <Col>
+                        <Row>
+                            <Col xs={6}><h5>Number of Users:</h5></Col>
+                            <Col><h5>{stats?.user_count}</h5></Col>
+                        </Row>
+                        <Row>
+                            <Col xs={6}><h5>Number of Saved Calculations:</h5></Col>
+                            <Col><h5>{stats?.fin_count}</h5></Col>
+                        </Row>
+                        <Row>
+                            <Col xs={6}><h5>Average Saved Calculations per User</h5></Col>
+                            <Col><h5>{stats?.average_fin}</h5></Col>
+                        </Row>
+                    </Col>
+                    </Container>
+                </Tab>
             </Tabs>
             <ConfirmationModal
                 show={showConfirmationModal}
@@ -152,6 +197,7 @@ function AdminActions({  userData, refreshData }) {
             <DeleteAccountModal show={showDeleteModal} handleClose={() => {setShowDeleteModal(!showDeleteModal); setUserToDelete(null);}} user={userToDelete} />
         </div>
     );
+    }
 }
 
 export default AdminActions;

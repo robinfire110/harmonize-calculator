@@ -23,6 +23,7 @@ function Account() {
     const [financials, setFinancials] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedContent, setSelectedContent] = useState(window.location.hash);
+    const [gasPrices, setGasPrices] = useState();
 
     const verifyUser = async () => {
         if (!cookies.jwt) 
@@ -48,7 +49,22 @@ function Account() {
     };
 
     useEffect(() => {
-            verifyUser();
+        //Get Gas Prices
+        if (!gasPrices)
+        {
+            axios.get(`${getBackendURL()}/gas`).then(res => {
+                let map = {};
+                for (let i = 0; i < res.data.length; i++)
+                {
+                    map[res.data[i].location] = res.data[i].average_price;
+                }   
+                setGasPrices(map);
+            });
+        }
+    }, [])
+
+    useEffect(() => {
+        verifyUser();
     }, [cookies, navigate, removeCookie]);
 
     const fetchUsers = async () => {
@@ -141,19 +157,18 @@ function Account() {
                 return <Financials financials={financials} refreshData={verifyUser}/>;
             
             case '#profile':
-                return <EditProfile userData={userData}
-                                    onUserChange={setUserData} />
+                return <EditProfile userData={userData} onUserChange={setUserData} gasPrices={gasPrices}/>
+                                    
             case '#admin':
-                return <AdminActions userData={ users }
-                                 refreshData={fetchUsers}/>;
+                if (userData.isAdmin) return <AdminActions userData={ users } refreshData={fetchUsers}/>;  
+                else setSelectedContent("calculations");
+                
             default:
                 if (window.location.hash != "#calculations") window.location.hash = "calculations";
                 
 
         }
     };
-
-    const dashboardTitle = isAdmin ? 'Admin Dashboard' : 'User Dashboard';
 
     if (isLoading) {
         return <Spinner />;

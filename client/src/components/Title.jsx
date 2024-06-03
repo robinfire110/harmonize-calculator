@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 
 function Title({title}) {
     useEffect(() => {
-        document.title = `Harmonize - ${title}`;
+        document.title = `Harmonize Calculator - ${title}`;
     }, []);
     return (
         <>

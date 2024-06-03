@@ -7,7 +7,7 @@ import FormNumber from '../../components/FormNumber';
 import TooltipButton from '../../components/TooltipButton';
 import DeleteAccountModal from '../../components/DeleteAccountModal';
 
-function EditProfile({ userData, onUserChange }) {
+function EditProfile({ userData, onUserChange, gasPrices}) {
 	const [formData, setFormData] = useState({
 		email: userData.email,
 		zip: userData.zip || "",
@@ -34,24 +34,12 @@ function EditProfile({ userData, onUserChange }) {
 	const [tripNumSelect, setTripNumSelect] = useState(parseIntZero(userData.default_trip_num) <= 2 ? parseIntZero(userData.default_trip_num) == 1 ? 0 : 1 : 2);
     const [gasPricePerGallon, setGasPricePerGallon] = useState(userData.default_gas_price || null);
     const [vehicleMPG, setVehicleMPG] = useState(userData.default_mpg || null);
-	const [gasPrices, setGasPrices] = useState();
 
 	//Modal
 	const [deleteAccountModal, setDeleteAccountModal] = useState(false);
 	const [gigNumModalOpen, setGigNumModalOpen] = useState(false);
 
-	//Get Gas Prices
-	if (!gasPrices)
-	{
-		axios.get(`${getBackendURL()}/gas`).then(res => {
-			let map = {};
-			for (let i = 0; i < res.data.length; i++)
-			{
-				map[res.data[i].location] = res.data[i].average_price;
-			}   
-			setGasPrices(map);
-		});
-	}
+	
 
 	useEffect(() => {
 		setFormData({ ...formData, ["default_gas_price"]: parseFloatZero(gasPricePerGallon) });
@@ -60,10 +48,6 @@ function EditProfile({ userData, onUserChange }) {
 	useEffect(() => {
 		setFormData({ ...formData, ["default_mpg"]: parseFloatZero(vehicleMPG) });
 	}, [vehicleMPG])
-
-	useEffect(() => {
-		console.log(formData.default_trip_num);
-	}, [formData]);
 
 	const handleChange = (e) => {
 		const name = e.target.name;
