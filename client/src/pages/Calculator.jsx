@@ -1078,24 +1078,29 @@ const Calculator = () => {
                                 <Button className="float-end" variant="primary" href="/calculator">New Calculation</Button>
                             </div>
                         </Row>
-                        {user && <Row className="mt-4">
-                            <Col><h4>Saved Calculations</h4></Col>
-                            </Row>}
-                        <Row>
-                        <input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mx-2 mb-2 py-2" style={{width: '95%', borderRadius: "20px", border: '1px solid #ced4da'}}/>
-                        </Row>
-                        <Row>
-                            <Col style={{maxHeight: "300px", overflowY: "auto", overflowX: "hidden"}}>
-                            <Container>
-                                    {userFinancials}
-                            </Container>
-                            </Col>
-                        </Row>  
-                        <Row>
-                            <div>
-                            <Button className="mt-2 float-end" variant="secondary" style={{width: "auto"}} onClick={() => {navigate("/account#calculations")}}>Manage</Button>
-                            </div>
-                        </Row> 
+                        {user && 
+                            <>
+                            <Row className="mt-4">
+                                <Col><h4>Saved Calculations</h4></Col>
+                            </Row>
+                            <Row>
+                                <input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mx-2 mb-2 py-2" style={{width: '95%', borderRadius: "20px", border: '1px solid #ced4da'}}/>
+                            </Row>
+                            <Row>
+                                <Col style={{maxHeight: "300px", overflowY: "auto", overflowX: "hidden"}}>
+                                <Container>
+                                        {userFinancials}
+                                </Container>
+                                </Col>
+                            </Row>  
+                            <Row>
+                                <div>
+                                <Button className="mt-2 float-end" variant="secondary" style={{width: "auto"}} onClick={() => {navigate("/account#calculations")}}>Manage</Button>
+                                </div>
+                            </Row>  
+                            </> 
+                        }
+                        
                         </Container>
                     </Col>
                 </Row>

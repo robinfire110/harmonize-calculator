@@ -15,7 +15,11 @@ function Header() {
     const navigate = useNavigate();
 
     useEffect(() => {
-      setIsLoggedIn(cookies.jwt);
+        //Cookie check
+        console.log("Cookies: ", cookies.jwt);
+
+
+        setIsLoggedIn(cookies.jwt);
     }, [])
 
     return (
@@ -35,6 +39,7 @@ function Header() {
                             {!isLoggedIn && <Nav.Item className='m-lg-0 m-sm-auto m-auto'><GoogleLogin
                                 onSuccess={credentialResponse => {
                                     axios.post(`${getBackendURL()}/login`, {"credential": credentialResponse.credential}, { withCredentials: true}).then((res) => {
+                                        console.log("Log in response: ", res);
                                         sessionStorage.setItem("isNewUser", res.data.isNewUser);
                                         window.location.replace("/");
                                     });
