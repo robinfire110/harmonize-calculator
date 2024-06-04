@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 
 function Financials({ financials, refreshData }) {
 	const [searchQuery, setSearchQuery] = useState('');
-	const [sort, setSort] = useState(0);
+	const [sort, setSort] = useState("0");
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
 	const [filteredFinancials, setFilteredFinancials] = useState([]);
@@ -140,18 +140,45 @@ function Financials({ financials, refreshData }) {
 		setShowConfirmationModal(true);
 	};
 
+	const handleDeleteSelectedFinancial = () => {
+		setFinancialToDelete(selectedRows);
+		setDeleteMessage(`Are you sure you want to delete ${selectedRows.length} selected calculations?`);
+		setShowConfirmationModal(true);
+	};
+
 	const handleConfirmDeleteFinancial = () => {
 		if (!isDeleting)
 		{
 			setIsDeleting(true);
 			if (financialToDelete) {
+				//Set array if needed
+				const isArray = financialToDelete instanceof Array;
+				let idString = ""
+				let finName = "selected calculations"
+				if (isArray)
+				{
+					financialToDelete.map((i, j) => {
+						idString += currentFinancials[i].fin_id;
+						if (j != selectedRows.length-1) idString += "|";
+					});
+				}
+				else
+				{
+					idString = financialToDelete.fin_id;
+					finName = financialToDelete.fin_name;
+				} 
+
 				//Delete
-				axios.delete(`${getBackendURL()}/financial/${financialToDelete.fin_id}`, {withCredentials: true}).then((res) => {
-					toast.success(`Successfully deleted ${financialToDelete.fin_name}`, toastSuccess);
+				axios.delete(`${getBackendURL()}/financial/${idString}`, {withCredentials: true}).then((res) => {
+					toast.success(`Successfully deleted ${finName}.`, toastSuccess);
 					setFinancialToDelete(null);
-					setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== financialToDelete.index));
 					setIsDeleting(false);
 					setShowConfirmationModal(false);
+
+					//Set selected rows
+					if (!isArray) setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== financialToDelete.index));
+					else setSelectedRows([]);
+
 					refreshData();
 				}).catch((error) => {
 					console.error('Error deleting financial.:', error);
@@ -185,7 +212,8 @@ function Financials({ financials, refreshData }) {
 				<Col>
 					<div className="text-lg-end text-md-start text-sm-start text-xs-start" style={{textAlign: "left"}}>
 						<Button className="my-1 me-2 btn btn-dark" variant="primary" onClick={handleCreateNewCalc}>Create New Calculation</Button>
-						<Button className="my-2" variant="success" onClick={handleExportAllToSpreadsheet} disabled={selectedRows.length === 0}>Export Selected to Spreadsheet</Button>
+						<Button className="my-1 me-2" variant="success" onClick={handleExportAllToSpreadsheet} disabled={selectedRows.length === 0}>Export Selected</Button>
+						<Button className="my-2" variant="danger" onClick={handleDeleteSelectedFinancial} disabled={selectedRows.length === 0}>Delete Selected</Button>
 					</div>
 				</Col>
 			</Row>
@@ -194,19 +222,7 @@ function Financials({ financials, refreshData }) {
 					<Button onClick={handleRowSelectAll}>Select All </Button>
 				</Col>
 				<Col className="mb-1" lg={4} xs={12}>
-					<input
-						type="text"
-						placeholder="Search calculations..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						style={{
-							width: '100%',
-							padding: '8px',
-							paddingLeft: '30px',
-							borderRadius: '20px',
-							border: '1px solid #ced4da',
-						}}
-					/>
+					<input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '8px', paddingLeft: '30px', borderRadius: '20px', border: '1px solid #ced4da',}} />
 				</Col>
 				<Col className="mb-1" lg={2} xs={6}>
 					<Form.Select placeholder="Sort" value={sort} onChange={(e) => setSort(e.target.value)}>
@@ -274,14 +290,7 @@ function Financials({ financials, refreshData }) {
 				</Col>
 			</Row>
 			
-			<ConfirmationModal
-				show={showConfirmationModal}
-				handleClose={() => setShowConfirmationModal(false)}
-				message={deleteMessage}
-				onConfirm={handleConfirmDeleteFinancial}
-				isLoading={isDeleting}
-				isDelete={true}
-			/>
+			<ConfirmationModal show={showConfirmationModal} handleClose={() => setShowConfirmationModal(false)} message={deleteMessage} onConfirm={handleConfirmDeleteFinancial} isLoading={isDeleting} isDelete={true} />
 		</div>
 	);
 }

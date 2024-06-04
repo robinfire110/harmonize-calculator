@@ -20,7 +20,7 @@ router.get("/user_id/:id", checkUser, async (req, res) => {
             throw new Error("Unauthorized access.");
         }
 
-        const financials = await db.Financial.findAll({include: {model: db.User, where: {user_id: id}, attributes: {exclude: ['password', 'isAdmin']}}});
+        const financials = await db.Financial.findAll({include: {model: db.User, where: {user_id: id}, attributes: []}});
         res.json(financials);
     } catch (error) {
         res.status(500).send(error.message);
@@ -31,7 +31,7 @@ router.get("/user_id/:id", checkUser, async (req, res) => {
 router.get("/fin_id/:id", checkUser, async (req, res) => {
     try {
         const id = req.params.id;
-        const financial = await db.Financial.findOne({where: {fin_id: id}, include: {model: db.User, attributes: {exclude: ['password', 'isAdmin']}}});
+        const financial = await db.Financial.findOne({where: {fin_id: id}, include: {model: db.User, attributes: ['user_id']}});
         
         //Check User
         if (!(req.user && (req.user.user_id == financial.Users[0].user_id || req.user.isAdmin == 1)))
@@ -56,7 +56,7 @@ router.get("/user_id/fin_id/:user_id/:fin_id", checkUser, async (req, res) => {
             throw new Error("Unauthorized access.");
         }
 
-        const financials = await db.Financial.findAll({where: {fin_id: fin_id}, include: {model: db.User, where: {user_id: user_id}, attributes: {exclude: ['password', 'isAdmin']}}});
+        const financials = await db.Financial.findAll({where: {fin_id: fin_id}, include: {model: db.User, where: {user_id: user_id}, attributes: ['user_id']}});
         res.json(financials);
     } catch (error) {
         res.status(500).send(error.message);
@@ -125,7 +125,7 @@ router.put("/:id", checkUser, async (req, res) => {
             }
         }
 
-        const financial = await db.Financial.findOne({where: {fin_id: id}, include: [{model: db.User, attributes: {exclude: ['password', 'isAdmin']}}]});
+        const financial = await db.Financial.findOne({where: {fin_id: id}, include: [{model: db.User, attributes: ['user_id']}]});
         if (financial)
         {
             //Check User
@@ -148,19 +148,25 @@ router.put("/:id", checkUser, async (req, res) => {
 });
 
 /* DELETE */
+//To delete multiple, separate with "|"
 router.delete("/:id", checkUser, async (req, res) => {
     try {
-        const id = req.params.id;
+        const id = (req.params.id).split("|");
+        const whereClause = {where: {fin_id: id}, include: [{model: db.User, where: {user_id: req.user.user_id}, attributes: ['user_id']}]};
 
-        const financial = await db.Financial.findOne({where: {fin_id: id}, include: [{model: db.User, attributes: {exclude: ['password', 'isAdmin']}}]});
+        const financial = await db.Financial.findAll(whereClause);
         if (financial)
         {
-            //Check User
-            if (!(req.user && (req.user.user_id == financial.Users[0].user_id || req.user.isAdmin == 1)))
-            {
-                throw new Error("Unauthorized access.");
-            }
-            await financial.destroy();
+            //Check User Access
+            financial.forEach(fin => {
+                if (!(req.user && (req.user.user_id == fin.Users[0].user_id)))
+                {
+                    throw new Error("Unauthorized access.");
+                }
+            });
+            
+            //Destroy
+            await db.Financial.destroy(whereClause)
             res.send(financial);
         }
         else

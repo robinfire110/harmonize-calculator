@@ -8,7 +8,7 @@ const {checkUser, checkUserOptional} = require("../Middleware/AuthMiddleWare");
 const { Op } = require('sequelize');
 
 //Varaibles
-const userSensitiveAttributes = ['password', 'isAdmin'];
+const userSensitiveAttributes = ['isAdmin'];
 
 /* GET */
 //Get all
@@ -57,7 +57,6 @@ router.get("/id/:id", checkUserOptional, async (req, res) => {
         let attributes = {exclude: userSensitiveAttributes}
         if (req.user && (req.user.user_id == id || req.user.isAdmin == 1))
         {
-            attributes = {exclude: ['password']}
             include = [db.Financial];
         } 
         const user = await db.User.findOne({where: {user_id: id}, attributes: attributes, include: include});
@@ -69,22 +68,23 @@ router.get("/id/:id", checkUserOptional, async (req, res) => {
 
 /* POST */
 //Add new user
-//Required - email, password, name, zip
-//Optional - Bio, is_admin (default: false), instrument(s)
-//Instrument can be either name or ID. Can mix and match.
+//Required - email
+//Replaced by login in AuthRoutes
+/*
 router.post("/", async (req, res) => {
     try {
         //Get data
         const data = req.body;
 
         //Add to User
-        const newUser = await db.User.create({email: data?.email, password: data?.password, name: data?.name, zip: data?.zip, bio: data?.bio, is_admin: data?.is_admin});
+        const newUser = await db.User.create({email: data?.email, name: data?.name, zip: data?.zip, bio: data?.bio, is_admin: data?.is_admin});
 
         res.send({newUser});
     } catch (error) {
         res.status(500).send(error.message);
     }
 });
+*/
 
 /* UPDATE */
 //Update user

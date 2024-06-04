@@ -33,9 +33,10 @@ If you wish to delete your account and all associated data, you can do so at any
 
 # Versions
 ## Version 1.0.0
-* Spin-Off from original Harmonize. Removed all non-calculator related features.
+* Spin-Off from original Harmonize. Removed all non-calculator related features and pages.
 * Added Google SSO, removed email and password login.
 * Added Trip Number (instead of Trip Type).
 * Added Calculator Defaults.
 * Added search to Saved Calculations on Calculator screen.
+* Added ability to delete multiple financials.
 * Updated footer and added About Modal.
