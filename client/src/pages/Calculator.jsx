@@ -55,9 +55,9 @@ const Calculator = () => {
     const [totalMileage, setTotalMileage] = useState();
     const [mileageCovered, setMileageCovered] = useState();
     const [travelHours, setTravelHours] = useState();
-    const [tripNumSelect, setTripNumSelect] = useState(0);
+    const [tripNumSelect, setTripNumSelect] = useState(1);
     const [customTripNum, setCustomTripNum] = useState();
-    const [tripNum, setTripNum] = useState(1);
+    const [tripNum, setTripNum] = useState(2);
     const [gasPricePerMile, setGasPricePerMile] = useState();
     const [gasPricePerGallon, setGasPricePerGallon] = useState();
     const [vehicleMPG, setVehicleMPG] = useState();
@@ -128,7 +128,7 @@ const Calculator = () => {
                         setCurrentState(userData.default_state || '');
                         setCurrentVehicle(userData.default_vehicle || '');
                         setMileageCovered(userData.default_miles_covered || null);
-                        setTripNum(parseIntZero(userData.trip_num));
+                        setTripNum(userData.default_trip_num);
                         setPracticeHours(userData.default_practice || null);
                         setRehearsalHours(userData.default_rehearsal || null);
                         setTax(userData.default_tax || null);
@@ -380,7 +380,7 @@ const Calculator = () => {
             let gasPrice = parseFloat(gasPricePerMile);
             //Subtract mileage covered
             if (mileageCoveredEnabled && mileageCovered) gasPrice -= parseFloat(mileageCovered);
-            gasPrice = parseFloat(totalMileage) * tripNum * travelNum * gasPrice;
+            gasPrice = parseFloat(totalMileage) * parseIntZero(tripNum) * travelNum * gasPrice;
             setTotalGas(gasPrice);
             wage -= gasPrice;
         }
@@ -396,10 +396,10 @@ const Calculator = () => {
         //Calculate hours
         let hours = 0;
         
-        if (gigHours) hours = parseFloat(gigHours) * gigHoursNum;
-        if (practiceHoursEnabled && practiceHours) hours += parseFloat(practiceHours) * practiceHoursNum;
-        if (rehearsalHoursEnabled && rehearsalHours) hours += parseFloat(rehearsalHours) * rehearsalHoursNum;
-        if (travelHoursEnabled && travelHours) hours += parseFloat(travelHours) * travelNum * tripNum;
+        if (gigHours) hours = parseFloatZero(gigHours) * gigHoursNum;
+        if (practiceHoursEnabled && practiceHours) hours += parseFloatZero(practiceHours) * practiceHoursNum;
+        if (rehearsalHoursEnabled && rehearsalHours) hours += parseFloatZero(rehearsalHours) * rehearsalHoursNum;
+        if (travelHoursEnabled && travelHours) hours += parseFloatZero(travelHours) * travelNum * parseIntZero(tripNum);
         setTotalHours(hours.toFixed(2));
 
         //Final division

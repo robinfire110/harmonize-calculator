@@ -37,13 +37,14 @@ function metersToMiles(meters) {
 //Parse values (returns 0 instead of undefined/NaN for undefined values)
 function parseFloatZero(value)
 {
-    if (value && value != NaN) return parseFloat(value);
+    console.log(parseFloat(value));
+    if (value && value != NaN && parseFloat(value)) return parseFloat(value);
     else return 0
 }
 
 function parseIntZero(value)
 {
-    if (value) return parseInt(value);
+    if (value && value != NaN && parseInt(value)) return parseInt(value);
     else return 0
 }
 
