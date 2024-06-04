@@ -135,7 +135,7 @@ function Financials({ financials, refreshData }) {
 
 	const handleDeleteFinancial = (financial) => {
 		setFinancialToDelete(financial);
-		setDeleteMessage(`Are you sure you want to delete '${financial.fin_name}'?`);
+		setDeleteMessage(`Are you sure you want to delete "${financial.fin_name}"?`);
 		setShowConfirmationModal(true);
 	};
 
@@ -270,6 +270,7 @@ function Financials({ financials, refreshData }) {
 				handleClose={() => setShowConfirmationModal(false)}
 				message={deleteMessage}
 				onConfirm={handleConfirmDeleteFinancial}
+				isDelete={true}
 			/>
 		</div>
 	);

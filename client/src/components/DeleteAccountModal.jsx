@@ -5,23 +5,30 @@ import axios from 'axios';
 import { getBackendURL, toastError, toastSuccess } from "../Utils";
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
+import { BarLoader } from 'react-spinners';
 
 const DeleteAccountModal = ({ show, handleClose, user}) => {
 	const generateError = (err) => toast(err, toastError)
 	const navigate = useNavigate();
 	const [confirmText, setConfirmText] = useState("");
 	const [,, removeCookie] = useCookies([]);
+	const [confirmDelete, setConfirmDelete] = useState(false);
 
 	const handleConfirm = async () => {
-		if (confirmText === "delete")
+		if (confirmDelete == false && confirmText === "delete")
 		{
+			setConfirmDelete(true);
 			axios.delete(`${getBackendURL()}/user/${user.user_id}`, { withCredentials: true }).then((res) => {
 				if (window.location.hash !== "#admin")
 				{
 					removeCookie("jwt");
 					window.location.replace("/");
 				}
-				
+				else window.location.reload();
+			}).catch((error) => {
+				console.log(error);
+				toast("An error occured while attempting to delete account.", toastError);
+				setConfirmDelete(false);
 			});
 		}
 	};
@@ -42,7 +49,7 @@ const DeleteAccountModal = ({ show, handleClose, user}) => {
 			</Modal.Body>
 			<Modal.Footer>
 				<Button variant="secondary" onClick={handleClose}>Cancel</Button>
-				<Button className="btn" variant="danger" onClick={handleConfirm} disabled={confirmText !== "delete"}>Delete Account</Button>
+				<Button className="btn" variant="danger" onClick={handleConfirm} disabled={confirmText !== "delete"}>{confirmDelete ? <BarLoader color="#FFFFFF" height={4} />: "Delete Account"}</Button>
 			</Modal.Footer>
 		</Modal>
 	);

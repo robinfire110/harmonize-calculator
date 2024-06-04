@@ -12,6 +12,7 @@ const LogoutButton = () => {
 
     const logOut = () => {
         removeCookie("jwt");
+        sessionStorage.setItem("isLogout", true);
         window.location.replace("/");
     };
 

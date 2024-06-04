@@ -271,8 +271,8 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 					</Col>
 				</Row>
 				<hr />
-				<div className='text-center'>
-				<Button className="btn btn-dark" size='lg' variant="primary" type="submit">Update Profile</Button>
+				<div className='mb-3 text-center'>
+					<Button className="btn btn-dark" size='lg' variant="primary" type="submit">Update Profile</Button>
 				</div>
 			</Form>
 		</div>

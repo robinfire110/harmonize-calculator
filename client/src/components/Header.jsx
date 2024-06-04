@@ -2,22 +2,40 @@ import React, { useEffect, useState } from 'react';
 import { Navbar, Nav, Container, Col } from 'react-bootstrap';
 import LogoutButton from './LogoutButton';
 import { useCookies } from 'react-cookie';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
-import { getBackendURL } from '../Utils';
+import { getBackendURL, toastSuccess } from '../Utils';
 import axios from 'axios';
 
 function Header() {
     const [cookies] = useCookies(['jwt']);
-    const location = useLocation();
     const [isLoggedIn, setIsLoggedIn] = useState(cookies.jwt)
-    const navigate = useNavigate();
 
     useEffect(() => {
-        //Cookie check
-        console.log("Cookies: ", cookies.jwt);
+        //Check for Sign in
+        if (sessionStorage.getItem("isSignIn") != null)
+        {
+            if (sessionStorage.getItem("isSignIn") === "true" && sessionStorage.getItem("isNewUser") !== "true")
+            { 
+                setTimeout(() => {
+                    toast("You have been successfully signed-in.", toastSuccess);
+                }, 100);
+            }
+            sessionStorage.removeItem("isSignIn");
+        }
+        
 
+        //Check for logout
+        if (sessionStorage.getItem("isLogout") != null)
+        {
+            if (sessionStorage.getItem("isLogout") === "true")
+            { 
+                setTimeout(() => {
+                    toast("You have been successfully signed-out.", toastSuccess);
+                }, 100);
+            }
+            sessionStorage.removeItem("isLogout");
+        }
 
         setIsLoggedIn(cookies.jwt);
     }, [])
@@ -39,8 +57,8 @@ function Header() {
                             {!isLoggedIn && <Nav.Item className='m-lg-0 m-sm-auto m-auto'><GoogleLogin
                                 onSuccess={credentialResponse => {
                                     axios.post(`${getBackendURL()}/login`, {"credential": credentialResponse.credential}, { withCredentials: true}).then((res) => {
-                                        console.log("Log in response: ", res);
                                         sessionStorage.setItem("isNewUser", res.data.isNewUser);
+                                        sessionStorage.setItem("isSignIn", true);
                                         window.location.replace("/");
                                     });
                                 }}

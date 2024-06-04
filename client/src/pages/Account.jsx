@@ -170,30 +170,28 @@ function Account() {
         }
     };
 
-    if (isLoading) {
-        return <Spinner />;
-    }
-    else
-    {
-        return (
-            <Container>
-            <Row>
-                <Col lg={2}>
-                    <div>
-                        <Sidebar handleLinkClick={handleLinkClick} isAdmin={isAdmin} />
-                    </div>
-                </Col>
-                <Col>
-                    <Title title={"Account"} />
-                    <Container className='justify-content-center'>
-                        {!isLoading && selectedContent && renderContent()}
-                    </Container>
-                </Col>
-                
-            </Row>
-            </Container>
-        );
-    }
+    return (
+        <Container>
+        <Row>
+            <Col lg={2}>
+                <div>
+                    <Sidebar handleLinkClick={handleLinkClick} isAdmin={isAdmin} />
+                </div>
+            </Col>
+            <Col>
+                {isLoading ? <Spinner /> :
+                <>
+                <Title title={"Account"} />
+                <Container className='justify-content-center'>
+                    {!isLoading && selectedContent && renderContent()}
+                </Container>
+                </>
+                }
+            </Col>
+            
+        </Row>
+        </Container>
+    );
 
     
 }
