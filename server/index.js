@@ -19,7 +19,7 @@ const routeGas = require('./routes/GasPrice');
 const routeAPI = require('./routes/API');
 
 const app = express();
-const port = process.env.port || 5000;
+const port = process.env.PORT;
 
 //Allowed origins
 const allowedOrigins = []
@@ -55,7 +55,7 @@ const gasPricePull = schedule.scheduleJob({tz: "America/New_York", hour: 8, minu
 // Database setup
 app.listen(port, async () => {
     await connectToDatabase();
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
 
     //Run Scripts
     console.log(`Server is running at http://localhost:${port}`);
