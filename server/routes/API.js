@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const nodemailer = require('nodemailer');
-const striptags = require('striptags');
 const {checkUser, checkUserOptional} = require("../Middleware/AuthMiddleWare");
 
 require('dotenv').config();

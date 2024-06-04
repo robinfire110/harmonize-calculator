@@ -67,4 +67,4 @@ async function checkValidFinancialId(id)
     return false;
 }
 
-module.exports = { getRandomInt, getGasPrices, createFakerData, checkValidUserId, checkValidFinancialId }
+module.exports = { getRandomInt, getGasPrices, checkValidUserId, checkValidFinancialId }
