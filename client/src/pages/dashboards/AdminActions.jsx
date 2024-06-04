@@ -5,7 +5,8 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import { PaginationControl } from 'react-bootstrap-pagination-control';
 import DeleteAccountModal from '../../components/DeleteAccountModal';
 import axios from 'axios';
-import { getBackendURL } from '../../Utils';
+import { getBackendURL, toastError } from '../../Utils';
+import { toast } from 'react-toastify';
 
 function AdminActions({ userData, refreshData }) {
     const [stats, setStats] = useState();
@@ -18,9 +19,7 @@ function AdminActions({ userData, refreshData }) {
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [actionToConfirm, setActionToConfirm] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
-    const [userToResetPass, setUserToResetPass] = useState(null);
-    const [userToDemote, setUserToDemote] = useState(null);
-    const [userToPromote, setUserToPromote] = useState(null);
+    const [isPromoting, setIsPromoting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -63,29 +62,48 @@ function AdminActions({ userData, refreshData }) {
     };
 
     const handlePromoteUser = (user) => {
-        setUserToPromote(user);
         setActionToConfirm(() => () => onPromoteUser(user));
         setConfirmationMessage(`Are you sure you want to promote ${user.email} to Admin?`);
         setShowConfirmationModal(true);
     };
 
     const onPromoteUser = (user) => {
-        axios.put(`${getBackendURL()}/user/${user.user_id}`, {isAdmin: 1}, { withCredentials: true }).then((res) => {
-            refreshData();
-        })
+        if (!isPromoting)
+        {
+            setIsPromoting(true);
+            axios.put(`${getBackendURL()}/user/${user.user_id}`, {isAdmin: 1}, { withCredentials: true }).then((res) => {
+                refreshData();
+                setIsPromoting(false);
+                setShowConfirmationModal(false);
+            }).catch((error) => {
+                console.log(error);
+                toast("An error occured promoting user.", toastError);
+                setIsPromoting(false);
+            });
+        }
     }
 
     const handleDemoteUser = (user) => {
-        setUserToDemote(user);
         setActionToConfirm(() => () => onDemoteUser(user));
         setConfirmationMessage(`Are you sure you want to demote ${user.email} from Admin?`);
         setShowConfirmationModal(true);
     };
 
     const onDemoteUser = (user) => {
-        axios.put(`${getBackendURL()}/user/${user.user_id}`, {isAdmin: 0}, { withCredentials: true }).then((res) => {
-            refreshData();
-        })
+        if (!isPromoting)
+        {
+            setIsPromoting(true);
+            axios.put(`${getBackendURL()}/user/${user.user_id}`, {isAdmin: 0}, { withCredentials: true }).then((res) => {
+                refreshData();
+                setIsPromoting(false);
+                setShowConfirmationModal(false); 
+            }).catch((error) => {
+                console.log(error);
+                toast("An error occured demoting user.", toastError);
+                setIsPromoting(false);
+            });  
+        }
+        
     }
 
     const handleConfirmation = () => {
@@ -93,7 +111,6 @@ function AdminActions({ userData, refreshData }) {
             actionToConfirm();
             setActionToConfirm(null);
         }
-        setShowConfirmationModal(false);
     };
 
     const indexOfLastUser = currentPage * itemsPerPage;
@@ -193,6 +210,7 @@ function AdminActions({ userData, refreshData }) {
                 handleClose={() => setShowConfirmationModal(false)}
                 message={confirmationMessage}
                 onConfirm={handleConfirmation}
+                isLoading={isPromoting}
             />
             <DeleteAccountModal show={showDeleteModal} handleClose={() => {setShowDeleteModal(!showDeleteModal); setUserToDelete(null);}} user={userToDelete} />
         </div>

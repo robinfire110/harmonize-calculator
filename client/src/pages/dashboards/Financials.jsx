@@ -20,6 +20,7 @@ function Financials({ financials, refreshData }) {
 	const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [financialsPerPage, setFinancialsPerPage] = useState(10);
+	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -140,19 +141,27 @@ function Financials({ financials, refreshData }) {
 	};
 
 	const handleConfirmDeleteFinancial = () => {
-		if (financialToDelete) {
-			//Delete
-			axios.delete(`${getBackendURL()}/financial/${financialToDelete.fin_id}`, {withCredentials: true}).then((res) => {
-				toast.success(`Successfully deleted ${financialToDelete.fin_name}`, toastSuccess);
-                refreshData();
-			}).catch((error) => {
-				console.error('Error deleting financial.:', error);
-            	toast.error('Failed to delete financial.', toastError);
-			});
-			setFinancialToDelete(null);
-			setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== financialToDelete.index));
+		if (!isDeleting)
+		{
+			setIsDeleting(true);
+			if (financialToDelete) {
+				//Delete
+				axios.delete(`${getBackendURL()}/financial/${financialToDelete.fin_id}`, {withCredentials: true}).then((res) => {
+					toast.success(`Successfully deleted ${financialToDelete.fin_name}`, toastSuccess);
+					setFinancialToDelete(null);
+					setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== financialToDelete.index));
+					setIsDeleting(false);
+					setShowConfirmationModal(false);
+					refreshData();
+				}).catch((error) => {
+					console.error('Error deleting financial.:', error);
+					toast.error('Failed to delete financial.', toastError);
+					setIsDeleting(false);
+				});
+			}
+			
 		}
-		setShowConfirmationModal(false);
+		
 	};
 
 	const handleRowClick = (financial) => {
@@ -270,6 +279,7 @@ function Financials({ financials, refreshData }) {
 				handleClose={() => setShowConfirmationModal(false)}
 				message={deleteMessage}
 				onConfirm={handleConfirmDeleteFinancial}
+				isLoading={isDeleting}
 				isDelete={true}
 			/>
 		</div>
