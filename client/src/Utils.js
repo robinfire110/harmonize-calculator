@@ -6,7 +6,7 @@ const {saveAs} = require('file-saver')
 function getBackendURL()
 {
     if (process.env.NODE_ENV== "development") return "http://localhost:5000";
-    else return "http://localhost:5000";
+    else return "https://harmnize.com/api";
 }
 
 //Constant Variables
