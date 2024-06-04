@@ -100,32 +100,5 @@ module.exports = (sequelize, Sequelize, Event) => {
     },
   });
 
-  Financial.getFinancialsByFinIds = async (finIds) => {
-    try {
-      return await Financial.findAll({
-        where: {
-          fin_id: finIds
-        }
-      });
-    } catch (error) {
-      console.error('Error retrieving financials:', error);
-      throw error;
-    }
-  };
-
-  Financial.deleteFinancialByFinId = async (finId) => {
-    try {
-      const deletedFinancial = await Financial.destroy({
-        where: {
-          fin_id: finId
-        }
-      });
-      return deletedFinancial;
-    } catch (error) {
-      console.error('Error deleting financial:', error);
-      throw error;
-    }
-  };
-
   return Financial;
 };
