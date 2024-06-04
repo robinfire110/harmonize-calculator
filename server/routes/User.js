@@ -54,12 +54,11 @@ router.get("/id/:id", checkUserOptional, async (req, res) => {
     try {
         const id = req.params.id;
         //Check user to change attributes returned (if not user or admin, only return non-sensitive attributes); 
-        let attributes = {exclude: userSensitiveAttributes}
         if (req.user && (req.user.user_id == id || req.user.isAdmin == 1))
         {
             include = [db.Financial];
         } 
-        const user = await db.User.findOne({where: {user_id: id}, attributes: attributes, include: include});
+        const user = await db.User.findOne({where: {user_id: id}, include: include});
         res.json(user);
     } catch (error) {
         res.status(500).send(error.message);
