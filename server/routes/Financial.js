@@ -66,7 +66,7 @@ router.get("/user_id/fin_id/:user_id/:fin_id", checkUser, async (req, res) => {
 /* POST */
 //Add new financial
 //Required - fin_name, total_wage, event_hours, date
-//Optional - hourly_wage, event_num, rehearse_hours, practice_hours, travel_hours, total_mileage, mileage_pay, zip, gas_price, mpg, tax, fees, event_id
+//Optional - hourly_wage, event_num, rehearsal_hours, practice_hours, travel_hours, total_mileage, mileage_covered, zip, gas_price, mpg, tax, fees, event_id
 router.post("/:id", checkUser, async (req, res) => {
     try {
         //Get data
@@ -95,7 +95,7 @@ router.post("/:id", checkUser, async (req, res) => {
         }
 
         //Add to User
-        const newFinancial = await db.Financial.create({fin_id: uid.rnd(), fin_name: data?.fin_name, date: data?.date, total_wage: data?.total_wage, hourly_wage: data?.hourly_wage, event_num: data?.event_num, event_hours: data?.event_hours, rehearse_hours: data?.rehearse_hours, practice_hours: data?.practice_hours, travel_hours: data?.travel_hours, total_mileage: data?.total_mileage, mileage_pay: data?.mileage_pay, zip: data?.zip, gas_price: data?.gas_price, mpg: data?.mpg, tax: data?.tax, fees: data?.fees, event_id: data?.event_id, round_trip: data?.round_trip, multiply_pay: data?.multiply_pay, multiply_hours: data?.multiply_hours, multiply_travel: data?.multiply_travel, multiply_practice: data?.multiply_practice, multiply_rehearsal: data?.multiply_rehearsal, multiply_other: data?.multiply_other});
+        const newFinancial = await db.Financial.create({fin_id: uid.rnd(), fin_name: data?.fin_name, date: data?.date, total_wage: data?.total_wage, hourly_wage: data?.hourly_wage, event_num: data?.event_num, event_hours: data?.event_hours, rehearsal_hours: data?.rehearsal_hours, practice_hours: data?.practice_hours, travel_hours: data?.travel_hours, total_mileage: data?.total_mileage, mileage_covered: data?.mileage_covered, zip: data?.zip, gas_price: data?.gas_price, mpg: data?.mpg, tax: data?.tax, fees: data?.fees, event_id: data?.event_id, round_trip: data?.round_trip, multiply_pay: data?.multiply_pay, multiply_hours: data?.multiply_hours, multiply_travel: data?.multiply_travel, multiply_practice: data?.multiply_practice, multiply_rehearsal: data?.multiply_rehearsal, multiply_other: data?.multiply_other});
         const newFinStatus = await db.FinStatus.create({user_id: id, fin_id: newFinancial.fin_id});
         res.send(newFinancial);
     } catch (error) {

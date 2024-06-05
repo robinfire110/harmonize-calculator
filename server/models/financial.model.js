@@ -31,7 +31,7 @@ module.exports = (sequelize, Sequelize, Event) => {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
-    rehearse_hours: {
+    rehearsal_hours: {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
@@ -47,9 +47,13 @@ module.exports = (sequelize, Sequelize, Event) => {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
-    mileage_pay: {
+    mileage_covered: {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
+    },
+    travel_fees: {
+      type: Sequelize.FLOAT,
+      default: 0.0
     },
     zip: {
       type: Sequelize.STRING

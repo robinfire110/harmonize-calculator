@@ -57,6 +57,7 @@ const Calculator = () => {
     const [travelHours, setTravelHours] = useState();
     const [tripNumSelect, setTripNumSelect] = useState(1);
     const [customTripNum, setCustomTripNum] = useState();
+    const [travelFees, setTravelFees] = useState();
     const [tripNum, setTripNum] = useState(2);
     const [gasPricePerMile, setGasPricePerMile] = useState();
     const [gasPricePerGallon, setGasPricePerGallon] = useState();
@@ -66,7 +67,7 @@ const Calculator = () => {
     const [tax, setTax] = useState();
     const [otherFees, setOtherFees] = useState();
     const [totalOtherFees, setTotalOtherFees] = useState();
-    const [totalGas, setTotalGas] = useState(0.0); 
+    const [totalTravel, setTotalTravel] = useState(0.0); 
     const [totalTax, setTotalTax] = useState(0.0); 
     const [totalHours, setTotalHours] = useState(0.0);
     const [totalPay, setTotalPay] = useState(0);
@@ -83,6 +84,7 @@ const Calculator = () => {
     const [totalMileageEnabled, setTotalMileageEnabled] = useState(false);
     const [travelHoursEnabled, setTravelHoursEnabled] = useState(false);
     const [mileageCoveredEnabled, setMileageCoveredEnabled] = useState(false);
+    const [travelFeesEnabled, setTravelFeesEnabled] = useState(false);
     const [practiceHoursEnabled, setPracticeHoursEnabled] = useState(false);
     const [rehearsalHoursEnabled, setRehearsalHoursEnabled] = useState(false);
     const [taxEnabled, setTaxEnabled] = useState(false);
@@ -122,17 +124,18 @@ const Calculator = () => {
                 {
                     axios.get(`${getBackendURL()}/user/id/${res.data.user.user_id}`, { withCredentials: true }).then(res => {
                         const userData = res.data;
-
+                        loadData(userData);
+                        /*
                         //Set User Defaults
                         setModalOriginZip(userData.zip || '');
                         setCurrentState(userData.default_state || '');
                         setCurrentVehicle(userData.default_vehicle || '');
-                        setMileageCovered(userData.default_miles_covered || null);
-                        setTripNum(userData.default_trip_num);
-                        setPracticeHours(userData.default_practice || null);
-                        setRehearsalHours(userData.default_rehearsal || null);
-                        setTax(userData.default_tax || null);
-                        setOtherFees(userData.default_fees || null);
+                        setMileageCovered(userData.mileage_covered || null);
+                        setTripNum(userData.trip_num);
+                        setPracticeHours(userData.practice_hours || null);
+                        setRehearsalHours(userData.rehearsal_hours || null);
+                        setTax(userData.tax || null);
+                        setOtherFees(userData.fees || null);
                         setMultiplyPay(userData.multiply_pay);
                         setMultiplyGigHours(userData.multiply_hours);
                         setMultiplyTravel(userData.multiply_travel);
@@ -142,25 +145,26 @@ const Calculator = () => {
 
                         //Set gas prices
                         if (userData.default_state !== "custom") setGasPricePerGallon(Math.round(gasPrices[userData.default_state] * 100) / 100);
-                        else setGasPricePerGallon(userData.default_gas_price);
+                        else setGasPricePerGallon(userData.gas_price);
                         if (userData.default_vehicle !== "custom") setVehicleMPG(gasPrices[userData.default_vehicle]);
-                        else setVehicleMPG(userData.default_mpg);
+                        else setVehicleMPG(userData.mpg);
 
                         //Set Switches
-                        setMileageCoveredEnabled(userData.default_miles_covered > 0);
-                        setPracticeHoursEnabled(userData.default_practice > 0);
-                        setRehearsalHoursEnabled(userData.default_rehearsal > 0);
-                        setTaxEnabled(userData.default_tax > 0);
-                        setOtherFeesEnabled(userData.default_fees > 0);
+                        setMileageCoveredEnabled(userData.mileage_covered > 0);
+                        setPracticeHoursEnabled(userData.practice_hours > 0);
+                        setRehearsalHoursEnabled(userData.rehearsal_hours > 0);
+                        setTaxEnabled(userData.tax > 0);
+                        setOtherFeesEnabled(userData.fees > 0);
 
                         //Set Trip Num
-                        if (userData.default_trip_num == 1) setTripNumSelect(0);
-                        else if (userData.default_trip_num == 2) setTripNumSelect(1);
+                        if (userData.trip_num == 1) setTripNumSelect(0);
+                        else if (userData.trip_num == 2) setTripNumSelect(1);
                         else
                         {
                             setTripNumSelect(2);
-                            setCustomTripNum(userData.default_trip_num);
+                            setCustomTripNum(userData.trip_num);
                         } 
+                        */
                         
                         setUser(userData);
                     });  
@@ -203,8 +207,8 @@ const Calculator = () => {
         //Calculate Wage
         calculateHourlyWage();
         
-    }, [gigPay, gigHours, gigNum, totalMileage, mileageCovered, gasPricePerMile, travelHours, practiceHours, rehearsalHours, tax, otherFees,
-        gigNumEnabled, totalMileageEnabled, mileageCoveredEnabled, travelHoursEnabled, practiceHoursEnabled, rehearsalHoursEnabled, taxEnabled, otherFeesEnabled,
+    }, [gigPay, gigHours, gigNum, totalMileage, mileageCovered, gasPricePerMile, travelHours, travelFees, practiceHours, rehearsalHours, tax, otherFees,
+        gigNumEnabled, totalMileageEnabled, mileageCoveredEnabled, travelHoursEnabled, travelFeesEnabled, practiceHoursEnabled, rehearsalHoursEnabled, taxEnabled, otherFeesEnabled,
         tripNum, multiplyPay, multiplyGigHours, multiplyTravel, multiplyPracticeHours, multiplyRehearsalHours, multiplyOtherFees])
 
     //Runs when any fields related to gas price calcuation updates.
@@ -225,26 +229,28 @@ const Calculator = () => {
     useEffect(() => {
         getSavedFinancials();
     }, [searchQuery]);
-    
-    /* Functions */
+
     //Load data
     function loadData(data)
     {
+        //Set data
         if (data?.fin_name) setCalcName(data.fin_name);
         if (data?.date) setCalcDate(data.date)
         if (data?.zip) setZip(data.zip);
+        if (data?.default_state) setCurrentState(data.default_state || '');
+        if (data?.default_vehicle) setCurrentVehicle(data.default_vehicle || '');
         if (data?.hourly_wage) setHourlyWage(data.hourly_wage);
         if (data?.total_wage > 0) setGigPay(data.total_wage);
         if (data?.event_hours > 0) setGigHours(data.event_hours);
         if (data?.event_num > 0) setGigNum(data.event_num); 
         if (data?.total_mileage > 0) setTotalMileage(data.total_mileage); 
         if (data?.travel_hours > 0) setTravelHours(data.travel_hours); 
-        if (data?.mileage_pay > 0) setMileageCovered(data.mileage_pay); 
+        if (data?.mileage_covered > 0) setMileageCovered(data.mileage_covered); 
         if (data?.gas_price > 0) setGasPricePerGallon(data.gas_price);
         if (data?.mpg > 0) setVehicleMPG(data.mpg);
         if (data?.trip_num > 0) setTripNum(data?.trip_num);
         if (data?.practice_hours > 0) setPracticeHours(data.practice_hours); 
-        if (data?.rehearse_hours > 0) setRehearsalHours(data.rehearse_hours); 
+        if (data?.rehearsal_hours > 0) setRehearsalHours(data.rehearsal_hours); 
         if (data?.tax > 0) setTax(data.tax); 
         if (data?.fees > 0) setOtherFees(data.fees);
         if (data?.multiply_pay != undefined) setMultiplyPay(data.multiply_pay);
@@ -255,13 +261,19 @@ const Calculator = () => {
         if (data?.multiply_other != undefined) setMultiplyOtherFees(data.multiply_other);
         //console.log(data);
 
+        //Set gas prices
+        if (data?.default_state !== "custom") setGasPricePerGallon(Math.round(gasPrices[data.default_state] * 100) / 100);
+        else setGasPricePerGallon(data?.gas_price);
+        if (data?.default_vehicle !== "custom") setVehicleMPG(gasPrices[data.default_vehicle]);
+        else setVehicleMPG(data?.mpg);
+
         //Set switches
         setGigNumEnabled(data?.event_num > 0);
         setTotalMileageEnabled(data?.total_mileage > 0);
         setTravelHoursEnabled(data?.travel_hours > 0);
-        setMileageCoveredEnabled(data?.mileage_pay > 0);
+        setMileageCoveredEnabled(data?.mileage_covered > 0);
         setPracticeHoursEnabled(data?.practice_hours > 0);
-        setRehearsalHoursEnabled(data?.rehearse_hours > 0);
+        setRehearsalHoursEnabled(data?.rehearsal_hours > 0);
         setTaxEnabled(data?.tax > 0);
         setOtherFeesEnabled(data?.fees > 0);
         if (data?.zip) setModalDestinationZip(data?.zip);
@@ -274,8 +286,6 @@ const Calculator = () => {
             setTripNumSelect(2);
             setCustomTripNum(data?.trip_num);
         } 
-        
-
     }
 
     //Load from database (both fin_id)
@@ -375,16 +385,30 @@ const Calculator = () => {
         } 
 
         //Calculate mileage pay
-        if (totalMileageEnabled && totalMileage && gasPricePerMile)
+        let totalTravelCosts = 0;
+        let gasPrice = 0;
+        let totalTravelFees = 0;
+
+        if (travelFeesEnabled && travelFees)
         {
-            let gasPrice = parseFloat(gasPricePerMile);
-            //Subtract mileage covered
-            if (mileageCoveredEnabled && mileageCovered) gasPrice -= parseFloat(mileageCovered);
-            gasPrice = parseFloat(totalMileage) * parseIntZero(tripNum) * travelNum * gasPrice;
-            setTotalGas(gasPrice);
-            wage -= gasPrice;
+            totalTravelFees = parseFloatZero(travelFees);
         }
 
+        if (totalMileageEnabled && totalMileage && gasPricePerMile)
+        {
+            gasPrice = parseFloat(gasPricePerMile);
+            //Subtract mileage covered
+            if (mileageCoveredEnabled && mileageCovered) gasPrice -= parseFloat(mileageCovered);
+            gasPrice = parseFloat(totalMileage) * parseIntZero(tripNum) * gasPrice;
+        }
+
+        if (!(gasPrice == 0 && totalTravelFees == 0))
+        {
+            totalTravelCosts = (gasPrice+totalTravelFees) * travelNum;
+            setTotalTravel(totalTravelCosts);
+            wage -= totalTravelCosts;
+        }
+        
         //Other fees (if needed)
         if (otherFeesEnabled && otherFees)
         {
@@ -454,11 +478,11 @@ const Calculator = () => {
                 event_hours: parseFloatZero(gigHours),
                 event_num: parseIntZero(gigNum),
                 hourly_wage: parseFloatZero(hourlyWage),
-                rehearse_hours: parseFloatZero(rehearsalHours),
+                rehearsal_hours: parseFloatZero(rehearsalHours),
                 practice_hours: parseFloatZero(practiceHours),
                 travel_hours: parseFloatZero(travelHours),
                 total_mileage: parseFloatZero(totalMileage),
-                mileage_pay: parseFloatZero(mileageCovered),
+                mileage_covered: parseFloatZero(mileageCovered),
                 zip: parseStringUndefined(modalDestinationZip),
                 gas_price: parseFloatZero(gasPricePerGallon),
                 mpg: parseFloatZero(vehicleMPG),
@@ -582,7 +606,7 @@ const Calculator = () => {
             rows.push(worksheet.addRow([calcName, calcDate, parseFloatZero(gigPay), parseIntZero(gigNum) == 0 ? 1 : parseIntZero(gigNum), "", "Payment", parseFloatZero(gigPay)]));
             rows[1].getCell(3).numFmt = '$#,##0.00'; //Format cell as currency
             rows.push(worksheet.addRow(["", "", "", "", "", "Tax Cut", parseFloatZero(totalTax)])); //Results row
-            rows.push(worksheet.addRow(["Event Hours", "Individual Practice Hours", "Rehearsal Hours", "", "", "Travel Cost", parseFloatZero(totalGas)]));
+            rows.push(worksheet.addRow(["Event Hours", "Individual Practice Hours", "Rehearsal Hours", "", "", "Travel Cost", parseFloatZero(totalTravel)]));
             rows.push(worksheet.addRow([parseFloatZero(gigHours), parseFloatZero(practiceHours), parseFloatZero(rehearsalHours), "", "", "Other Fees", parseFloatZero(otherFees)]));
             rows.push(worksheet.addRow([""])); //Results row
             rows.push(worksheet.addRow(["Total Mileage", "Travel Hours", "Mileage Covered", "Trip Number", "", "Total Hours", parseFloatZero(totalHours)]));
@@ -952,13 +976,23 @@ const Calculator = () => {
                                             </Row>
                                         </Col>
 
-                                        <Row className="mt-3">
+                                        <Row className="my-3">
                                             <Form.Label>Mileage Covered (in $ per mile)</Form.Label>
                                             <InputGroup>
                                                 <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setMileageCoveredEnabled(!mileageCoveredEnabled)}} checked={mileageCoveredEnabled}></Form.Check>
                                                 <InputGroup.Text>$</InputGroup.Text>
                                                 <FormNumber id="mileageCovered" maxValue={999.99} value={mileageCovered} placeholder="Ex. 0.21" integer={false} disabled={!mileageCoveredEnabled} onChange={e => setMileageCovered(e.target.value)} />
                                                 <TooltipButton text="Number of miles that will be covered by organizers. Will subtract from total mileage for final result."/>
+                                            </InputGroup>
+                                        </Row>
+
+                                        <Row className="mb-3">
+                                            <Form.Label>Additional Travel Costs</Form.Label>
+                                            <InputGroup>
+                                                <Form.Check id="travelFeesSwitch" checked={travelFeesEnabled} type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setTravelFeesEnabled(!travelFeesEnabled)}}></Form.Check>
+                                                <InputGroup.Text>$</InputGroup.Text>
+                                                <FormNumber id="travelFees" maxValue={99999.99} value={travelFees} placeholder="Ex. 4.50" integer={false} disabled={!travelFeesEnabled} onChange={e => setTravelFees(e.target.value)} />
+                                                <TooltipButton text="Any additional travel fees. This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."/>
                                             </InputGroup>
                                         </Row>
                                         
@@ -1036,7 +1070,7 @@ const Calculator = () => {
                                     <Row>
                                         <Col lg={6} md={6} sm={7} xs={5}>
                                             {taxEnabled ? <h5 style={{display: "block"}}>Tax Cut ({tax ? tax : "0"}%):</h5> : ""}
-                                            {totalMileageEnabled ? <h5 style={{display: "block"}}>Total Travel Cost:</h5> : ""}
+                                            {(totalMileageEnabled || travelFeesEnabled) ? <h5 style={{display: "block"}}>Total Travel Cost:</h5> : ""}
                                             {otherFeesEnabled ? <h5 style={{display: "block"}}>Other Fees:</h5> : ""}
                                             <hr style={{margin: "0px ", textAlign: "right", width: "0px"}}/>
                                             <h5 style={{display: "block"}}><br /></h5>
@@ -1045,7 +1079,7 @@ const Calculator = () => {
                                         <Col lg={1} md={1} sm={1} xs={1}>
                                             <div style={{whiteSpace: "pre-wrap"}}>
                                             {taxEnabled ? <h5 style={{display: "block"}}>-</h5> : ""}
-                                            {totalMileageEnabled ? <h5 style={{display: "block"}}>-</h5> : ""}
+                                            {(totalMileageEnabled || travelFeesEnabled) ? <h5 style={{display: "block"}}>-</h5> : ""}
                                             {otherFeesEnabled ? <h5 style={{display: "block"}}>-</h5> : ""}
                                             <h5 style={{display: "block"}}><br /></h5>
                                             <h5 style={{display: "block"}}>÷</h5>
@@ -1054,7 +1088,7 @@ const Calculator = () => {
                                         <Col>                      
                                             <div style={{whiteSpace: "pre-wrap", textAlign: "right", display: "block"}}>
                                                 {taxEnabled ? <h5 style={{display: "block"}}>{formatCurrency(totalTax)}</h5> : ""}
-                                                {totalMileageEnabled ? <h5 style={{display: "block"}}>{totalMileage ? formatCurrency(totalGas) : formatCurrency(0)}</h5> : ""}
+                                                {(totalMileageEnabled || travelFeesEnabled) ? <h5 style={{display: "block"}}>{(totalMileageEnabled || travelFeesEnabled) ? formatCurrency(totalTravel) : formatCurrency(0)}</h5> : ""}
                                                 {otherFeesEnabled ? <h5 style={{display: "block"}}>{formatCurrency(totalOtherFees)}</h5> : ""}
                                                 <hr style={{margin: "0px ", textAlign: "right"}}/>
                                                 <h5 style={{display: "block"}}>{formatCurrency(totalPay)}</h5>

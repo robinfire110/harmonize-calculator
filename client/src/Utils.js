@@ -98,7 +98,7 @@ function getTotalFinHours(fin)
     let multiplyTravel = fin.multiply_travel == 1 ? event_num : 1;
     let multiplyPractice = fin.multiply_practice == 1 ? event_num : 1;
     let multiplyRehearsal = fin.multiply_rehearsal == 1 ? event_num : 1;
-    let totalHours = (fin.event_hours*multiplyGigHours) + (fin.practice_hours*multiplyPractice) + (fin.rehearse_hours*multiplyRehearsal) + (fin.travel_hours*multiplyTravel*fin.trip_num);
+    let totalHours = (fin.event_hours*multiplyGigHours) + (fin.practice_hours*multiplyPractice) + (fin.rehearsal_hours*multiplyRehearsal) + (fin.travel_hours*multiplyTravel*fin.trip_num);
     return totalHours;
 }
 
@@ -141,7 +141,7 @@ async function saveSpreadsheetAll(data, filename = 'Harmonize_Export')
     let rowCount = 1;
     data.forEach(fin => {
         rowCount++;
-        var row = worksheet.addRow([fin.fin_name, fin.date, parseFloatZero(fin.total_wage), parseIntZero(fin.event_num) === 0 ? 1 : parseIntZero(fin.event_num), parseFloatZero(fin.event_hours), parseFloatZero(fin.practice_hours), parseFloatZero(fin.rehearse_hours), parseFloatZero(fin.total_mileage), parseFloatZero(fin.travel_hours), parseFloatZero(fin.gas_price), parseFloatZero(fin.mpg), parseFloatZero(fin.gas_price/fin.mpg), parseFloatZero(fin.mileage_pay), parseIntZero(fin.trip_num), parseFloatZero(fin.tax), parseFloatZero(fin.fees), fin.total_wage*(.01*parseFloatZero(fin.tax)), 0, parseFloatZero(fin.gas_price/fin.mpg)*parseFloatZero(fin.total_mileage), 0, parseFloatZero(fin.hourly_wage)]);
+        var row = worksheet.addRow([fin.fin_name, fin.date, parseFloatZero(fin.total_wage), parseIntZero(fin.event_num) === 0 ? 1 : parseIntZero(fin.event_num), parseFloatZero(fin.event_hours), parseFloatZero(fin.practice_hours), parseFloatZero(fin.rehearsal_hours), parseFloatZero(fin.total_mileage), parseFloatZero(fin.travel_hours), parseFloatZero(fin.gas_price), parseFloatZero(fin.mpg), parseFloatZero(fin.gas_price/fin.mpg), parseFloatZero(fin.mileage_covered), parseIntZero(fin.trip_num), parseFloatZero(fin.tax), parseFloatZero(fin.fees), fin.total_wage*(.01*parseFloatZero(fin.tax)), 0, parseFloatZero(fin.gas_price/fin.mpg)*parseFloatZero(fin.total_mileage), 0, parseFloatZero(fin.hourly_wage)]);
 
         //Get values
         let event_num = Math.max(fin.event_num, 1);
@@ -156,7 +156,7 @@ async function saveSpreadsheetAll(data, filename = 'Harmonize_Export')
         let otherFees = fin.fees * multiplyOther;
         let totalPay = fin.total_wage * multiplyPay;
         let taxCut = totalPay * (fin.tax * .01);
-        let travelCosts = fin.total_mileage*(gasPerMile-fin.mileage_pay)*multiplyTravel*tripNum;
+        let travelCosts = fin.total_mileage*(gasPerMile-fin.mileage_covered)*multiplyTravel*tripNum;
         let totalHours = getTotalFinHours(fin);
 
         //Set Formulas

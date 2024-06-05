@@ -12,15 +12,15 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 		email: userData.email,
 		zip: userData.zip || "",
 		default_state: userData.default_state,
-		default_gas_price: userData.default_gas_price || null,
+		gas_price: userData.gas_price || null,
 		default_vehicle: userData.default_vehicle,
-		default_mpg: userData.default_mpg || null,
-		default_miles_covered: userData.default_miles_covered || null,
-		default_practice: userData.default_practice || null,
-		default_rehearsal: userData.default_rehearsal || null,
-		default_tax: userData.default_tax || null,
-		default_fees: userData.default_fees || null,
-		trip_num: userData.default_trip_num,
+		mpg: userData.mpg || null,
+		mileage_covered: userData.mileage_covered || null,
+		practice_hours: userData.practice_hours || null,
+		rehearsal_hours: userData.rehearsal_hours || null,
+		tax: userData.tax || null,
+		fees: userData.fees || null,
+		trip_num: userData.trip_num,
 		multiply_pay: userData.multiply_pay,
 		multiply_hours: userData.multiply_hours,
 		multiply_travel: userData.multiply_travel,
@@ -30,10 +30,10 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 	});
 
 	//States
-	const [customTripNum, setCustomTripNum] = useState(parseIntZero(userData.default_trip_num) > 2 ? parseIntZero(userData.default_trip_num) : "");
-	const [tripNumSelect, setTripNumSelect] = useState(parseIntZero(userData.default_trip_num) <= 2 ? parseIntZero(userData.default_trip_num) == 1 ? 0 : 1 : 2);
-    const [gasPricePerGallon, setGasPricePerGallon] = useState(userData.default_gas_price || null);
-    const [vehicleMPG, setVehicleMPG] = useState(userData.default_mpg || null);
+	const [customTripNum, setCustomTripNum] = useState(parseIntZero(userData.trip_num) > 2 ? parseIntZero(userData.trip_num) : "");
+	const [tripNumSelect, setTripNumSelect] = useState(parseIntZero(userData.trip_num) <= 2 ? parseIntZero(userData.trip_num) == 1 ? 0 : 1 : 2);
+    const [gasPricePerGallon, setGasPricePerGallon] = useState(userData.gas_price || null);
+    const [vehicleMPG, setVehicleMPG] = useState(userData.mpg || null);
 
 	//Modal
 	const [deleteAccountModal, setDeleteAccountModal] = useState(false);
@@ -42,11 +42,11 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 	
 
 	useEffect(() => {
-		setFormData({ ...formData, ["default_gas_price"]: parseFloatZero(gasPricePerGallon) });
+		setFormData({ ...formData, ["gas_price"]: parseFloatZero(gasPricePerGallon) });
 	}, [gasPricePerGallon])
 	
 	useEffect(() => {
-		setFormData({ ...formData, ["default_mpg"]: parseFloatZero(vehicleMPG) });
+		setFormData({ ...formData, ["mpg"]: parseFloatZero(vehicleMPG) });
 	}, [vehicleMPG])
 
 	const handleChange = (e) => {
@@ -62,7 +62,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 		//Check validity
 		let valid = true;
 		//Trip Number
-		if (formData.default_trip_num <= 0)
+		if (formData.trip_num <= 0)
 		{
 			let tripNumBox = document.getElementById('tripNum');
 			tripNumBox.setCustomValidity("Value must be greater than 0.");
@@ -164,7 +164,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 							<Form.Label>Mileage Covered (in $ per mile)</Form.Label>
 							<InputGroup>
 								<InputGroup.Text>$</InputGroup.Text>
-								<FormNumber id="mileageCovered" name='default_miles_covered' maxValue={999.99} value={formData.default_miles_covered} placeholder="Ex. 0.21" integer={false} onChange={handleChange} />
+								<FormNumber id="mileageCovered" name='mileage_covered' maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} onChange={handleChange} />
 								<TooltipButton text="Default number of miles that will be covered by organizers. Will subtract from total mileage for final result."/>
 							</InputGroup>
 						</Row>
@@ -172,11 +172,11 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 							<Form.Label>Trip Number</Form.Label>
 							<InputGroup>
 								<ButtonGroup>
-									<ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setFormData({ ...formData, ['default_trip_num']: 1})}}>One-Way</ToggleButton>
-									<ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setFormData({ ...formData, ['default_trip_num']: 2})}}>Round Trip</ToggleButton>
-									<ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setFormData({ ...formData, ['default_trip_num']: customTripNum})}}>Custom</ToggleButton>
+									<ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setFormData({ ...formData, ['trip_num']: 1})}}>One-Way</ToggleButton>
+									<ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setFormData({ ...formData, ['trip_num']: 2})}}>Round Trip</ToggleButton>
+									<ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setFormData({ ...formData, ['trip_num']: customTripNum})}}>Custom</ToggleButton>
 								</ButtonGroup>
-								<FormNumber id="tripNum" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setFormData({ ...formData, ['default_trip_num']: parseIntZero(e.target.value)}); setCustomTripNum(e.target.value)}} disabled={tripNumSelect != 2} required/>
+								<FormNumber id="tripNum" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setFormData({ ...formData, ['trip_num']: parseIntZero(e.target.value)}); setCustomTripNum(e.target.value)}} disabled={tripNumSelect != 2} required/>
 								<TooltipButton text="Default number of trips taken. One-Way will multiply travel mileage and hours by 1, Round-Trip by 2 and custom by whatever value is set."/>
 							</InputGroup>
 						</Row>
@@ -239,14 +239,14 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 						<Row>
 							<Form.Label>Individual Practice Hours</Form.Label>
 							<InputGroup>
-							<FormNumber id="practiceHours" name="default_practice" max={999.9} value={formData.default_practice} placeholder="Ex. 3" integer={false} onChange={handleChange} />
+							<FormNumber id="practiceHours" name="practice_hours" max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} onChange={handleChange} />
 							<TooltipButton text="Default practice hours for event (individually, not including group rehearsal)."/>
 							</InputGroup>
 						</Row>
 						<Row>
 							<Form.Label>Rehearsal Hours</Form.Label>
 							<InputGroup>
-							<FormNumber id="rehearsalHours" name='default_rehearsal' max={999.9} value={formData.default_rehearsal} placeholder="Ex. 2" integer={false} onChange={handleChange} />
+							<FormNumber id="rehearsalHours" name='rehearsal_hours' max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} onChange={handleChange} />
 							<TooltipButton text="Default rehearsal hours for event (not including individual practice)."/>
 							</InputGroup>
 						</Row>
@@ -256,7 +256,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 							<Form.Label>Income Tax Percentage</Form.Label>
 							<InputGroup>
 								<InputGroup.Text>%</InputGroup.Text>
-								<FormNumber id="tax" name='default_tax' value={formData.default_tax} maxValue={100} placeholder="Ex. 17.5" integer={false} onChange={handleChange} />
+								<FormNumber id="tax" name='tax' value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} onChange={handleChange} />
 							<TooltipButton text='Default percentage of income tax.'/>
 							</InputGroup>
 						</Row>
@@ -264,7 +264,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 							<Form.Label>Other Fees</Form.Label>
 							<InputGroup>
 								<InputGroup.Text>$</InputGroup.Text>
-								<FormNumber id="otherFees" name='default_fees' maxValue={9999.99} value={formData.default_fees} placeholder="Ex. 15.00" integer={false} onChange={handleChange} />
+								<FormNumber id="otherFees" name='fees' maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} onChange={handleChange} />
 								<TooltipButton text="Default additional fees (i.e. food, parking, instrument wear etc.)"/>
 							</InputGroup>
 						</Row>

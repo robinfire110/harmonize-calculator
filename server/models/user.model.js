@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       defaultValue: "average_gas"
     },
-    default_gas_price: {
+    gas_price: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
@@ -25,33 +25,37 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       defaultValue: "average_mpg"
     },
-    default_mpg: {
+    mpg: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    default_miles_covered: {
+    mileage_covered: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    default_practice: {
+    practice_hours: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    default_rehearsal: {
+    rehearsal_hours: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    default_tax: {
+    tax: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    default_fees: {
+    fees: {
       type: Sequelize.FLOAT,
       defaultValue: 0
     },
-    default_trip_num: {
+    trip_num: {
       type: Sequelize.INTEGER,
       defaultValue: 2
+    },
+    travel_fees: {
+      type: Sequelize.FLOAT,
+      default: 0.0
     },
     multiply_pay: {
       type: Sequelize.BOOLEAN,
