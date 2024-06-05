@@ -40,40 +40,61 @@ const Calculator = () => {
 
     //States
     //Variables
-    const [calcName, setCalcName] = useState();
+    const [formData, setFormData] = useState({
+        fin_name: "",
+        date: moment().format("YYYY-MM-DD"),
+        event_num: null,
+        total_wage: null,
+        event_hours: null,
+        hourly_wage: null,
+        practice_hours: null,
+        rehearsal_hours: null,
+        travel_hours: null,
+        total_mileage: null,
+        mileage_covered: null,
+        trip_num: 2,
+        travel_fees: null,
+        zip: null,
+        gas_price: null,
+        mpg: null,
+        tax: null,
+        fees: null,
+        multiply_pay: true,
+        multiply_hours: true,
+        multiply_travel: true,
+        multiply_practice: false,
+        multiply_rehearsal: false,
+        multiply_other: false,
+    });
+
+    const DATA_VALUE = {INT: 0, FLOAT: 1, STRING: 2}
+    function setFormDataValue(variable, value, type=null)
+    {
+        //Parse value (if needed)
+        switch (type)
+        {
+            case DATA_VALUE.INT: value = parseIntZero(value); break;
+            case DATA_VALUE.FLOAT: value = parseFloatZero(value); break;
+            case DATA_VALUE.STRING: value = parseStringUndefined(value); break;
+        }
+        setFormData({...formData, [variable]: value});
+    }
+
     const [nameLength, setNameLength] = useState(maxFinancialNameLength);
-    const [calcDate, setCalcDate] = useState(moment().format("YYYY-MM-DD"));
-    const [gigPay, setGigPay] = useState();
-    const [gigHours, setGigHours] = useState();
-    const [gigNum, setGigNum] = useState();
-    const [multiplyPay, setMultiplyPay] = useState(true);
-    const [multiplyGigHours, setMultiplyGigHours] = useState(true);
-    const [multiplyTravel, setMultiplyTravel] = useState(true);
-    const [multiplyRehearsalHours, setMultiplyRehearsalHours] = useState(false);
-    const [multiplyPracticeHours, setMultiplyPracticeHours] = useState(false);
-    const [multiplyOtherFees, setMultiplyOtherFees] = useState(false);
-    const [totalMileage, setTotalMileage] = useState();
-    const [mileageCovered, setMileageCovered] = useState();
-    const [travelHours, setTravelHours] = useState();
     const [tripNumSelect, setTripNumSelect] = useState(1);
     const [customTripNum, setCustomTripNum] = useState();
-    const [travelFees, setTravelFees] = useState();
-    const [tripNum, setTripNum] = useState(2);
     const [gasPricePerMile, setGasPricePerMile] = useState();
-    const [gasPricePerGallon, setGasPricePerGallon] = useState();
-    const [vehicleMPG, setVehicleMPG] = useState();
-    const [practiceHours, setPracticeHours] = useState();
-    const [rehearsalHours, setRehearsalHours] = useState();
-    const [tax, setTax] = useState();
-    const [otherFees, setOtherFees] = useState();
+    const [hourlyWage, setHourlyWage] = useState(0.0);
+    
+    //Totals for calculator
     const [totalOtherFees, setTotalOtherFees] = useState();
     const [totalTravel, setTotalTravel] = useState(0.0); 
     const [totalTax, setTotalTax] = useState(0.0); 
     const [totalHours, setTotalHours] = useState(0.0);
     const [totalPay, setTotalPay] = useState(0);
-    const [hourlyWage, setHourlyWage] = useState(0.0);
+    
     const [gasPrices, setGasPrices] = useState();
-    const [zip, setZip] = useState("");
+    
     const [zipCodeError, setZipCodeError] = useState(false);
     const [modalOriginZip, setModalOriginZip] = useState("");
     const [modalDestinationZip, setModalDestinationZip] = useState("");
@@ -125,47 +146,6 @@ const Calculator = () => {
                     axios.get(`${getBackendURL()}/user/id/${res.data.user.user_id}`, { withCredentials: true }).then(res => {
                         const userData = res.data;
                         loadData(userData);
-                        /*
-                        //Set User Defaults
-                        setModalOriginZip(userData.zip || '');
-                        setCurrentState(userData.default_state || '');
-                        setCurrentVehicle(userData.default_vehicle || '');
-                        setMileageCovered(userData.mileage_covered || null);
-                        setTripNum(userData.trip_num);
-                        setPracticeHours(userData.practice_hours || null);
-                        setRehearsalHours(userData.rehearsal_hours || null);
-                        setTax(userData.tax || null);
-                        setOtherFees(userData.fees || null);
-                        setMultiplyPay(userData.multiply_pay);
-                        setMultiplyGigHours(userData.multiply_hours);
-                        setMultiplyTravel(userData.multiply_travel);
-                        setMultiplyPracticeHours(userData.multiply_practice);
-                        setMultiplyRehearsalHours(userData.multiply_rehearsal);
-                        setMultiplyOtherFees(userData.multiply_other);
-
-                        //Set gas prices
-                        if (userData.default_state !== "custom") setGasPricePerGallon(Math.round(gasPrices[userData.default_state] * 100) / 100);
-                        else setGasPricePerGallon(userData.gas_price);
-                        if (userData.default_vehicle !== "custom") setVehicleMPG(gasPrices[userData.default_vehicle]);
-                        else setVehicleMPG(userData.mpg);
-
-                        //Set Switches
-                        setMileageCoveredEnabled(userData.mileage_covered > 0);
-                        setPracticeHoursEnabled(userData.practice_hours > 0);
-                        setRehearsalHoursEnabled(userData.rehearsal_hours > 0);
-                        setTaxEnabled(userData.tax > 0);
-                        setOtherFeesEnabled(userData.fees > 0);
-
-                        //Set Trip Num
-                        if (userData.trip_num == 1) setTripNumSelect(0);
-                        else if (userData.trip_num == 2) setTripNumSelect(1);
-                        else
-                        {
-                            setTripNumSelect(2);
-                            setCustomTripNum(userData.trip_num);
-                        } 
-                        */
-                        
                         setUser(userData);
                     });  
                 }
@@ -206,24 +186,23 @@ const Calculator = () => {
     useEffect(() => {
         //Calculate Wage
         calculateHourlyWage();
+        console.log("Data", formData);
         
-    }, [gigPay, gigHours, gigNum, totalMileage, mileageCovered, gasPricePerMile, travelHours, travelFees, practiceHours, rehearsalHours, tax, otherFees,
-        gigNumEnabled, totalMileageEnabled, mileageCoveredEnabled, travelHoursEnabled, travelFeesEnabled, practiceHoursEnabled, rehearsalHoursEnabled, taxEnabled, otherFeesEnabled,
-        tripNum, multiplyPay, multiplyGigHours, multiplyTravel, multiplyPracticeHours, multiplyRehearsalHours, multiplyOtherFees])
+    }, [formData, gasPricePerMile, gigNumEnabled, totalMileageEnabled, mileageCoveredEnabled, travelHoursEnabled, travelFeesEnabled, practiceHoursEnabled, rehearsalHoursEnabled, taxEnabled, otherFeesEnabled])
 
     //Runs when any fields related to gas price calcuation updates.
     useEffect(() => {
-      calculateGasPerMile();
-    }, [gasPricePerGallon, vehicleMPG])
+        calculateGasPerMile();
+    }, [formData.gas_price, formData.mpg])
 
     //Update name length
     useEffect(() => {
-        const nameBox = document.getElementById("financialName");
+        const nameBox = document.getElementById("fin_name");
         if (nameBox)
         {
             setNameLength(maxFinancialNameLength-nameBox.value.length);
         } 
-    }, [calcName]);
+    }, [formData.fin_name]);
 
     //Search
     useEffect(() => {
@@ -234,38 +213,37 @@ const Calculator = () => {
     function loadData(data)
     {
         //Set data
-        if (data?.fin_name) setCalcName(data.fin_name);
-        if (data?.date) setCalcDate(data.date)
-        if (data?.zip) setZip(data.zip);
-        if (data?.default_state) setCurrentState(data.default_state || '');
-        if (data?.default_vehicle) setCurrentVehicle(data.default_vehicle || '');
-        if (data?.hourly_wage) setHourlyWage(data.hourly_wage);
-        if (data?.total_wage > 0) setGigPay(data.total_wage);
-        if (data?.event_hours > 0) setGigHours(data.event_hours);
-        if (data?.event_num > 0) setGigNum(data.event_num); 
-        if (data?.total_mileage > 0) setTotalMileage(data.total_mileage); 
-        if (data?.travel_hours > 0) setTravelHours(data.travel_hours); 
-        if (data?.mileage_covered > 0) setMileageCovered(data.mileage_covered); 
-        if (data?.gas_price > 0) setGasPricePerGallon(data.gas_price);
-        if (data?.mpg > 0) setVehicleMPG(data.mpg);
-        if (data?.trip_num > 0) setTripNum(data?.trip_num);
-        if (data?.practice_hours > 0) setPracticeHours(data.practice_hours); 
-        if (data?.rehearsal_hours > 0) setRehearsalHours(data.rehearsal_hours); 
-        if (data?.tax > 0) setTax(data.tax); 
-        if (data?.fees > 0) setOtherFees(data.fees);
-        if (data?.multiply_pay != undefined) setMultiplyPay(data.multiply_pay);
-        if (data?.multiply_hours != undefined) setMultiplyGigHours(data.multiply_hours);
-        if (data?.multiply_travel != undefined) setMultiplyTravel(data.multiply_travel);
-        if (data?.multiply_practice != undefined) setMultiplyPracticeHours(data.multiply_practice);
-        if (data?.multiply_rehearsal != undefined) setMultiplyRehearsalHours(data.multiply_rehearsal);
-        if (data?.multiply_other != undefined) setMultiplyOtherFees(data.multiply_other);
-        //console.log(data);
+        const newData = {...data};
+        
+        //Filter unneeded
+        const defaultState = newData?.default_state;
+        const defaultVehicle = newData?.default_vehicle;
+        const filterVars = ["user_id", "email", "isAdmin", "Users", "Financials", "fin_id", "default_state", "default_vehicle"];
+        filterVars.forEach(element => {
+            if (newData[element]) delete newData[element];
+        });
 
+        //Filter (so you don't have zeros everywhere)
+        const nullVars = Object.keys(data);
+        nullVars.forEach(element => {
+            if (!element.includes("multiply") && data[element] <= 0 || data[element] === "") newData[element] = null;
+        });
+        
         //Set gas prices
-        if (data?.default_state !== "custom") setGasPricePerGallon(Math.round(gasPrices[data.default_state] * 100) / 100);
-        else setGasPricePerGallon(data?.gas_price);
-        if (data?.default_vehicle !== "custom") setVehicleMPG(gasPrices[data.default_vehicle]);
-        else setVehicleMPG(data?.mpg);
+        if (defaultState)
+        {
+            if (defaultState !== "custom") newData.gas_price = Math.round(gasPrices[defaultState] * 100) / 100;
+            else setCurrentState(defaultState || '');
+        }
+        
+        if (defaultVehicle)
+        {
+            if (defaultVehicle !== "custom") newData.mpg =  gasPrices[defaultVehicle];
+            else setCurrentVehicle(defaultVehicle || '');
+        }
+
+        //Set Form Data
+        setFormData({...formData, ...newData});
 
         //Set switches
         setGigNumEnabled(data?.event_num > 0);
@@ -276,7 +254,7 @@ const Calculator = () => {
         setRehearsalHoursEnabled(data?.rehearsal_hours > 0);
         setTaxEnabled(data?.tax > 0);
         setOtherFeesEnabled(data?.fees > 0);
-        if (data?.zip) setModalDestinationZip(data?.zip);
+        if (data?.zip) setModalOriginZip(data?.zip);
 
         //Set Trip Num
         if (data?.trip_num == 1) setTripNumSelect(0);
@@ -321,8 +299,9 @@ const Calculator = () => {
                     const durationInHours = ((duration/60)/60).toFixed(2);
                     setTotalMileageEnabled(true);
                     setTravelHoursEnabled(true);
-                    setTotalMileage(distanceInMiles);
-                    setTravelHours(durationInHours);
+                    setFormDataValue("total_mileage", distanceInMiles, DATA_VALUE.FLOAT);
+                    setFormDataValue("travel_hours", durationInHours, DATA_VALUE.FLOAT);
+                    setFormDataValue("zip", destinationZip, DATA_VALUE.STRING);
                     setLocationModalOpen(false);
                     setIsGettingLocation(false);
                 }
@@ -365,21 +344,21 @@ const Calculator = () => {
         let finalPay = 0;
 
         //Set multiples
-        let gigHoursNum = gigNumEnabled && gigNum && multiplyGigHours ? parseFloat(gigNum) : 1;
-        let practiceHoursNum = gigNumEnabled && gigNum && multiplyPracticeHours ? parseFloat(gigNum) : 1;
-        let rehearsalHoursNum = gigNumEnabled && gigNum && multiplyRehearsalHours ? parseFloat(gigNum) : 1;
-        let travelNum = gigNumEnabled && gigNum && multiplyTravel? parseFloat(gigNum) : 1;
-        let otherFeesNum = gigNumEnabled && gigNum && multiplyOtherFees? parseFloat(gigNum) : 1;
+        let gigHoursNum = gigNumEnabled && formData.event_num && formData.multiply_hours ? parseFloat(formData.event_num) : 1;
+        let practiceHoursNum = gigNumEnabled && formData.event_num && formData.multiply_practice ? parseFloat(formData.event_num) : 1;
+        let rehearsalHoursNum = gigNumEnabled && formData.event_num && formData.multiply_rehearsal ? parseFloat(formData.event_num) : 1;
+        let travelNum = gigNumEnabled && formData.event_num && formData.multiply_travel? parseFloat(formData.event_num) : 1;
+        let otherFeesNum = gigNumEnabled && formData.event_num && formData.multiply_other? parseFloat(formData.event_num) : 1;
 
         //Calculate possible income
-        if (gigPay) wage = parseFloat(gigPay);
-        if (gigNumEnabled && gigNum && multiplyPay) wage *= parseInt(gigNum);
+        if (formData.total_wage) wage = parseFloat(formData.total_wage);
+        if (gigNumEnabled && formData.event_num && formData.multiply_pay) wage *= parseInt(formData.event_num);
 
         //Calculate tax (if needed)
         if (taxEnabled)
         {  
             let currentTax = 0;
-            if (tax) currentTax = wage * (parseFloat(tax)/100);
+            if (formData.tax) currentTax = wage * (parseFloat(formData.tax)/100);
             setTotalTax(currentTax);
             wage -= currentTax;
         } 
@@ -389,17 +368,17 @@ const Calculator = () => {
         let gasPrice = 0;
         let totalTravelFees = 0;
 
-        if (travelFeesEnabled && travelFees)
+        if (travelFeesEnabled && formData.travel_fees)
         {
-            totalTravelFees = parseFloatZero(travelFees);
+            totalTravelFees = parseFloatZero(formData.travel_fees);
         }
 
-        if (totalMileageEnabled && totalMileage && gasPricePerMile)
+        if (totalMileageEnabled && formData.total_mileage && gasPricePerMile)
         {
             gasPrice = parseFloat(gasPricePerMile);
             //Subtract mileage covered
-            if (mileageCoveredEnabled && mileageCovered) gasPrice -= parseFloat(mileageCovered);
-            gasPrice = parseFloat(totalMileage) * parseIntZero(tripNum) * gasPrice;
+            if (mileageCoveredEnabled && formData.mileage_covered) gasPrice -= parseFloat(formData.mileage_covered);
+            gasPrice = parseFloat(formData.total_mileage) * parseIntZero(formData.trip_num) * gasPrice;
         }
 
         if (!(gasPrice == 0 && totalTravelFees == 0))
@@ -410,9 +389,9 @@ const Calculator = () => {
         }
         
         //Other fees (if needed)
-        if (otherFeesEnabled && otherFees)
+        if (otherFeesEnabled && formData.fees)
         {
-            let fees = parseFloat(otherFees) * (otherFeesNum);
+            let fees = parseFloat(formData.fees) * (otherFeesNum);
             setTotalOtherFees(fees)
             wage -= fees;
         } 
@@ -420,16 +399,16 @@ const Calculator = () => {
         //Calculate hours
         let hours = 0;
         
-        if (gigHours) hours = parseFloatZero(gigHours) * gigHoursNum;
-        if (practiceHoursEnabled && practiceHours) hours += parseFloatZero(practiceHours) * practiceHoursNum;
-        if (rehearsalHoursEnabled && rehearsalHours) hours += parseFloatZero(rehearsalHours) * rehearsalHoursNum;
-        if (travelHoursEnabled && travelHours) hours += parseFloatZero(travelHours) * travelNum * parseIntZero(tripNum);
+        if (formData.event_hours) hours = parseFloatZero(formData.event_hours) * gigHoursNum;
+        if (practiceHoursEnabled && formData.practice_hours) hours += parseFloatZero(formData.practice_hours) * practiceHoursNum;
+        if (rehearsalHoursEnabled && formData.rehearsal_hours) hours += parseFloatZero(formData.rehearsal_hours) * rehearsalHoursNum;
+        if (travelHoursEnabled && formData.travel_hours) hours += parseFloatZero(formData.travel_hours) * travelNum * parseIntZero(formData.trip_num);
         setTotalHours(hours.toFixed(2));
 
         //Final division
         setTotalPay(wage);
         if (hours > 0) finalPay = wage/hours;
-        if (!gigPay) finalPay = 0;
+        if (!formData.total_wage) finalPay = 0;
         
         //Convert
         setHourlyWage(finalPay);
@@ -438,10 +417,10 @@ const Calculator = () => {
     //Calculate gas per mile
     function calculateGasPerMile() 
     {
-        if (gasPricePerGallon && vehicleMPG)
+        if (formData.gas_price && formData.mpg)
         {
             //Set
-            let value = (gasPricePerGallon/vehicleMPG).toFixed(2);
+            let value = (formData.gas_price/formData.mpg).toFixed(2);
             setGasPricePerMile(value);
         }
         else
@@ -460,8 +439,8 @@ const Calculator = () => {
         if (data)
         {
             /* Check if login, use local state. Else, use default. */
-            setGasPricePerGallon(Math.round(data[state] * 100) / 100);
-            setVehicleMPG(data[vehicle]);
+            console.log(vehicle);
+            setFormData({...formData, gas_price: Math.round(data[state] * 100) / 100, mpg: data[vehicle]})
             setGasModalOpen(false);
         }
     }
@@ -470,32 +449,35 @@ const Calculator = () => {
     {
         if (!saveStatus)
         {
-            //Get data
+            //Set data
+            //I do it manually to check for enabled/disable and parse the data correctly (i.e. no null or undefined values)
             const data = {
-                fin_name: parseStringUndefined(calcName),
-                date: moment(calcDate).format("YYYY-MM-DD"),
-                total_wage: parseFloatZero(gigPay),
-                event_hours: parseFloatZero(gigHours),
-                event_num: parseIntZero(gigNum),
+                fin_name: parseStringUndefined(formData.fin_name),
+                date: moment(formData.date).format("YYYY-MM-DD"),
+                total_wage: parseFloatZero(formData.total_wage),
+                event_hours: parseFloatZero(formData.event_hours),
+                event_num: gigNumEnabled ? parseIntZero(formData.event_num) : 0,
                 hourly_wage: parseFloatZero(hourlyWage),
-                rehearsal_hours: parseFloatZero(rehearsalHours),
-                practice_hours: parseFloatZero(practiceHours),
-                travel_hours: parseFloatZero(travelHours),
-                total_mileage: parseFloatZero(totalMileage),
-                mileage_covered: parseFloatZero(mileageCovered),
-                zip: parseStringUndefined(modalDestinationZip),
-                gas_price: parseFloatZero(gasPricePerGallon),
-                mpg: parseFloatZero(vehicleMPG),
-                tax: parseFloatZero(tax),
-                fees: parseFloatZero(otherFees),
-                trip_num: tripNum,
-                multiply_pay: multiplyPay,
-                multiply_hours: multiplyGigHours,
-                multiply_travel: multiplyTravel,
-                multiply_practice: multiplyPracticeHours,
-                multiply_rehearsal: multiplyRehearsalHours,
-                multiply_other: multiplyOtherFees
+                practice_hours: practiceHoursEnabled ? parseFloatZero(formData.practice_hours) : 0,
+                rehearsal_hours: rehearsalHoursEnabled ? parseFloatZero(formData.rehearsal_hours) : 0,
+                travel_hours: travelHoursEnabled ? parseFloatZero(formData.travel_hours) : 0,
+                total_mileage: totalMileageEnabled ? parseFloatZero(formData.total_mileage) : 0,
+                trip_num: parseIntZero(formData.trip_num),
+                travel_fees: travelFeesEnabled ? parseFloatZero(formData.travel_fees) : 0,
+                mileage_covered: mileageCoveredEnabled ? parseFloatZero(formData.mileage_covered) : 0,
+                zip: parseStringUndefined(formData.zip),
+                gas_price: parseFloatZero(formData.gas_price),
+                mpg: parseFloatZero(formData.mpg),
+                tax: taxEnabled ? parseFloatZero(formData.tax) : 0,
+                fees: otherFeesEnabled ? parseFloatZero(formData.fees) : 0,
+                multiply_pay: parseBool(formData.multiply_pay),
+                multiply_hours: parseBool(formData.multiply_hours),
+                multiply_travel: parseBool(formData.multiply_travel),
+                multiply_practice: parseBool(formData.multiply_practice),
+                multiply_rehearsal: parseBool(formData.multiply_rehearsal),
+                multiply_other: parseBool(formData.multiply_other)
             }
+            console.log("Submit", data);
             
             //Check validity (will return false if not valid, HTML will take care of the rest).
             const inputs = document.getElementById("calculatorForm").elements;
@@ -510,9 +492,9 @@ const Calculator = () => {
 
             //Check other validity
             //Trip Number
-            if (tripNum <= 0)
+            if (formData.trip_num <= 0)
             {
-                let tripNumBox = document.getElementById('tripNum');
+                let tripNumBox = document.getElementById('formData.trip_num');
                 tripNumBox.setCustomValidity("Value must be greater than 0.");
             }
 
@@ -603,23 +585,23 @@ const Calculator = () => {
             //Set Rows
             const rows = [];
             rows.push(worksheet.addRow(["Name", "Date", "Total Wage", "Number of gigs"]));
-            rows.push(worksheet.addRow([calcName, calcDate, parseFloatZero(gigPay), parseIntZero(gigNum) == 0 ? 1 : parseIntZero(gigNum), "", "Payment", parseFloatZero(gigPay)]));
+            rows.push(worksheet.addRow([formData.calcName, formData.date, parseFloatZero(formData.total_wage), parseIntZero(formData.event_num) == 0 ? 1 : parseIntZero(formData.event_num), "", "Payment", parseFloatZero(formData.total_wage)]));
             rows[1].getCell(3).numFmt = '$#,##0.00'; //Format cell as currency
             rows.push(worksheet.addRow(["", "", "", "", "", "Tax Cut", parseFloatZero(totalTax)])); //Results row
             rows.push(worksheet.addRow(["Event Hours", "Individual Practice Hours", "Rehearsal Hours", "", "", "Travel Cost", parseFloatZero(totalTravel)]));
-            rows.push(worksheet.addRow([parseFloatZero(gigHours), parseFloatZero(practiceHours), parseFloatZero(rehearsalHours), "", "", "Other Fees", parseFloatZero(otherFees)]));
+            rows.push(worksheet.addRow([parseFloatZero(formData.event_hours), parseFloatZero(formData.practice_hours), parseFloatZero(formData.rehearsal_hours), "", "", "Other Fees", parseFloatZero(formData.fees)]));
             rows.push(worksheet.addRow([""])); //Results row
             rows.push(worksheet.addRow(["Total Mileage", "Travel Hours", "Mileage Covered", "Trip Number", "", "Total Hours", parseFloatZero(totalHours)]));
-            rows.push(worksheet.addRow([parseFloatZero(totalMileage), parseFloatZero(travelHours), parseFloatZero(mileageCovered), parseIntZero(tripNum), "", "Total Hourly Wage", parseFloatZero(hourlyWage)]));
+            rows.push(worksheet.addRow([parseFloatZero(formData.total_mileage), parseFloatZero(formData.travel_hours), parseFloatZero(formData.mileage_covered), parseIntZero(formData.trip_num), "", "Total Hourly Wage", parseFloatZero(hourlyWage)]));
             rows[7].getCell(3).numFmt = '$#,##0.00'; //Format cell as currency
             rows.push(worksheet.addRow([""])); //Results row
             rows.push(worksheet.addRow(["Gas Price per Gallon", "Vehicle MPG", "Gas Price per Mile"]));
-            rows.push(worksheet.addRow([parseFloatZero(gasPricePerGallon), parseFloatZero(vehicleMPG), parseFloatZero(gasPricePerMile)]));
+            rows.push(worksheet.addRow([parseFloatZero(formData.gas_price), parseFloatZero(formData.mpg), parseFloatZero(gasPricePerMile)]));
             rows[10].getCell(1).numFmt = '$#,##0.00'; //Format cell as currency
             rows[10].getCell(3).numFmt = '$#,##0.00'; //Format cell as currency
             rows.push(worksheet.addRow([""])); //Results row
             rows.push(worksheet.addRow(["Tax Percentage (%)", "Other Fees"]));
-            rows.push(worksheet.addRow([parseFloatZero(tax), parseFloatZero(otherFees)]));
+            rows.push(worksheet.addRow([parseFloatZero(formData.tax), parseFloatZero(formData.fees)]));
             rows[13].getCell(1).numFmt = '0.00##\\%'; //Format cell as currency
             rows[13].getCell(2).numFmt = '$#,##0.00'; //Format cell as currency
 
@@ -653,22 +635,22 @@ const Calculator = () => {
             }
             worksheet.getCell("F11").value = "Multiply Pay";
             worksheet.getCell("G11").dataValidation = enabledDataValidation;
-            worksheet.getCell("G11").value = multiplyPay == 1 ? "Enabled" : "Disabled";
+            worksheet.getCell("G11").value = formData.multiply_pay == 1 ? "Enabled" : "Disabled";
             worksheet.getCell("F12").value = "Multiply Gig Hours";
             worksheet.getCell("G12").dataValidation = enabledDataValidation;
-            worksheet.getCell("G12").value = multiplyGigHours == 1 ? "Enabled" : "Disabled";
+            worksheet.getCell("G12").value = formData.multiply_hours == 1 ? "Enabled" : "Disabled";
             worksheet.getCell("F13").value = "Multiply Travel";
             worksheet.getCell("G13").dataValidation = enabledDataValidation;
-            worksheet.getCell("G13").value = multiplyTravel == 1 ? "Enabled" : "Disabled";
+            worksheet.getCell("G13").value = formData.multiply_travel == 1 ? "Enabled" : "Disabled";
             worksheet.getCell("F14").value = "Multiply Practice";
             worksheet.getCell("G14").dataValidation = enabledDataValidation;
-            worksheet.getCell("G14").value = multiplyPracticeHours == 1 ? "Enabled" : "Disabled";
+            worksheet.getCell("G14").value = formData.multiply_practice == 1 ? "Enabled" : "Disabled";
             worksheet.getCell("F15").value = "Multiply Rehearsal";
             worksheet.getCell("G15").dataValidation = enabledDataValidation;
-            worksheet.getCell("G15").value = multiplyRehearsalHours == 1 ? "Enabled" : "Disabled";
+            worksheet.getCell("G15").value = formData.multiply_rehearsal == 1 ? "Enabled" : "Disabled";
             worksheet.getCell("F16").value = "Multiply Other Fees";
             worksheet.getCell("G16").dataValidation = enabledDataValidation;
-            worksheet.getCell("G16").value = multiplyOtherFees == 1 ? "Enabled" : "Disabled";
+            worksheet.getCell("G16").value = formData.multiply_other == 1 ? "Enabled" : "Disabled";
 
             //Validation
             worksheet.getCell("D2").dataValidation = {
@@ -702,7 +684,7 @@ const Calculator = () => {
             autoSizeColumn(worksheet);
 
             const buf = await workbook.xlsx.writeBuffer();
-            saveAs(new Blob([buf]), `${calcName.replace(/ /g,"_")}.xlsx`);
+            saveAs(new Blob([buf]), `${formData.calcName.replace(/ /g,"_")}.xlsx`);
             toast("Calculator data exported", toastSuccess);
         }
         catch(error)
@@ -773,11 +755,11 @@ const Calculator = () => {
                                                     <Col className="text-end">{nameLength}/{maxFinancialNameLength}</Col>
                                                 </Row>
                                             </Form.Label>
-                                            <Form.Control id="financialName" value={calcName || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculation Name" onChange={e => setCalcName(e.target.value)} pattern={`[a-zA-Z0-9\\s.'"-!,]+`}></Form.Control>
+                                            <Form.Control id="fin_name" value={formData.fin_name || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculation Name" onChange={e => setFormDataValue("fin_name", e.target.value, DATA_VALUE.STRING)} pattern={`[a-zA-Z0-9\\s.'"-!,]+`}></Form.Control>
                                         </Col>
                                         <Col lg="4">
                                             <Form.Label>Date<span style={{color: "red"}}>*</span></Form.Label>
-                                            <Form.Control id="financialDate" value={calcDate || ""} type="date" required={true} onChange={e => setCalcDate(e.target.value)}></Form.Control>
+                                            <Form.Control id="date" value={formData.date || ""} type="date" required={true} onChange={e => setFormDataValue("date", e.target.value, DATA_VALUE.STRING)}></Form.Control>
                                         </Col>
                                     </Row>
                                     <Row className="mb-3" xs={1} lg={3}>
@@ -785,14 +767,14 @@ const Calculator = () => {
                                             <Form.Label>Pay per gig<span style={{color: "red"}}>*</span></Form.Label>
                                             <InputGroup>
                                                 <InputGroup.Text id="basic-addon1">$</InputGroup.Text>
-                                                <FormNumber id="gigPay" maxValue={9999.99} value={gigPay} placeholder="Ex. 75.00" required={true} integer={false} onChange={e => setGigPay(e.target.value)}/>
+                                                <FormNumber id="total_wage" maxValue={9999.99} value={formData.total_wage} placeholder="Ex. 75.00" required={true} integer={false} onChange={e => setFormDataValue("total_wage", e.target.value, DATA_VALUE.FLOAT)}/>
                                                 <TooltipButton text="Payment for gig."/>
                                             </InputGroup>
                                         </Col>
                                         <Col lg={3}>
                                             <Form.Label>Hours per gig<span style={{color: "red"}}>*</span></Form.Label>
                                             <InputGroup>
-                                                <FormNumber id="gigHours" maxValue={999} value={gigHours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setGigHours(e.target.value)}/>
+                                                <FormNumber id="event_hours" maxValue={999} value={formData.event_hours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setFormDataValue("event_hours", e.target.value, DATA_VALUE.FLOAT)}/>
                                                 <TooltipButton text="Number of hours for event. Does not include rehearsal or practice hours."/>
                                             </InputGroup>
                                         </Col>
@@ -800,7 +782,7 @@ const Calculator = () => {
                                             <Form.Label>Number of gigs</Form.Label>
                                             <InputGroup>
                                                 <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setGigNumEnabled(!gigNumEnabled)}} checked={gigNumEnabled}></Form.Check>
-                                                <FormNumber id="gigNum" max={2} value={gigNum || ""} placeholder="Ex. 1" disabled={!gigNumEnabled} onChange={e => setGigNum(e.target.value)} />
+                                                <FormNumber id="event_num" max={2} value={formData.event_num || ""} placeholder="Ex. 1" disabled={!gigNumEnabled} onChange={e => setFormDataValue("event_num", e.target.value, DATA_VALUE.INT)} />
                                                 <Button variant='light' disabled={!gigNumEnabled} onClick={() => {setGigNumModalOpen(!gigNumModalOpen)}}>Options</Button>
                                                 <TooltipButton text='Number of gigs. Used if you have multiple of the same gig or service. Will multiply any activated fields in the options by number of gigs.'/>
                                             </InputGroup>
@@ -818,27 +800,27 @@ const Calculator = () => {
                                                                 <Container>
                                                                     <Col>
                                                                         <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setMultiplyPay(!multiplyPay)}} checked={multiplyPay}></Form.Check></Col>
+                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_pay", !formData.multiply_pay)}} checked={formData.multiply_pay}></Form.Check></Col>
                                                                             <Col><div>Multiply Pay</div></Col>
                                                                         </Row>
                                                                         <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setMultiplyGigHours(!multiplyGigHours)}} checked={multiplyGigHours}></Form.Check></Col>
+                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_hours", !formData.multiply_hours)}} checked={formData.multiply_hours}></Form.Check></Col>
                                                                             <Col><div>Multiply Gig Hours</div></Col>
                                                                         </Row>
                                                                         <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setMultiplyTravel(!multiplyTravel)}} checked={multiplyTravel}></Form.Check></Col>
+                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_travel", !formData.multiply_travel)}} checked={formData.multiply_travel}></Form.Check></Col>
                                                                             <Col><div>Multiply Travel</div></Col>
                                                                         </Row>
                                                                         <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setMultiplyPracticeHours(!multiplyPracticeHours)}} checked={multiplyPracticeHours}></Form.Check></Col>
+                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_practice", !formData.multiply_practice)}} checked={formData.multiply_practice}></Form.Check></Col>
                                                                             <Col><div>Multiply Individual Practice Hours</div></Col>
                                                                         </Row>
                                                                         <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setMultiplyRehearsalHours(!multiplyRehearsalHours)}} checked={multiplyRehearsalHours}></Form.Check></Col>
+                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_rehearsal", !formData.multiply_rehearsal)}} checked={formData.multiply_rehearsal}></Form.Check></Col>
                                                                             <Col><div>Multiply Rehearsal Hours</div></Col>  
                                                                         </Row>
                                                                         <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setMultiplyOtherFees(!multiplyOtherFees)}} checked={multiplyOtherFees}></Form.Check></Col>
+                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_other", !formData.multiply_other)}} checked={formData.multiply_other}></Form.Check></Col>
                                                                             <Col><div>Multiply Other Fees</div></Col>  
                                                                         </Row>
                                                                     </Col>
@@ -861,7 +843,7 @@ const Calculator = () => {
                                             <Form.Label>Total Mileage</Form.Label>
                                             <InputGroup>
                                                 <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setTotalMileageEnabled(!totalMileageEnabled);}} checked={totalMileageEnabled}></Form.Check>
-                                                <FormNumber id="totalMileage" maxValue={9999.99} value={totalMileage} placeholder="Ex. 20" integer={false} disabled={!totalMileageEnabled} onChange={e => setTotalMileage(e.target.value)} />
+                                                <FormNumber id="total_mileage" maxValue={9999.99} value={formData.total_mileage} placeholder="Ex. 20" integer={false} disabled={!totalMileageEnabled} onChange={e => setFormDataValue("total_mileage", e.target.value, DATA_VALUE.FLOAT)} />
                                                 <Button variant='light' onClick={() => {setLocationModalOpen(!locationModalOpen)}}>Use Location</Button>
                                                 <TooltipButton text='Total number of miles driven to get to event. Will multiply by <i>Gas Price per Mile</i> for final result. Click <strong>Use Location</strong> to calculate based off Zip Code.'/>
                                                 <Modal show={locationModalOpen} onHide={() => {setLocationModalOpen(false); setZipCodeError(false)}} centered={true}>
@@ -897,7 +879,7 @@ const Calculator = () => {
                                             <Form.Label>Travel Hours</Form.Label>
                                             <InputGroup>
                                                 <Form.Check id="travelHoursSwitch" checked={travelHoursEnabled} type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setTravelHoursEnabled(!travelHoursEnabled)}}></Form.Check>
-                                                <FormNumber id="travelHours" maxValue={99.9} value={travelHours} placeholder="Ex. 2.5" integer={false} disabled={!travelHoursEnabled} onChange={e => setTravelHours(e.target.value)} />
+                                                <FormNumber id="travel_hours" maxValue={99.9} value={formData.travel_hours} placeholder="Ex. 2.5" integer={false} disabled={!travelHoursEnabled} onChange={e => setFormDataValue("travel_hours", e.target.value, DATA_VALUE.FLOAT)} />
                                                 <TooltipButton text="Number of hours spent traveling. Will be added to total hours."/>
                                             </InputGroup>
                                         </Row>
@@ -905,11 +887,11 @@ const Calculator = () => {
                                             <Form.Label>Trip Number</Form.Label>
                                             <InputGroup>
                                                 <ButtonGroup>
-                                                    <ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setTripNum(1)}} disabled={!travelHoursEnabled && !totalMileageEnabled}>One-Way</ToggleButton>
-                                                    <ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setTripNum(2)}} disabled={!travelHoursEnabled && !totalMileageEnabled}>Round Trip</ToggleButton>
-                                                    <ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setTripNum(customTripNum)}} disabled={!travelHoursEnabled && !totalMileageEnabled}>Custom</ToggleButton>
+                                                    <ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setFormDataValue("trip_num", 1, DATA_VALUE.INT);}} disabled={!travelHoursEnabled && !totalMileageEnabled}>One-Way</ToggleButton>
+                                                    <ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setFormDataValue("trip_num", 2, DATA_VALUE.INT);}} disabled={!travelHoursEnabled && !totalMileageEnabled}>Round Trip</ToggleButton>
+                                                    <ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setFormDataValue("trip_num", customTripNum, DATA_VALUE.INT);}} disabled={!travelHoursEnabled && !totalMileageEnabled}>Custom</ToggleButton>
                                                 </ButtonGroup>
-                                                <FormNumber id="tripNum" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setCustomTripNum(e.target.value); setTripNum(parseIntZero(e.target.value))}} disabled={tripNumSelect != 2} required/>
+                                                <FormNumber id="trip_num" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setCustomTripNum(e.target.value); setFormDataValue("trip_num", parseIntZero(e.target.value), DATA_VALUE.INT)}} disabled={tripNumSelect != 2} required/>
                                                 <TooltipButton text="Determines how many trips taken. One-Way will multiply travel mileage and hours by 1, Round-Trip by 2 and custom by whatever value is set."/>
                                             </InputGroup>
                                         </Row>
@@ -963,14 +945,14 @@ const Calculator = () => {
                                             <Row>
                                                 <InputGroup>    
                                                     <InputGroup.Text>Gas $/Gallon</InputGroup.Text>
-                                                    <FormNumber id="gasPricePerGallon" maxValue={9.99} value={gasPricePerGallon} placeholder="Ex. 2.80" integer={false} disabled={!totalMileageEnabled} onChange={e => setGasPricePerGallon(e.target.value)} />
+                                                    <FormNumber id="gas_price" maxValue={9.99} value={formData.gas_price} placeholder="Ex. 2.80" integer={false} disabled={!totalMileageEnabled} onChange={e => setFormDataValue("gas_price", e.target.value, DATA_VALUE.FLOAT)} />
                                                     <TooltipButton text='Amount of money in dollars per gallon of gas. Divided by <i>Vehicle MPG</i> to calculate <i>Gas Price per Mile</i>.'/>
                                                 </InputGroup>
                                             </Row>
                                             <Row >
                                                 <InputGroup>    
                                                     <InputGroup.Text>Vehicle MPG</InputGroup.Text>
-                                                    <FormNumber id="vehicleMPG" max={99.9} value={vehicleMPG} placeholder="Ex. 20" integer={false} disabled={!totalMileageEnabled} onChange={e => setVehicleMPG(e.target.value)} />
+                                                    <FormNumber id="mpg" max={99.9} value={formData.mpg} placeholder="Ex. 20" integer={false} disabled={!totalMileageEnabled} onChange={e => setFormDataValue("mpg", e.target.value, DATA_VALUE.FLOAT)} />
                                                     <TooltipButton text='Miles-Per-Gallon of your vehicle. Divisor of <i>Gas $/Gallon</i> to calculate <i>Gas Price per Mile</i>.'/>
                                                 </InputGroup>
                                             </Row>
@@ -981,7 +963,7 @@ const Calculator = () => {
                                             <InputGroup>
                                                 <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setMileageCoveredEnabled(!mileageCoveredEnabled)}} checked={mileageCoveredEnabled}></Form.Check>
                                                 <InputGroup.Text>$</InputGroup.Text>
-                                                <FormNumber id="mileageCovered" maxValue={999.99} value={mileageCovered} placeholder="Ex. 0.21" integer={false} disabled={!mileageCoveredEnabled} onChange={e => setMileageCovered(e.target.value)} />
+                                                <FormNumber id="mileage_covered" maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} disabled={!mileageCoveredEnabled} onChange={e => setFormDataValue("mileage_covered", e.target.value, DATA_VALUE.FLOAT)} />
                                                 <TooltipButton text="Number of miles that will be covered by organizers. Will subtract from total mileage for final result."/>
                                             </InputGroup>
                                         </Row>
@@ -991,7 +973,7 @@ const Calculator = () => {
                                             <InputGroup>
                                                 <Form.Check id="travelFeesSwitch" checked={travelFeesEnabled} type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setTravelFeesEnabled(!travelFeesEnabled)}}></Form.Check>
                                                 <InputGroup.Text>$</InputGroup.Text>
-                                                <FormNumber id="travelFees" maxValue={99999.99} value={travelFees} placeholder="Ex. 4.50" integer={false} disabled={!travelFeesEnabled} onChange={e => setTravelFees(e.target.value)} />
+                                                <FormNumber id="travel_fees" maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} disabled={!travelFeesEnabled} onChange={e => setFormDataValue("travel_fees", e.target.value, DATA_VALUE.FLOAT)} />
                                                 <TooltipButton text="Any additional travel fees. This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."/>
                                             </InputGroup>
                                         </Row>
@@ -1007,7 +989,7 @@ const Calculator = () => {
                                         <Form.Label>Individual Practice Hours</Form.Label>
                                         <InputGroup>
                                         <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setPracticeHoursEnabled(!practiceHoursEnabled)}} checked={practiceHoursEnabled}></Form.Check>
-                                        <FormNumber id="practiceHours" max={999.9} value={practiceHours} placeholder="Ex. 3" integer={false} disabled={!practiceHoursEnabled} onChange={e => setPracticeHours(e.target.value)} />
+                                        <FormNumber id="practice_hours" max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} disabled={!practiceHoursEnabled} onChange={e => setFormDataValue("practice_hours", e.target.value, DATA_VALUE.FLOAT)} />
                                         <TooltipButton text="The total hours spent practicing for event (individually, not including group rehearsal)."/>
                                         </InputGroup>
                                     </Col>
@@ -1015,7 +997,7 @@ const Calculator = () => {
                                         <Form.Label>Rehearsal Hours</Form.Label>
                                         <InputGroup>
                                         <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setRehearsalHoursEnabled(!rehearsalHoursEnabled)}} checked={rehearsalHoursEnabled}></Form.Check>
-                                        <FormNumber id="rehearsalHours" max={999.9} value={rehearsalHours} placeholder="Ex. 2" integer={false} disabled={!rehearsalHoursEnabled} onChange={e => setRehearsalHours(e.target.value)} />
+                                        <FormNumber id="rehearsal_hours" max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} disabled={!rehearsalHoursEnabled} onChange={e => setFormDataValue("rehearsal_hours", e.target.value, DATA_VALUE.FLOAT)} />
                                         <TooltipButton text="The total hours spent in rehearsal for event (not including individual practice)."/>
                                         </InputGroup>
                                     </Col>
@@ -1030,7 +1012,7 @@ const Calculator = () => {
                                         <InputGroup>
                                             <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setTaxEnabled(!taxEnabled)}} checked={taxEnabled}></Form.Check>
                                             <InputGroup.Text>%</InputGroup.Text>
-                                            <FormNumber id="tax" value={tax} maxValue={100} placeholder="Ex. 17.5" integer={false} disabled={!taxEnabled} onChange={e => setTax(e.target.value)} />
+                                            <FormNumber id="tax" value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} disabled={!taxEnabled} onChange={e => setFormDataValue("tax", e.target.value, DATA_VALUE.FLOAT)} />
                                         <TooltipButton text='Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses.'/>
                                         </InputGroup>
                                     </Col>
@@ -1039,7 +1021,7 @@ const Calculator = () => {
                                         <InputGroup>
                                             <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setOtherFeesEnabled(!otherFeesEnabled)}} checked={otherFeesEnabled}></Form.Check>
                                             <InputGroup.Text>$</InputGroup.Text>
-                                            <FormNumber id="otherFees" maxValue={9999.99} value={otherFees} placeholder="Ex. 15.00" integer={false} disabled={!otherFeesEnabled} onChange={e => setOtherFees(e.target.value)} />
+                                            <FormNumber id="fees" maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} disabled={!otherFeesEnabled} onChange={e => setFormDataValue("fees", e.target.value, DATA_VALUE.FLOAT)} />
                                             <TooltipButton text="Any other additional fees (i.e. food, parking, instrument wear etc.) Will be subtracted at the end of the calculation."/>
                                         </InputGroup>
                                     </Col>
@@ -1064,12 +1046,12 @@ const Calculator = () => {
                                             <h5 style={{display: "block"}}>Payment: </h5>
                                         </Col>
                                         <Col>
-                                        <h5 style={{whiteSpace: "pre-wrap", textAlign: "right", display: "block"}}>{formatCurrency(gigPay)}{gigNumEnabled && multiplyPay && gigNum ? ` x ${gigNum} = ${formatCurrency(gigPay*gigNum)}` : ""}</h5>
+                                        <h5 style={{whiteSpace: "pre-wrap", textAlign: "right", display: "block"}}>{formatCurrency(formData.total_wage)}{gigNumEnabled && formData.multiply_pay && formData.event_num ? ` x ${formData.event_num} = ${formatCurrency(formData.total_wage*formData.event_num)}` : ""}</h5>
                                         </Col>
                                     </Row>
                                     <Row>
                                         <Col lg={6} md={6} sm={7} xs={5}>
-                                            {taxEnabled ? <h5 style={{display: "block"}}>Tax Cut ({tax ? tax : "0"}%):</h5> : ""}
+                                            {taxEnabled ? <h5 style={{display: "block"}}>Tax Cut ({formData.tax ? formData.tax : "0"}%):</h5> : ""}
                                             {(totalMileageEnabled || travelFeesEnabled) ? <h5 style={{display: "block"}}>Total Travel Cost:</h5> : ""}
                                             {otherFeesEnabled ? <h5 style={{display: "block"}}>Other Fees:</h5> : ""}
                                             <hr style={{margin: "0px ", textAlign: "right", width: "0px"}}/>
