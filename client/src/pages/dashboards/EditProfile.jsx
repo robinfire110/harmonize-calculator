@@ -134,7 +134,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 										<option key={"average_gas"} value={"average_gas"}>Average</option>
 										{gasPrices ? Object.keys(gasPrices).map((element) => {if (element.length == 2) return <option key={element} value={element}>{element}</option>}) : ""}
 									</Form.Select>
-									<FormNumber id='gasPricePerGallon' maxValue={9.99} value={gasPricePerGallon} placeholder="Ex. 0.14" integer={false} disabled={formData.default_state !== "custom"} onChange={e => setGasPricePerGallon(e.target.value)} required={formData.default_state === "custom"} />
+									<FormNumber id='gasPricePerGallon' maxValue={9.99} value={gasPricePerGallon} placeholder="Ex. 3.21" integer={false} disabled={formData.default_state !== "custom"} onChange={e => setGasPricePerGallon(e.target.value)} required={formData.default_state === "custom"} />
 									<TooltipButton text="Default location used for distance calculations. Select Custom to input value instead."/>
 								</InputGroup>
 							</Form.Group>
