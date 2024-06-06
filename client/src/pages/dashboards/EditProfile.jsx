@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {Form, Button, Container, Col, Row, InputGroup, Modal, Card, ButtonGroup, ToggleButton} from 'react-bootstrap';
 import {toast, ToastContainer} from 'react-toastify';
 import axios from 'axios';
-import {getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero, toastError, toastSuccess} from "../../Utils";
+import {DATA_VALUE, getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, toastError, toastSuccess} from "../../Utils";
 import FormNumber from '../../components/FormNumber';
 import TooltipButton from '../../components/TooltipButton';
 import DeleteAccountModal from '../../components/DeleteAccountModal';
+import TripNumber from '../../components/TripNumber';
+import CalculatorInput from '../../components/CalculatorInput';
+import GigOptionsModal from '../../components/GigOptionsModal';
 
 function EditProfile({ userData, onUserChange, gasPrices}) {
 	const [formData, setFormData] = useState({
@@ -21,6 +24,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 		tax: userData.tax || null,
 		fees: userData.fees || null,
 		trip_num: userData.trip_num,
+		travel_fees: userData.travel_fees || null,
 		multiply_pay: userData.multiply_pay,
 		multiply_hours: userData.multiply_hours,
 		multiply_travel: userData.multiply_travel,
@@ -39,7 +43,17 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 	const [deleteAccountModal, setDeleteAccountModal] = useState(false);
 	const [gigNumModalOpen, setGigNumModalOpen] = useState(false);
 
-	
+	function setFormDataValue(variable, value, type=null)
+    {
+        //Parse value (if needed)
+        switch (type)
+        {
+            case DATA_VALUE.INT: value = parseIntZero(value); break;
+            case DATA_VALUE.FLOAT: value = parseFloatZero(value); break;
+            case DATA_VALUE.STRING: value = parseStringUndefined(value); break;
+        }
+        setFormData({...formData, [variable]: value});
+    }
 
 	useEffect(() => {
 		setFormData({ ...formData, ["gas_price"]: parseFloatZero(gasPricePerGallon) });
@@ -119,10 +133,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 						<Row>
 							<Form.Group className="text-start mb-3">
 								<Form.Label>Default Location</Form.Label>
-								<InputGroup>
-								<FormNumber placeholder="Ex. 27412" name="zip" min={5} max={5} integer={true} value={formData.zip} onChange={handleChange} required />
-								<TooltipButton text="Default location used for distance calculations."/>
-								</InputGroup>
+								<CalculatorInput placeholder="Ex. 27412" name="zip" isEnabled={false} min={5} max={5} integer={true} value={formData.zip} onChange={handleChange} required={true} tooltip={"Default location used for distance calculations."} />
 							</Form.Group>
 						</Row>
 						<Row>
@@ -161,24 +172,13 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 							</Form.Group>
 						</Row>
 						<Row>
-							<Form.Label>Mileage Covered (in $ per mile)</Form.Label>
-							<InputGroup>
-								<InputGroup.Text>$</InputGroup.Text>
-								<FormNumber id="mileageCovered" name='mileage_covered' maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} onChange={handleChange} />
-								<TooltipButton text="Default number of miles that will be covered by organizers. Will subtract from total mileage for final result."/>
-							</InputGroup>
+							<CalculatorInput id="mileage_covered" isMoney={true} label={"Mileage Covered (in $ per mile)"} isEnabled={false} maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} onChange={e => setFormDataValue("mileage_covered", e.target.value)} tooltip={"Default number of miles that will be covered by organizers. Will subtract from total mileage for final result."}/>
 						</Row>
 						<Row className='mt-3'>
-							<Form.Label>Trip Number</Form.Label>
-							<InputGroup>
-								<ButtonGroup>
-									<ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setFormData({ ...formData, ['trip_num']: 1})}}>One-Way</ToggleButton>
-									<ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setFormData({ ...formData, ['trip_num']: 2})}}>Round Trip</ToggleButton>
-									<ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setFormData({ ...formData, ['trip_num']: customTripNum})}}>Custom</ToggleButton>
-								</ButtonGroup>
-								<FormNumber id="tripNum" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setFormData({ ...formData, ['trip_num']: parseIntZero(e.target.value)}); setCustomTripNum(e.target.value)}} disabled={tripNumSelect != 2} required/>
-								<TooltipButton text="Default number of trips taken. One-Way will multiply travel mileage and hours by 1, Round-Trip by 2 and custom by whatever value is set."/>
-							</InputGroup>
+							<TripNumber customTripNum={customTripNum} setCustomTripNum={setCustomTripNum} tripNumSelect={tripNumSelect} setTripNumSelect={setTripNumSelect} setFormDataValue={setFormDataValue} />
+						</Row>
+						<Row className='mt-3'>
+							<CalculatorInput id="travel_fees" isMoney={true} label={"Additional Travel Costs"} isEnabled={false} maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} onChange={e => setFormDataValue("travel_fees", e.target.value)} tooltip={"Any additional travel fees. This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."}/>
 						</Row>
 					</Col>
 					<Col className="mb-3" lg={6}>
@@ -188,91 +188,29 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 								<Button style={{width: "91%"}} variant='outline-dark' onClick={() => {setGigNumModalOpen(!gigNumModalOpen)}}>Number of Gig Options</Button>
 								<TooltipButton style={{width: "9%"}} text='Default settings for Number of Gigs Options. Used if you have multiple of the same gig or service.'/>
 							</InputGroup>
-							<Modal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false);}} centered={true}>
-								<Modal.Header closeButton>
-									<Modal.Title>Number of Services Options</Modal.Title>
-								</Modal.Header>
-								<Modal.Body>
-									<p>
-										Choose which attributes get multiplied by number of gigs.
-										<br />
-										<small>Note - If all options are enabled, number of gigs will make no difference because all fields are multiplied by the same amount.</small>
-									</p>
-									<Card style={{display:'flex'}}>
-										<Container>
-											<Col>
-												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_pay"]: parseBool(e.target.checked) })} checked={formData.multiply_pay}></Form.Check></Col>
-													<Col><div>Multiply Pay</div></Col>
-												</Row>
-												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_hours"]: parseBool(e.target.checked) })} checked={formData.multiply_hours}></Form.Check></Col>
-													<Col><div>Multiply Gig Hours</div></Col>
-												</Row>
-												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_travel"]: parseBool(e.target.checked) })} checked={formData.multiply_travel}></Form.Check></Col>
-													<Col><div>Multiply Travel</div></Col>
-												</Row>
-												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_practice"]: parseBool(e.target.checked) })} checked={formData.multiply_practice}></Form.Check></Col>
-													<Col><div>Multiply Individual Practice Hours</div></Col>
-												</Row>
-												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_rehearsal"]: parseBool(e.target.checked) })} checked={formData.multiply_rehearsal}></Form.Check></Col>
-													<Col><div>Multiply Rehearsal Hours</div></Col>  
-												</Row>
-												<Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-													<Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={(e) => setFormData({ ...formData, ["multiply_other"]: parseBool(e.target.checked) })} checked={formData.multiply_other}></Form.Check></Col>
-													<Col><div>Multiply Other Fees</div></Col>  
-												</Row>
-											</Col>
-										</Container>
-									</Card>
-								</Modal.Body>
-								<Modal.Footer>
-									<Button variant="primary" onClick={() => {setGigNumModalOpen(false)}}>Close</Button>
-								</Modal.Footer>
-							</Modal>
+							<GigOptionsModal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false);}} setFormDataValue={setFormDataValue} formData={formData}/>
 						</Row>
 						<br />
 						<h4>Additional Hours</h4>
 						<Row>
-							<Form.Label>Individual Practice Hours</Form.Label>
-							<InputGroup>
-							<FormNumber id="practiceHours" name="practice_hours" max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} onChange={handleChange} />
-							<TooltipButton text="Default practice hours for event (individually, not including group rehearsal)."/>
-							</InputGroup>
+							<CalculatorInput id="practice_hours" label={"Individual Practice Hours"} isEnabled={false} max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} onChange={e => setFormDataValue("practice_hours", e.target.value)} tooltip={"Default practice hours for event (individually, not including group rehearsal)."}/>
 						</Row>
 						<Row>
-							<Form.Label>Rehearsal Hours</Form.Label>
-							<InputGroup>
-							<FormNumber id="rehearsalHours" name='rehearsal_hours' max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} onChange={handleChange} />
-							<TooltipButton text="Default rehearsal hours for event (not including individual practice)."/>
-							</InputGroup>
+							<CalculatorInput id="rehearsal_hours" label={"Rehearsal Hours"} isEnabled={false} max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} onChange={e => setFormDataValue("rehearsal_hours", e.target.value)} tooltip={"Default rehearsal hours for event (not including individual practice)."} />
 						</Row>
 						<br />
 						<h4>Other Expenses</h4>
 						<Row>
-							<Form.Label>Income Tax Percentage</Form.Label>
-							<InputGroup>
-								<InputGroup.Text>%</InputGroup.Text>
-								<FormNumber id="tax" name='tax' value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} onChange={handleChange} />
-							<TooltipButton text='Default percentage of income tax.'/>
-							</InputGroup>
+							<CalculatorInput id="tax" preText="%" label={"Income Tax Percentage"} isEnabled={false} value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} onChange={e => setFormDataValue("tax", e.target.value)} tooltip={"Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses."} />                           
 						</Row>
 						<Row>
-							<Form.Label>Other Fees</Form.Label>
-							<InputGroup>
-								<InputGroup.Text>$</InputGroup.Text>
-								<FormNumber id="otherFees" name='fees' maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} onChange={handleChange} />
-								<TooltipButton text="Default additional fees (i.e. food, parking, instrument wear etc.)"/>
-							</InputGroup>
+							<CalculatorInput id="fees" label={"Other Fees"} isEnabled={false} isMoney={true} maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} onChange={e => setFormDataValue("fees", e.target.value)} tooltip={"Any other additional fees (i.e. food, parking, instrument wear etc.) Will be subtracted at the end of the calculation."} />
 						</Row>
 					</Col>
 				</Row>
 				<hr />
 				<div className='mb-3 text-center'>
-					<Button className="btn btn-dark" size='lg' variant="primary" type="submit">Update Profile</Button>
+					<Button className="btn" size='lg' variant="primary" type="submit">Update Profile</Button>
 				</div>
 			</Form>
 		</div>

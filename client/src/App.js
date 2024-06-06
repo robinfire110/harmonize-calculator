@@ -6,6 +6,7 @@ import {
   Route
 } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css"
+import 'simplebar-react/dist/simplebar.min.css';
 import Account from "./pages/Account";
 import Calculator from "./pages/Calculator";
 import Header from "./components/Header";

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Col, Container, Form, Row, Table } from 'react-bootstrap';
+import { Button, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getBackendURL, getTotalFinHours, saveSpreadsheetAll, toastError, toastSuccess } from '../../Utils';
 import ConfirmationModal from '../../components/ConfirmationModal';
@@ -7,6 +7,7 @@ import { PaginationControl } from 'react-bootstrap-pagination-control';
 import moment from 'moment';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import SimpleBar from 'simplebar-react';
 
 function Financials({ financials, refreshData }) {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -22,6 +23,7 @@ function Financials({ financials, refreshData }) {
 	const [financialsPerPage, setFinancialsPerPage] = useState(10);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		setFilteredFinancials(financials);
@@ -89,6 +91,7 @@ function Financials({ financials, refreshData }) {
 			
 		});
 
+		setIsLoading(false);
 		setFilteredFinancials(filtered);
 	}, [searchQuery, startDate, endDate, financials, sort]);
 
@@ -199,6 +202,14 @@ function Financials({ financials, refreshData }) {
 	const indexOfFirstFinancial = indexOfLastFinancial - financialsPerPage;
 	const currentFinancials = filteredFinancials.slice(indexOfFirstFinancial, indexOfLastFinancial);
 
+	if (isLoading)
+	{
+		<Container>
+		<Spinner />
+		</Container>
+	}
+	else
+	{
 	return (
 		<div>
 			<Row>
@@ -242,7 +253,8 @@ function Financials({ financials, refreshData }) {
 				</Col>
 			</Row>
 			{filteredFinancials.length > 0 ? (
-			<div style={{overflow: "auto", maxHeight: "610px"}}>
+			<>
+			<SimpleBar style={{maxHeight: "610px"}}>
 				<Table striped bordered hover responsive>
 					<thead>
 					<tr>
@@ -269,13 +281,8 @@ function Financials({ financials, refreshData }) {
 					))}
 					</tbody>
 				</Table>
-			</div>
-			) : (
-				<div className="no-financials-message">
-					<br />
-					<h4>No financial records to show.</h4>
-				</div>
-			)}
+			</SimpleBar>
+
 			<Row className="mt-1 justify-content-center">
 				<Col lg={{offset: 1}} md={{offset: 1}} sm={{offset: 4}} xs={{offset: 3}}>
 					<PaginationControl page={currentPage} total={filteredFinancials.length} limit={financialsPerPage} changePage={(page) => {setCurrentPage(page)}} ellipsis={1}/>
@@ -289,10 +296,18 @@ function Financials({ financials, refreshData }) {
 					</Form.Select>
 				</Col>
 			</Row>
+			</>
+			) : (
+				<div className="no-financials-message">
+					<br />
+					<h4>No calculations to show.</h4>
+				</div>
+			)}
 			
 			<ConfirmationModal show={showConfirmationModal} handleClose={() => setShowConfirmationModal(false)} message={deleteMessage} onConfirm={handleConfirmDeleteFinancial} isLoading={isDeleting} isDelete={true} />
 		</div>
 	);
+}
 }
 
 export default Financials;

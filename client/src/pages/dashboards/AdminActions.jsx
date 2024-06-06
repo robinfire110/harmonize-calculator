@@ -7,6 +7,7 @@ import DeleteAccountModal from '../../components/DeleteAccountModal';
 import axios from 'axios';
 import { getBackendURL, toastError } from '../../Utils';
 import { toast } from 'react-toastify';
+import SimpleBar from 'simplebar-react';
 
 function AdminActions({ userData, refreshData }) {
     const [stats, setStats] = useState();
@@ -140,34 +141,36 @@ function AdminActions({ userData, refreshData }) {
                         }}
                         />
                     </div>
-                    <Table className='text-center' striped bordered hover responsive>
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Email</th>
-                            <th>User Type</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {currentUsers.map(user => (
-                            <tr key={user.user_id} style={{ cursor: 'pointer' }}>
-                                <td>{user.user_id}</td>
-                                <td>{user.email}</td>
-                                <td>{user.is_admin ? 'Admin' : 'User'}</td>
-                                <td>
-                                    {user.is_admin ? (
-                                        <Button variant="warning" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDemoteUser(user); }}>Demote</Button>
-                                    ) : (
-                                        <Button variant="primary" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handlePromoteUser(user); }}>Promote</Button>
-                                    )}
-                                    <Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); setUserToDelete(user); setShowDeleteModal(true); }}>Delete</Button>
-
-                                </td>
+                    <SimpleBar style={{maxHeight: "610px"}}>
+                        <Table className='text-center' striped bordered hover responsive>
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>User Type</th>
+                                <th>Actions</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </Table>
+                            </thead>
+                            <tbody>
+                            {currentUsers.map(user => (
+                                <tr key={user.user_id} style={{ cursor: 'pointer' }}>
+                                    <td>{user.user_id}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.is_admin ? 'Admin' : 'User'}</td>
+                                    <td>
+                                        {user.is_admin ? (
+                                            <Button variant="warning" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDemoteUser(user); }}>Demote</Button>
+                                        ) : (
+                                            <Button variant="primary" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handlePromoteUser(user); }}>Promote</Button>
+                                        )}
+                                        <Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); setUserToDelete(user); setShowDeleteModal(true); }}>Delete</Button>
+
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </Table>
+                    </SimpleBar>
 
                     <Row className="justify-content-center">
                         <Col lg={{offset: 1}} sm={{offset: 1}} xs={{offset: 1}}>

@@ -22,6 +22,9 @@ const toastSuccess = { theme: toastTheme, position: toastPosition, type: "succes
 const toastError = { theme: toastTheme, position: toastPosition, type: "error", autoClose: toastTimeout};
 const toastInfo = { theme: toastTheme, position: toastPosition, type: "info", autoClose: toastTimeout};
 
+//Data Value Const
+const DATA_VALUE = {INT: 0, FLOAT: 1, STRING: 2}
+
 //Format number to currency
 function formatCurrency(value) 
 {
@@ -312,4 +315,4 @@ async function saveSpreadsheetAll(data, filename = 'Harmonize_Export')
     saveAs(new Blob([buf]), `${filename}.xlsx`);
 }
 
-module.exports = {formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet};
+module.exports = {DATA_VALUE, formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet};

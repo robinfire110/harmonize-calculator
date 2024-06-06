@@ -1,19 +1,21 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { Link, redirect, useNavigate, useParams, useSearchParams} from "react-router-dom";
+import { Link, redirect, useNavigate, useParams} from "react-router-dom";
 import { Container, Form, Col, Row, InputGroup, Button, Modal, Alert, OverlayTrigger, Card, ButtonGroup, ToggleButton, Popover } from "react-bootstrap";
 import moment from "moment";
+import SimpleBar from 'simplebar-react';
 import TooltipButton from "../components/TooltipButton";
 import FormNumber from "../components/FormNumber";
 import axios from "axios";
 import {BarLoader, ClipLoader} from 'react-spinners'
-import * as ExcelJS from "exceljs"
-import {saveAs} from "file-saver"
-import {autoSizeColumn, formatCurrency, maxFinancialNameLength, metersToMiles, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, saveSpreadsheet, toastError, toastInfo, toastSuccess} from "../Utils";
+import {DATA_VALUE, formatCurrency, maxFinancialNameLength, metersToMiles, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, saveSpreadsheet, toastError, toastInfo, toastSuccess} from "../Utils";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import {getBackendURL} from "../Utils";
 import Title from "../components/Title";
+import CalculatorInput from "../components/CalculatorInput";
+import GigOptionsModal from "../components/GigOptionsModal";
+import TripNumber from "../components/TripNumber";
 
 const Calculator = () => {
     /* Variables */
@@ -34,9 +36,6 @@ const Calculator = () => {
     const [locationModalOpen, setLocationModalOpen] = useState(false);
     const [gasModalOpen, setGasModalOpen] = useState(false);
     const [gigNumModalOpen, setGigNumModalOpen] = useState(false);
-
-    //Search parameters
-    const [searchParams] = useSearchParams();
 
     //States
     //Variables
@@ -67,7 +66,6 @@ const Calculator = () => {
         multiply_other: false,
     });
 
-    const DATA_VALUE = {INT: 0, FLOAT: 1, STRING: 2}
     function setFormDataValue(variable, value, type=null)
     {
         //Parse value (if needed)
@@ -233,8 +231,6 @@ const Calculator = () => {
         });
         
         //Set gas prices
-        //setAverageGasPrice(undefined, defaultState, defaultVehicle)
-        console.log(defaultState, defaultVehicle);
         if (defaultState)
         {
             if (defaultState !== "custom")
@@ -577,8 +573,14 @@ const Calculator = () => {
                 return financial.fin_name.toLowerCase().includes(searchQuery.toLowerCase());
             });
 
+            //Sort
+            const sorted = filtered.sort((a, b) => {
+                if (a.fin_name > b.fin_name) return 1;
+                return -1;
+            });
+
             //Apply
-            const financials = filtered.map((fin, index) =>
+            const financials = sorted.map((fin, index) =>
                 <Row className="my-1 py-1" style={{backgroundColor: `rgba(100,100,100,${.15+(index % 2 * .15)}`, borderRadius: "3px", verticalAlign: "middle"}} key={fin.fin_id}>
                     <Col className="mt-1"><h6>{fin.fin_name}</h6></Col>
                     <Col className='text-center' lg={3} md={3} sm={3} xs={3}><Button variant={fin.fin_id==finId ? "dark" : "secondary"} size="sm" disabled={fin.fin_id==finId} href={`/calculator/${fin.fin_id}`}>{fin.fin_id==finId ? "Loaded" : "Load"}</Button></Col>
@@ -637,73 +639,14 @@ const Calculator = () => {
                                     </Row>
                                     <Row className="mb-3" xs={1} lg={3}>
                                         <Col>
-                                            <Form.Label>Pay per gig<span style={{color: "red"}}>*</span></Form.Label>
-                                            <InputGroup>
-                                                <InputGroup.Text id="basic-addon1">$</InputGroup.Text>
-                                                <FormNumber id="total_wage" maxValue={9999.99} value={formData.total_wage} placeholder="Ex. 75.00" required={true} integer={false} onChange={e => setFormDataValue("total_wage", e.target.value)}/>
-                                                <TooltipButton text="Payment for gig."/>
-                                            </InputGroup>
+                                            <CalculatorInput id="total_wage" label={"Pay per gig"} isEnabled={false} isMoney={true} maxValue={9999.99} value={formData.total_wage} placeholder="Ex. 75.00" required={true} integer={false} onChange={e => setFormDataValue("total_wage", e.target.value)} tooltip={"Payment for gig."}/>
                                         </Col>
                                         <Col lg={3}>
-                                            <Form.Label>Hours per gig<span style={{color: "red"}}>*</span></Form.Label>
-                                            <InputGroup>
-                                                <FormNumber id="event_hours" maxValue={999} value={formData.event_hours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setFormDataValue("event_hours", e.target.value)}/>
-                                                <TooltipButton text="Number of hours for event. Does not include rehearsal or practice hours."/>
-                                            </InputGroup>
+                                            <CalculatorInput id="event_hours" label={"Hours per gig"} isEnabled={false} maxValue={999} value={formData.event_hours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setFormDataValue("event_hours", e.target.value)} tooltip={"Number of hours for event. Does not include rehearsal or practice hours."}/>
                                         </Col>
                                         <Col lg={5}>
-                                            <Form.Label>Number of gigs</Form.Label>
-                                            <InputGroup>
-                                                <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("event_num", !formEnabled.event_num)}} checked={formEnabled.event_num}></Form.Check>
-                                                <FormNumber id="event_num" max={2} value={formData.event_num || ""} placeholder="Ex. 1" disabled={!formEnabled.event_num} onChange={e => setFormDataValue("event_num", e.target.value)} />
-                                                <Button variant='light' disabled={!formEnabled.event_num} onClick={() => {setGigNumModalOpen(!gigNumModalOpen)}}>Options</Button>
-                                                <TooltipButton text='Number of gigs. Used if you have multiple of the same gig or service. Will multiply any activated fields in the options by number of gigs.'/>
-                                            </InputGroup>
-                                            <Modal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false);}} centered={true}>
-                                                    <Modal.Header closeButton>
-                                                        <Modal.Title>Number of Services Options</Modal.Title>
-                                                    </Modal.Header>
-                                                    <Modal.Body>
-                                                        <p>
-                                                            Choose which attributes get multiplied by number of gigs.
-                                                            <br />
-                                                            <small>Note - If all options are enabled, number of gigs will make no difference because all fields are multiplied by the same amount.</small>
-                                                        </p>
-                                                            <Card style={{display:'flex'}}>
-                                                                <Container>
-                                                                    <Col>
-                                                                        <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_pay", !formData.multiply_pay)}} checked={formData.multiply_pay}></Form.Check></Col>
-                                                                            <Col><div>Multiply Pay</div></Col>
-                                                                        </Row>
-                                                                        <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_hours", !formData.multiply_hours)}} checked={formData.multiply_hours}></Form.Check></Col>
-                                                                            <Col><div>Multiply Gig Hours</div></Col>
-                                                                        </Row>
-                                                                        <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_travel", !formData.multiply_travel)}} checked={formData.multiply_travel}></Form.Check></Col>
-                                                                            <Col><div>Multiply Travel</div></Col>
-                                                                        </Row>
-                                                                        <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_practice", !formData.multiply_practice)}} checked={formData.multiply_practice}></Form.Check></Col>
-                                                                            <Col><div>Multiply Individual Practice Hours</div></Col>
-                                                                        </Row>
-                                                                        <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .05)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_rehearsal", !formData.multiply_rehearsal)}} checked={formData.multiply_rehearsal}></Form.Check></Col>
-                                                                            <Col><div>Multiply Rehearsal Hours</div></Col>  
-                                                                        </Row>
-                                                                        <Row className="py-2 align-items-center" style={{backgroundColor: "rgba(100, 100, 100, .15)"}}>
-                                                                            <Col lg={2} xs={2} className="text-end"><Form.Check type="switch" onChange={() => {setFormDataValue("multiply_other", !formData.multiply_other)}} checked={formData.multiply_other}></Form.Check></Col>
-                                                                            <Col><div>Multiply Other Fees</div></Col>  
-                                                                        </Row>
-                                                                    </Col>
-                                                                </Container>
-                                                            </Card>
-                                                    </Modal.Body>
-                                                    <Modal.Footer>
-                                                    <Button variant="primary" onClick={() => {setGigNumModalOpen(false)}}>Close</Button>
-                                                    </Modal.Footer>
-                                            </Modal>
+                                            <CalculatorInput id="event_num" label={"Number of gigs"} button={true} buttonText={"Options"} buttonDisabled={!formEnabled.event_num} buttonOnClick={() => {setGigNumModalOpen(!gigNumModalOpen)}} checked={formEnabled.event_num} onCheck={() => {setFormEnabledValue("event_num", !formEnabled.event_num)}} max={2} value={formData.event_num || ""} placeholder="Ex. 1" disabled={!formEnabled.event_num} onChange={e => setFormDataValue("event_num", e.target.value)} tooltip={"Number of gigs. Used if you have multiple of the same gig or service. Will multiply any activated fields in the options by number of gigs."}/>
+                                            <GigOptionsModal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false)}} setFormDataValue={setFormDataValue} formData={formData}/>
                                         </Col>
                                     </Row>
                             </Form.Group>
@@ -713,141 +656,92 @@ const Calculator = () => {
                                 <Row className="mb-3" xs={1} lg={2}>
                                     <Col>
                                         <Row className="mb-1">
-                                            <Form.Label>Total Mileage</Form.Label>
-                                            <InputGroup>
-                                                <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("total_mileage", !formEnabled.total_mileage);}} checked={formEnabled.total_mileage}></Form.Check>
-                                                <FormNumber id="total_mileage" maxValue={9999.99} value={formData.total_mileage} placeholder="Ex. 20" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setFormDataValue("total_mileage", e.target.value)} />
-                                                <Button variant='light' onClick={() => {setLocationModalOpen(!locationModalOpen)}}>Use Location</Button>
-                                                <TooltipButton text='Total number of miles driven to get to event. Will multiply by <i>Gas Price per Mile</i> for final result. Click <strong>Use Location</strong> to calculate based off Zip Code.'/>
-                                                <Modal show={locationModalOpen} onHide={() => setLocationModalOpen(false)} centered={true}>
-                                                    <Form onSubmit={e => e.preventDefault()}>
-                                                        <Modal.Header closeButton>
-                                                            <Modal.Title>Calculate Mileage by Location</Modal.Title>
-                                                        </Modal.Header>
-                                                        <Modal.Body>
-                                                            <p>Input origin and destination zip codes to calculate mileage and distance using Google Maps.</p>
-                                                            <InputGroup className="mb-2">
-                                                                <InputGroup.Text>Origin Zip</InputGroup.Text>
-                                                                <FormNumber id="modalOriginZip" value={modalOriginZip} onChange={e => {setModalOriginZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 27413"} required={true} autoFocus={true} min={5} max={5}></FormNumber>
-                                                                <TooltipButton text="Zip code of where you are coming from."/>
-                                                            </InputGroup>
-                                                            <InputGroup>
-                                                                <InputGroup.Text>Destination Zip</InputGroup.Text>
-                                                                <FormNumber id="modalDestinationZip" value={modalDestinationZip} onChange={e => {setModalDestinationZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 27413"} required={true} min={5} max={5}></FormNumber>
-                                                                <TooltipButton text="Zip code of where you are going."/>
-                                                            </InputGroup>
-                                                        </Modal.Body>
-                                                        <Modal.Footer>
-                                                        <Button type="submit" variant="primary" onClick={() => getZipCodes()}>
-                                                            {isGettingLocation ? <BarLoader color="#FFFFFF" height={4} /> : "Calculate"}
-                                                        </Button>
-                                                        </Modal.Footer>
-                                                    </Form>
-                                                </Modal>
-
-                                            </InputGroup>
+                                            <CalculatorInput id="total_mileage" label={"Total Mileage"} button={true} buttonText={"Use Location"} buttonOnClick={() => {setLocationModalOpen(!locationModalOpen)}} checked={formEnabled.total_mileage} onCheck={() => {setFormEnabledValue("total_mileage", !formEnabled.total_mileage)}} maxValue={9999.99} value={formData.total_mileage} placeholder="Ex. 20" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setFormDataValue("total_mileage", e.target.value)} tooltip={"Total number of miles driven to get to event. Will multiply by <i>Gas Price per Mile</i> for final result. Click <strong>Use Location</strong> to calculate based off Zip Code."}/>
+                                            <Modal show={locationModalOpen} onHide={() => setLocationModalOpen(false)} centered={true}>
+                                                <Form onSubmit={e => e.preventDefault()}>
+                                                    <Modal.Header closeButton>
+                                                        <Modal.Title>Calculate Mileage by Location</Modal.Title>
+                                                    </Modal.Header>
+                                                    <Modal.Body>
+                                                        <p>Input origin and destination zip codes to calculate mileage and distance using Google Maps.</p>
+                                                        <InputGroup className="mb-2">
+                                                            <InputGroup.Text>Origin Zip</InputGroup.Text>
+                                                            <FormNumber id="modalOriginZip" value={modalOriginZip} onChange={e => {setModalOriginZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 27413"} required={true} autoFocus={true} min={5} max={5}></FormNumber>
+                                                            <TooltipButton text="Zip code of where you are coming from."/>
+                                                        </InputGroup>
+                                                        <InputGroup>
+                                                            <InputGroup.Text>Destination Zip</InputGroup.Text>
+                                                            <FormNumber id="modalDestinationZip" value={modalDestinationZip} onChange={e => {setModalDestinationZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 27413"} required={true} min={5} max={5}></FormNumber>
+                                                            <TooltipButton text="Zip code of where you are going."/>
+                                                        </InputGroup>
+                                                    </Modal.Body>
+                                                    <Modal.Footer>
+                                                    <Button type="submit" variant="primary" onClick={() => getZipCodes()}>
+                                                        {isGettingLocation ? <BarLoader color="#FFFFFF" height={4} /> : "Calculate"}
+                                                    </Button>
+                                                    </Modal.Footer>
+                                                </Form>
+                                            </Modal>
                                         </Row>
                                         <Row className="mb-3">
-                                            <Form.Label>Travel Hours</Form.Label>
-                                            <InputGroup>
-                                                <Form.Check id="travelHoursSwitch" checked={formEnabled.travel_hours} type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("travel_hours", !formEnabled.travel_hours)}}></Form.Check>
-                                                <FormNumber id="travel_hours" maxValue={99.9} value={formData.travel_hours} placeholder="Ex. 2.5" integer={false} disabled={!formEnabled.travel_hours} onChange={e => setFormDataValue("travel_hours", e.target.value)} />
-                                                <TooltipButton text="Number of hours spent traveling. Will be added to total hours."/>
-                                            </InputGroup>
+                                            <CalculatorInput id="travel_hours" label={"Travel Hours"} checked={formEnabled.travel_hours} onCheck={() => {setFormEnabledValue("travel_hours", !formEnabled.travel_hours)}} maxValue={99.9} value={formData.travel_hours} placeholder="Ex. 2.5" integer={false} disabled={!formEnabled.travel_hours} onChange={e => setFormDataValue("travel_hours", e.target.value)} tooltip={"Number of hours spent traveling. Will be added to total hours."}/>
                                         </Row>
                                         <Row className="mb-3">
-                                            <Form.Label>Trip Number</Form.Label>
-                                            <InputGroup>
-                                                <ButtonGroup>
-                                                    <ToggleButton type="radio" variant="outline-secondary" value={0} checked={tripNumSelect === 0} onClick={(e) => {setTripNumSelect(0); setFormDataValue("trip_num", 1, DATA_VALUE.INT);}} disabled={!formEnabled.travel_hours && !formEnabled.total_mileage}>One-Way</ToggleButton>
-                                                    <ToggleButton type="radio"variant="outline-secondary" value={1} checked={tripNumSelect === 1} onClick={(e) => {setTripNumSelect(1); setFormDataValue("trip_num", 2, DATA_VALUE.INT);}} disabled={!formEnabled.travel_hours && !formEnabled.total_mileage}>Round Trip</ToggleButton>
-                                                    <ToggleButton type="radio"variant="outline-secondary" value={2} checked={tripNumSelect === 2} onClick={(e) => {setTripNumSelect(2); setFormDataValue("trip_num", customTripNum, DATA_VALUE.INT);}} disabled={!formEnabled.travel_hours && !formEnabled.total_mileage}>Custom</ToggleButton>
-                                                </ButtonGroup>
-                                                <FormNumber id="trip_num" maxValue={999} value={customTripNum} placeholder="Ex. 4" onChange={(e) => {e.target.setCustomValidity(""); setCustomTripNum(e.target.value); setFormDataValue("trip_num", parseIntZero(e.target.value))}} disabled={tripNumSelect != 2} required/>
-                                                <TooltipButton text="Determines how many trips taken. One-Way will multiply travel mileage and hours by 1, Round-Trip by 2 and custom by whatever value is set."/>
-                                            </InputGroup>
+                                            <TripNumber customTripNum={customTripNum} setCustomTripNum={setCustomTripNum} tripNumSelect={tripNumSelect} setTripNumSelect={setTripNumSelect} formEnabled={formEnabled} setFormDataValue={setFormDataValue} />
                                         </Row>
                                     </Col>
                                     <Col>
-                                        <Form.Label>Gas Price per Mile</Form.Label>
-                                        <InputGroup>    
-                                            <InputGroup.Text>$</InputGroup.Text>
-                                            <FormNumber id='gasPricePerMile' maxValue={9.99} value={gasPricePerMile} placeholder="Ex. 0.14" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setGasPricePerMile(e.target.value)} />
-                                            <Button variant='light' onClick={() => {setGasModalOpen(true)}}>Use Average</Button>
-                                            <TooltipButton text='Price of gas per mile. Calculated using <i>Gas $/Gallon</i> and <i>Vehicle MPG</i>. Click <strong>Calculate Average</strong> to use average values.'/>
-                                            <Modal show={gasModalOpen} onHide={() => setGasModalOpen(false)} centered={true}>
-                                                    <Form onSubmit={e => e.preventDefault()}>
-                                                        <Modal.Header closeButton>
-                                                            <Modal.Title>Use Average Gas $ Per Mile</Modal.Title>
-                                                        </Modal.Header>
-                                                        <Modal.Body>
-                                                        <p>Select state to use for average gas price. Average gas price obtained from <a href="https://gasprices.aaa.com/state-gas-price-averages/" target="_blank" style={{color: "black"}}>AAA Daily Average</a>. Select vehicle type to use average MPG.</p>
-                                                        <InputGroup className="mb-2">
-                                                            <InputGroup.Text>Select State</InputGroup.Text>
-                                                            <Form.Select id="selectState" value={currentState} onChange={(e) => {setCurrentState(e.target.value)}}>
-                                                                <option key={"average_gas"} value={"average_gas"}>Average</option>
-                                                                {gasPrices ? Object.keys(gasPrices).map((element) => {if (element.length == 2) return <option key={element} value={element}>{element}</option>}) : ""}
-                                                            </Form.Select>
-                                                            <TooltipButton text='Select State to use average values. Select <i>Average</i> for average gas price across the United States.'/>
-                                                        </InputGroup>
-                                                        <InputGroup>
-                                                            <InputGroup.Text>Select Vehicle Type</InputGroup.Text>
-                                                                <Form.Select id="selectVehicleType" value={currentVehicle} onChange={(e) => {setCurrentVehicle(e.target.value)}}>
-                                                                    <option key={"average_mpg"} value={"average_mpg"}>Average</option>
-                                                                    {gasPrices ? Object.keys(gasPrices).map((element) => {
-                                                                        if (element != "average_gas" && element != "average_mpg" && element.length > 2)
-                                                                        {
-                                                                            let displayElement = element.replace("_mpg", "").replace("_", "/").replace("van", "Van").replace("suv", "SUV");
-                                                                            displayElement = displayElement[0].toUpperCase() + displayElement.slice(1);
-                                                                            return <option key={element} value={element}>{displayElement}</option>
-                                                                        } 
-                                                                    }) : ""}
-                                                                </Form.Select>
-                                                            <TooltipButton text='Select your type of vehicle. Will determine average MPG value. Choose <i>Average</i> for average MPG value.'/>
-                                                        </InputGroup>
-                                                        </Modal.Body>
-                                                        <Modal.Footer>
-                                                        <Button type="submit" variant="primary" onClick={() => setAverageGasPrice()}>Select</Button>
-                                                        </Modal.Footer>
-                                                    </Form>
-                                                </Modal>
-
-                                        </InputGroup>
+                                        <CalculatorInput id='gasPricePerMile' isEnabled={false} isMoney={true} label={"Gas Price per Mile"} button={true} buttonText={"Use Average"} buttonOnClick={() => {setGasModalOpen(true)}} checked={formEnabled.total_mileage} onCheck={() => {setFormEnabledValue("total_mileage", !formEnabled.total_mileage)}} maxValue={9.99} value={gasPricePerMile} placeholder="Ex. 0.14" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setGasPricePerMile(e.target.value)} tooltip={"Price of gas per mile. Calculated using <i>Gas $/Gallon</i> and <i>Vehicle MPG</i>. Click <strong>Calculate Average</strong> to use average values."}/>
+                                        <Modal show={gasModalOpen} onHide={() => setGasModalOpen(false)} centered={true}>
+                                            <Form onSubmit={e => e.preventDefault()}>
+                                                <Modal.Header closeButton>
+                                                    <Modal.Title>Use Average Gas $ Per Mile</Modal.Title>
+                                                </Modal.Header>
+                                                <Modal.Body>
+                                                <p>Select state to use for average gas price. Average gas price obtained from <a href="https://gasprices.aaa.com/state-gas-price-averages/" target="_blank" style={{color: "black"}}>AAA Daily Average</a>. Select vehicle type to use average MPG.</p>
+                                                <InputGroup className="mb-2">
+                                                    <InputGroup.Text>Select State</InputGroup.Text>
+                                                    <Form.Select id="selectState" value={currentState} onChange={(e) => {setCurrentState(e.target.value)}}>
+                                                        <option key={"average_gas"} value={"average_gas"}>Average</option>
+                                                        {gasPrices ? Object.keys(gasPrices).map((element) => {if (element.length == 2) return <option key={element} value={element}>{element}</option>}) : ""}
+                                                    </Form.Select>
+                                                    <TooltipButton text='Select State to use average values. Select <i>Average</i> for average gas price across the United States.'/>
+                                                </InputGroup>
+                                                <InputGroup>
+                                                    <InputGroup.Text>Select Vehicle Type</InputGroup.Text>
+                                                        <Form.Select id="selectVehicleType" value={currentVehicle} onChange={(e) => {setCurrentVehicle(e.target.value)}}>
+                                                            <option key={"average_mpg"} value={"average_mpg"}>Average</option>
+                                                            {gasPrices ? Object.keys(gasPrices).map((element) => {
+                                                                if (element != "average_gas" && element != "average_mpg" && element.length > 2)
+                                                                {
+                                                                    let displayElement = element.replace("_mpg", "").replace("_", "/").replace("van", "Van").replace("suv", "SUV");
+                                                                    displayElement = displayElement[0].toUpperCase() + displayElement.slice(1);
+                                                                    return <option key={element} value={element}>{displayElement}</option>
+                                                                } 
+                                                            }) : ""}
+                                                        </Form.Select>
+                                                    <TooltipButton text='Select your type of vehicle. Will determine average MPG value. Choose <i>Average</i> for average MPG value.'/>
+                                                </InputGroup>
+                                                </Modal.Body>
+                                                <Modal.Footer>
+                                                <Button type="submit" variant="primary" onClick={() => setAverageGasPrice()}>Select</Button>
+                                                </Modal.Footer>
+                                            </Form>
+                                        </Modal>
+                                        
                                         <Col md={{offset: 1}}>
                                             <Row>
-                                                <InputGroup>    
-                                                    <InputGroup.Text>Gas $/Gallon</InputGroup.Text>
-                                                    <FormNumber id="gas_price" maxValue={9.99} value={formData.gas_price.toFixed(2)} placeholder="Ex. 2.80" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setFormDataValue("gas_price", e.target.value)} />
-                                                    <TooltipButton text='Amount of money in dollars per gallon of gas. Divided by <i>Vehicle MPG</i> to calculate <i>Gas Price per Mile</i>.'/>
-                                                </InputGroup>
+                                                <CalculatorInput id="gas_price" preText={"Gas $/Gallon"} isEnabled={false} maxValue={9.99} value={formData.gas_price} placeholder="Ex. 2.80" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setFormDataValue("gas_price", e.target.value)} tooltip={"Amount of money in dollars per gallon of gas. Divided by <i>Vehicle MPG</i> to calculate <i>Gas Price per Mile</i>."}/>
                                             </Row>
                                             <Row >
-                                                <InputGroup>    
-                                                    <InputGroup.Text>Vehicle MPG</InputGroup.Text>
-                                                    <FormNumber id="mpg" max={99.9} value={formData.mpg} placeholder="Ex. 20" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setFormDataValue("mpg", e.target.value)} />
-                                                    <TooltipButton text='Miles-Per-Gallon of your vehicle. Divisor of <i>Gas $/Gallon</i> to calculate <i>Gas Price per Mile</i>.'/>
-                                                </InputGroup>
+                                                <CalculatorInput id="mpg" preText={"Vehicle MPG"} isEnabled={false} max={99.9} value={formData.mpg} placeholder="Ex. 20" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setFormDataValue("mpg", e.target.value)} tooltip={"Miles-Per-Gallon of your vehicle. Divisor of <i>Gas $/Gallon</i> to calculate <i>Gas Price per Mile</i>."}/>
                                             </Row>
                                         </Col>
-
                                         <Row className="my-3">
-                                            <Form.Label>Mileage Covered (in $ per mile)</Form.Label>
-                                            <InputGroup>
-                                                <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("mileage_covered", !formEnabled.mileage_covered)}} checked={formEnabled.mileage_covered}></Form.Check>
-                                                <InputGroup.Text>$</InputGroup.Text>
-                                                <FormNumber id="mileage_covered" maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} disabled={!formEnabled.mileage_covered} onChange={e => setFormDataValue("mileage_covered", e.target.value)} />
-                                                <TooltipButton text="Number of miles that will be covered by organizers. Will subtract from total mileage for final result."/>
-                                            </InputGroup>
+                                            <CalculatorInput id="mileage_covered" isMoney={true} label={"Mileage Covered (in $ per mile)"} checked={formEnabled.mileage_covered} onCheck={() => {setFormEnabledValue("mileage_covered", !formEnabled.mileage_covered)}} maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} disabled={!formEnabled.mileage_covered} onChange={e => setFormDataValue("mileage_covered", e.target.value)} tooltip={"Number of miles that will be covered by organizers. Will subtract from total mileage for final result."}/>
                                         </Row>
-
                                         <Row className="mb-3">
-                                            <Form.Label>Additional Travel Costs</Form.Label>
-                                            <InputGroup>
-                                                <Form.Check id="travelFeesSwitch" checked={formEnabled.travel_fees} type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("travel_fees", !formEnabled.travel_fees)}}></Form.Check>
-                                                <InputGroup.Text>$</InputGroup.Text>
-                                                <FormNumber id="travel_fees" maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} disabled={!formEnabled.travel_fees} onChange={e => setFormDataValue("travel_fees", e.target.value)} />
-                                                <TooltipButton text="Any additional travel fees. This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."/>
-                                            </InputGroup>
+                                            <CalculatorInput id="travel_fees" isMoney={true} label={"Additional Travel Costs"} checked={formEnabled.travel_fees} onCheck={() => {setFormEnabledValue("travel_fees", !formEnabled.travel_fees)}} maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} disabled={!formEnabled.travel_fees} onChange={e => setFormDataValue("travel_fees", e.target.value)} tooltip={"Any additional travel fees. This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."}/>
                                         </Row>
                                         
                                     </Col>
@@ -858,20 +752,10 @@ const Calculator = () => {
                             <Form.Group>
                                 <Row className="mb-3" xs={1} lg={2}>
                                     <Col>
-                                        <Form.Label>Individual Practice Hours</Form.Label>
-                                        <InputGroup>
-                                        <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("practice_hours", !formEnabled.practice_hours)}} checked={formEnabled.practice_hours}></Form.Check>
-                                        <FormNumber id="practice_hours" max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} disabled={!formEnabled.practice_hours} onChange={e => setFormDataValue("practice_hours", e.target.value)} />
-                                        <TooltipButton text="The total hours spent practicing for event (individually, not including group rehearsal)."/>
-                                        </InputGroup>
+                                        <CalculatorInput id="practice_hours" label={"Individual Practice Hours"} checked={formEnabled.practice_hours} onCheck={() => {setFormEnabledValue("practice_hours", !formEnabled.practice_hours)}} max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} disabled={!formEnabled.practice_hours} onChange={e => setFormDataValue("practice_hours", e.target.value)} tooltip={"The total hours spent practicing for event (individually, not including group rehearsal)."}/>
                                     </Col>
                                     <Col>
-                                        <Form.Label>Rehearsal Hours</Form.Label>
-                                        <InputGroup>
-                                        <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("rehearsal_hours", !formEnabled.rehearsal_hours)}} checked={formEnabled.rehearsal_hours}></Form.Check>
-                                        <FormNumber id="rehearsal_hours" max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} disabled={!formEnabled.rehearsal_hours} onChange={e => setFormDataValue("rehearsal_hours", e.target.value)} />
-                                        <TooltipButton text="The total hours spent in rehearsal for event (not including individual practice)."/>
-                                        </InputGroup>
+                                        <CalculatorInput id="rehearsal_hours" label={"Rehearsal Hours"} checked={formEnabled.rehearsal_hours} onCheck={() => {setFormEnabledValue("rehearsal_hours", !formEnabled.rehearsal_hours)}} max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} disabled={!formEnabled.rehearsal_hours} onChange={e => setFormDataValue("rehearsal_hours", e.target.value)} tooltip={"The total hours spent in rehearsal for event (not including individual practice)."} />
                                     </Col>
                                 </Row>
                             </Form.Group>
@@ -880,22 +764,10 @@ const Calculator = () => {
                             <Form.Group>
                                 <Row className="mb-3" xs={1} lg={2}>
                                     <Col>
-                                        <Form.Label>Income Tax Percentage</Form.Label>
-                                        <InputGroup>
-                                            <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("tax", !formEnabled.tax)}} checked={formEnabled.tax}></Form.Check>
-                                            <InputGroup.Text>%</InputGroup.Text>
-                                            <FormNumber id="tax" value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} disabled={!formEnabled.tax} onChange={e => setFormDataValue("tax", e.target.value)} />
-                                        <TooltipButton text='Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses.'/>
-                                        </InputGroup>
+                                        <CalculatorInput id="tax" preText="%" label={"Income Tax Percentage"} checked={formEnabled.tax} onCheck={() => {setFormEnabledValue("tax", !formEnabled.tax)}} value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} disabled={!formEnabled.tax} onChange={e => setFormDataValue("tax", e.target.value)} tooltip={"Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses."} />                           
                                     </Col>
                                     <Col>
-                                        <Form.Label>Other Fees</Form.Label>
-                                        <InputGroup>
-                                            <Form.Check type="switch" style={{marginTop: "5px", paddingLeft: "35px"}} onChange={() => {setFormEnabledValue("fees", !formEnabled.fees)}} checked={formEnabled.fees}></Form.Check>
-                                            <InputGroup.Text>$</InputGroup.Text>
-                                            <FormNumber id="fees" maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} disabled={!formEnabled.fees} onChange={e => setFormDataValue("fees", e.target.value)} />
-                                            <TooltipButton text="Any other additional fees (i.e. food, parking, instrument wear etc.) Will be subtracted at the end of the calculation."/>
-                                        </InputGroup>
+                                        <CalculatorInput id="fees" label={"Other Fees"} isMoney={true} checked={formEnabled.fees} onCheck={() => {setFormEnabledValue("fees", !formEnabled.fees)}} maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} disabled={!formEnabled.fees} onChange={e => setFormDataValue("fees", e.target.value)} tooltip={"Any other additional fees (i.e. food, parking, instrument wear etc.) Will be subtracted at the end of the calculation."} />
                                     </Col>
                                 </Row>
                             </Form.Group>
@@ -975,11 +847,9 @@ const Calculator = () => {
                                 <input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mx-2 mb-2 py-2" style={{width: '95%', borderRadius: "20px", border: '1px solid #ced4da'}}/>
                             </Row>
                             <Row>
-                                <Col style={{maxHeight: "300px", overflowY: "auto", overflowX: "hidden"}}>
-                                <Container>
-                                        {userFinancials}
-                                </Container>
-                                </Col>
+                                <SimpleBar style={{maxHeight: "325px"}}>
+                                    <Container>{userFinancials}</Container>
+                                </SimpleBar>
                             </Row>  
                             <Row>
                                 <div>
