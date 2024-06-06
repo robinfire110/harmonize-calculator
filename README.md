@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="https://github.com/robinfire110/music-gig-app/blob/dev/client/src/img/logo-circle-white.png?raw=true"/>
+  <img src="https://github.com/robinfire110/music-gig-app/blob/dev/client/src/img/logo-circle-white.png?raw=true" height="325px">
 </p>
 
 # Harmonize Calculator - [harmnize.com](harmnize.com)
@@ -10,7 +10,7 @@ Harmonize Calculator allows the user to calculate expenses for music gigs based 
 * Ability to export calculations as a functional Excel spreadsheet.
 * Signing in with Google SSO allowing you to save calculations, manage previous results, export multiple results into one spreadsheet and set calculator default values.
 
-The application is a cut down version of [Harmonize](https://github.com/robinfire110/music-gig-app), isolating the calculator feature and expanding on it. The original Harmonize was developed by Andy Bonola, Craig Smith and Andy Villasmil as a Senior Capstone project. The work to spin it off into this project was done by Andy Villasmil (robinfire110).
+The application is a spin-off of [Harmonize](https://github.com/robinfire110/music-gig-app), isolating the calculator feature and expanding on it. The original Harmonize was developed by Andy Bonola, Craig Smith and Andy Villasmil as a Senior Capstone project. The work to spin it off into this project was done by Andy Villasmil (robinfire110).
 
 ## How to Use
 1. Start by inputting your Pay per gig and Hours per gig to get a basic hourly wage.
@@ -27,16 +27,19 @@ The application is a cut down version of [Harmonize](https://github.com/robinfir
 If you have any issues or feature requests, please submit it on the [issues page](https://github.com/robinfire110/harmonize-calculator/issues).
 
 ## Privacy Policy
-If you make an account using Google, Harmonize Calculator will store your email for authentication purposes. No other data from your Google account is stored (such as name, location or password). All other user data (saved calculations and default settings) will be stored in our database and will not be shared with any third party. General, non-user specific aggregate data may be looked over for statistical purposes (i.e. total number of registered users or saved calculations) to monitor the usage of the application.
+If you're not signed in, Harmonize Calculator does not store or track any user data. If you sign-in using Google, Harmonize Calculator will store your email for authentication purposes. No other data from your Google account is stored (such as name, location or password). All other user data (saved calculations and default settings) will be stored in our database and will not be shared with any third party. General, non-user specific aggregate data may be looked over for statistical purposes (i.e. total number of registered users or saved calculations) to monitor the usage of the application.
 
-If you wish to delete your account and all associated data, you can do so at any time in the Account page. If you lose access to your Google account and wish for your data to be deleted, please let a the developer know (by contacting them or submitting an issue) and they will assist you.
+If you wish to delete your account and all associated data, you can do so at any time in the Account page. If you lose access to your Google account and wish for your data to be deleted, please let the developer know (by contacting them or submitting an issue) and they will assist you.
 
 # Versions
 ## Version 1.0.0
 * Spin-Off from original Harmonize. Removed all non-calculator related features and pages.
+* Refactored code to be more component based.
 * Added Google SSO, removed email and password login.
 * Added Trip Number (instead of Trip Type).
-* Added Calculator Defaults.
+* Added Additional Travel Costs
+* Added Calculator Defaults in Profile.
 * Added search to Saved Calculations on Calculator screen.
+* Added sort to Saved Calculations in Profile.
 * Added ability to delete multiple financials.
 * Updated footer and added About Modal.

@@ -49,6 +49,7 @@ function AboutModal({aboutModalOpen, setAboutModalOpen, isNewUser=false}) {
             </p>
         </Modal.Body>
         <Modal.Footer>
+            <small className='me-auto text-muted' >Version 1.0.0</small>
             <Button variant="primary" onClick={() => {setAboutModalOpen(false)}}>Close</Button>
         </Modal.Footer>
     </Modal>
