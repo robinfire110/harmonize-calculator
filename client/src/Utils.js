@@ -315,4 +315,14 @@ async function saveSpreadsheetAll(data, filename = 'Harmonize_Export')
     saveAs(new Blob([buf]), `${filename}.xlsx`);
 }
 
-module.exports = {DATA_VALUE, formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet};
+function formatMoneyVars(data)
+{
+    const moneyVars = ["total_wage", "gas_price", "mileage_covered", "travel_fees", "fees"]
+    moneyVars.forEach(element => {
+        const value = data[element];
+        if (value) data[element] = parseFloatZero(value).toFixed(2);
+    });
+    return data;
+}
+
+module.exports = {DATA_VALUE, formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet, formatMoneyVars};

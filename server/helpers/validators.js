@@ -7,7 +7,7 @@ const financialSchema = Joi.object({
     fin_name: Joi.string().pattern(/^[a-zA-Z0-9\s.'"!,-]+$/).max(maxFinancialNameLength).required(),
     date: Joi.date().format("YYYY-MM-DD").required(),
     total_wage: Joi.number().min(0).max(99999.99).required(),
-    hourly_wage: Joi.number().min(0).max(99999.99).required(),
+    hourly_wage: Joi.number().min(-99999.99).max(99999.99).required(),
     event_hours: Joi.number().min(0).max(100).required(),
     event_num: Joi.number().integer().min(0).max(99),
     rehearsal_hours: Joi.number().min(0).max(999.9),

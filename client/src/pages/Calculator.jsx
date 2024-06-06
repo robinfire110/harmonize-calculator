@@ -8,7 +8,7 @@ import TooltipButton from "../components/TooltipButton";
 import FormNumber from "../components/FormNumber";
 import axios from "axios";
 import {BarLoader, ClipLoader} from 'react-spinners'
-import {DATA_VALUE, formatCurrency, maxFinancialNameLength, metersToMiles, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, saveSpreadsheet, toastError, toastInfo, toastSuccess} from "../Utils";
+import {DATA_VALUE, formatCurrency, formatMoneyVars, maxFinancialNameLength, metersToMiles, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, saveSpreadsheet, toastError, toastInfo, toastSuccess} from "../Utils";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import {getBackendURL} from "../Utils";
@@ -229,6 +229,16 @@ const Calculator = () => {
         nullVars.forEach(element => {
             if (!element.includes("multiply") && data[element] <= 0 || data[element] === "") newData[element] = null;
         });
+
+        //Decimals (monetary fields load with 2 decimal places)
+        formatMoneyVars(newData);
+        /*
+        const moneyVars = ["total_wage", "gas_price", "mileage_covered", "travel_fees", "fees"]
+        moneyVars.forEach(element => {
+            const value = newData[element];
+            if (value) newData[element] = value.toFixed(2);
+        });
+        */
         
         //Set gas prices
         if (defaultState)

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Form, Button, Container, Col, Row, InputGroup, Modal, Card, ButtonGroup, ToggleButton} from 'react-bootstrap';
 import {toast, ToastContainer} from 'react-toastify';
 import axios from 'axios';
-import {DATA_VALUE, getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, toastError, toastSuccess} from "../../Utils";
+import {DATA_VALUE, formatMoneyVars, getBackendURL, maxBioLength, maxFNameLength, maxLNameLength, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, toastError, toastSuccess} from "../../Utils";
 import FormNumber from '../../components/FormNumber';
 import TooltipButton from '../../components/TooltipButton';
 import DeleteAccountModal from '../../components/DeleteAccountModal';
@@ -54,6 +54,11 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
         }
         setFormData({...formData, [variable]: value});
     }
+
+	//Format Data
+	useEffect(() => {
+		formatMoneyVars(formData);
+	}, []);
 
 	useEffect(() => {
 		setFormData({ ...formData, ["gas_price"]: parseFloatZero(gasPricePerGallon) });
