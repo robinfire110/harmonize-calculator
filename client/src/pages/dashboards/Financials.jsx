@@ -232,10 +232,10 @@ function Financials({ financials, refreshData }) {
 				<Col className="mb-1 text-start" lg={{order: 0, span: 2}} xs={{order: 3, span: 6}}>
 					<Button onClick={handleRowSelectAll}>Select All </Button>
 				</Col>
-				<Col className="mb-1" lg={4} xs={12}>
-					<input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '8px', paddingLeft: '30px', borderRadius: '20px', border: '1px solid #ced4da',}} />
+				<Col className="mb-1" lg={4} xs={8}>
+					<input className="" type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '8px', paddingLeft: '15px', borderRadius: '20px', border: '1px solid #ced4da',}} />
 				</Col>
-				<Col className="mb-1" lg={2} xs={6}>
+				<Col className="mb-1" lg={2} xs={4}>
 					<Form.Select placeholder="Sort" value={sort} onChange={(e) => setSort(e.target.value)}>
 						<option value={0}>Date ↑</option>
 						<option value={1}>Date ↓</option> 

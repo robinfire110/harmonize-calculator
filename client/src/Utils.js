@@ -212,7 +212,7 @@ async function saveSpreadsheet(formData)
         worksheet.getCell("G4").value = {formula: '((A8*D8*(ROUND(C11, 2)-C8))+D11)*IF(G13="Enabled", D2, 1)'}; //Travel Cost
         worksheet.getCell("G5").value = {formula: 'B14*IF(G16="Enabled", D2, 1)'}; //Other Fees 
         worksheet.getCell("G6").value = {formula: 'G2-G3-G4-G5'}; //Total Income
-        worksheet.getCell("G7").value = {formula: '=(A5*IF(G12="Enabled", D2, 1))+(B5*IF(G14="Enabled", D2, 1))+(C5*IF(G15="Enabled", D2, 1))+(B8*IF(G13="Enabled", D2, 1)*D8)'}; //Total Hours
+        worksheet.getCell("G7").value = {formula: '(A5*IF(G12="Enabled", D2, 1))+(B5*IF(G14="Enabled", D2, 1))+(C5*IF(G15="Enabled", D2, 1))+(B8*IF(G13="Enabled", D2, 1)*D8)'}; //Total Hours
         worksheet.getCell("G8").value = {formula: 'IFERROR(G6/G7, 0)'}; //Total Hourly Wage
         worksheet.getCell("C11").value = {formula: 'IFERROR(A11/B11, 0)'}; //Gas Price per Mile
 

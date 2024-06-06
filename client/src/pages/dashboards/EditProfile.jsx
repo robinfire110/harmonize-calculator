@@ -183,7 +183,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 							<TripNumber customTripNum={customTripNum} setCustomTripNum={setCustomTripNum} tripNumSelect={tripNumSelect} setTripNumSelect={setTripNumSelect} setFormDataValue={setFormDataValue} />
 						</Row>
 						<Row className='mt-3'>
-							<CalculatorInput id="travel_fees" isMoney={true} label={"Additional Travel Costs"} isEnabled={false} maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} onChange={e => setFormDataValue("travel_fees", e.target.value)} tooltip={"Any additional travel fees. This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."}/>
+							<CalculatorInput id="travel_fees" isMoney={true} label={"Additional Travel Costs"} isEnabled={false} maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} onChange={e => setFormDataValue("travel_fees", e.target.value)} tooltip={"Default additional travel fees (i.e. tolls, parking). This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."}/>
 						</Row>
 					</Col>
 					<Col className="mb-3" lg={6}>
