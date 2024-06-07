@@ -676,12 +676,12 @@ const Calculator = () => {
                                                         <p>Input origin and destination zip codes to calculate mileage and distance using Google Maps.</p>
                                                         <InputGroup className="mb-2">
                                                             <InputGroup.Text>Origin Zip</InputGroup.Text>
-                                                            <FormNumber id="modalOriginZip" value={modalOriginZip} onChange={e => {setModalOriginZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 27413"} required={true} autoFocus={true} min={5} max={5}></FormNumber>
+                                                            <FormNumber id="modalOriginZip" value={modalOriginZip} onChange={e => {setModalOriginZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 94043"} required={true} autoFocus={true} min={5} max={5}></FormNumber>
                                                             <TooltipButton text="Zip code of where you are coming from."/>
                                                         </InputGroup>
                                                         <InputGroup>
                                                             <InputGroup.Text>Destination Zip</InputGroup.Text>
-                                                            <FormNumber id="modalDestinationZip" value={modalDestinationZip} onChange={e => {setModalDestinationZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 27413"} required={true} min={5} max={5}></FormNumber>
+                                                            <FormNumber id="modalDestinationZip" value={modalDestinationZip} onChange={e => {setModalDestinationZip(e.target.value); if (!isGettingLocation) e.target.setCustomValidity("")}} placeholder={"Ex. 94043"} required={true} min={5} max={5}></FormNumber>
                                                             <TooltipButton text="Zip code of where you are going."/>
                                                         </InputGroup>
                                                     </Modal.Body>
@@ -841,7 +841,7 @@ const Calculator = () => {
                         </Row>
                         <br />
                         <Row>
-                            <div>
+                            <div className="mb-3">
                                 {user && <Button className="me-3" type="submit" variant="success" onClick={() => {saveFinancial(false)}} style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>{saveStatus ? <BarLoader color="#FFFFFF" height={4} width={50} /> : user && paramId ? "Update" : "Save"}</Button>}
                                 {!user && <OverlayTrigger placement="bottom" overlay={<Popover id="popover-trigger-hover-focus" title="Tool Tip" style={{padding: "10px"}}><div dangerouslySetInnerHTML={{__html: "You must be logged in to save."}}/></Popover>}><span><Button className="me-3" type="submit" variant="success" style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>Save</Button></span></OverlayTrigger>}
                                 <Button className="me-3" type="submit" variant="secondary" onClick={() => {saveFinancial(true)}} style={{paddingLeft: "10px", paddingRight: "10px"}}>Export</Button>
@@ -863,12 +863,11 @@ const Calculator = () => {
                             </Row>  
                             <Row>
                                 <div>
-                                <Button className="mt-2 float-end" variant="secondary" style={{width: "auto"}} onClick={() => {navigate("/account#calculations")}}>Manage</Button>
+                                <Button className="mt-2 mb-3 float-end" variant="secondary" style={{width: "auto"}} onClick={() => {navigate("/account#calculations")}}>Manage</Button>
                                 </div>
                             </Row>  
                             </> 
                         }
-                        
                         </Container>
                     </Col>
                 </Row>

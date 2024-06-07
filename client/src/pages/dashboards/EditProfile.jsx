@@ -138,7 +138,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 						<Row>
 							<Form.Group className="text-start mb-3">
 								<Form.Label>Default Location</Form.Label>
-								<CalculatorInput placeholder="Ex. 27412" name="zip" isEnabled={false} min={5} max={5} integer={true} value={formData.zip} onChange={handleChange} required={true} tooltip={"Default location used for distance calculations."} />
+								<CalculatorInput placeholder="Ex. 94043" name="zip" isEnabled={false} min={5} max={5} integer={true} value={formData.zip} onChange={handleChange} required={true} tooltip={"Default location used for distance calculations."} />
 							</Form.Group>
 						</Row>
 						<Row>
