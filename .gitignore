@@ -3,6 +3,8 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+client\build
+
 .idea\.gitignore
 .idea\misc.xml
 .idea\modules.xml
