@@ -1,5 +1,8 @@
 .App {
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .App-logo {
@@ -36,8 +39,6 @@
     transform: rotate(360deg);
   }
 }
-
-
 
 
 /*Sidebar/Dashboard styling*/
@@ -172,5 +173,3 @@
   margin-right: 8px;
   margin-bottom: 8px;
 }
-
-

@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Col, Container, Form, Row, Table } from 'react-bootstrap';
+import { Button, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { getTotalFinHours, saveSpreadsheetAll } from '../../Utils';
-import ConfirmationModal from './ConfirmationModal';
+import { getBackendURL, getTotalFinHours, saveSpreadsheetAll, toastError, toastSuccess } from '../../Utils';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import { PaginationControl } from 'react-bootstrap-pagination-control';
 import moment from 'moment';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import SimpleBar from 'simplebar-react';
 
-function Financials({ financials, onDeleteFinancial }) {
+function Financials({ financials, refreshData }) {
 	const [searchQuery, setSearchQuery] = useState('');
+	const [sort, setSort] = useState("0");
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
 	const [filteredFinancials, setFilteredFinancials] = useState([]);
@@ -17,7 +21,9 @@ function Financials({ financials, onDeleteFinancial }) {
 	const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [financialsPerPage, setFinancialsPerPage] = useState(10);
+	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		setFilteredFinancials(financials);
@@ -39,11 +45,55 @@ function Financials({ financials, onDeleteFinancial }) {
 				if (endDate) date = moment(financial.date).isBetween(moment(startDate).subtract(1, "day"), moment(endDate).add(1, "day"));
 				else date = moment(financial.date).isSameOrAfter(moment(startDate));
 			} 
-			
 			return search && date;
 		});
+
+		//Sort
+		filtered.sort((a, b) => {
+			switch (sort)
+			{
+				//Date Ascending
+				case "0":
+					if (moment(a.date).isSameOrBefore(moment(b.date))) return 1;
+					return -1;
+				break;
+
+				//Date Descending
+				case "1":
+					if (moment(a.date).isSameOrAfter(moment(b.date))) return 1;
+					return -1;
+				break;
+
+				//Name A->Z
+				case "2":
+					if (a.fin_name > b.fin_name) return 1;
+					return -1;
+				break;
+
+				//Name A<-Z
+				case "3":
+					if (a.fin_name < b.fin_name) return 1;
+					return -1;
+				break;
+
+				//Wage $$$<-$
+				case "4":
+					if (a.hourly_wage < b.hourly_wage) return 1;
+					return -1;
+				break;
+
+				//Wage $->$$$
+				case "5":
+					if (a.hourly_wage > b.hourly_wage) return 1;
+					return -1;
+				break;
+			}
+			
+		});
+
+		setIsLoading(false);
 		setFilteredFinancials(filtered);
-	}, [searchQuery, startDate, endDate, financials]);
+	}, [searchQuery, startDate, endDate, financials, sort]);
 
 	//Handle page change
 	useEffect(() => {
@@ -87,26 +137,61 @@ function Financials({ financials, onDeleteFinancial }) {
 		}
 	};
 
-	const handleExportToSpreadsheet = () => {
-		selectedRows.forEach(index => {
-			const selectedData = [filteredFinancials[index]];
-			saveSpreadsheetAll(selectedData, selectedData[0].fin_name);
-		});
-	};
-
 	const handleDeleteFinancial = (financial) => {
 		setFinancialToDelete(financial);
-		setDeleteMessage(`Are you sure you want to delete '${financial.fin_name}' record?`);
+		setDeleteMessage(`Are you sure you want to delete "${financial.fin_name}"?`);
+		setShowConfirmationModal(true);
+	};
+
+	const handleDeleteSelectedFinancial = () => {
+		setFinancialToDelete(selectedRows);
+		setDeleteMessage(`Are you sure you want to delete ${selectedRows.length} selected calculations?`);
 		setShowConfirmationModal(true);
 	};
 
 	const handleConfirmDeleteFinancial = () => {
-		if (financialToDelete) {
-			onDeleteFinancial(financialToDelete);
-			setFinancialToDelete(null);
-			setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== financialToDelete.index));
+		if (!isDeleting)
+		{
+			setIsDeleting(true);
+			if (financialToDelete) {
+				//Set array if needed
+				const isArray = financialToDelete instanceof Array;
+				let idString = ""
+				let finName = "selected calculations"
+				if (isArray)
+				{
+					financialToDelete.map((i, j) => {
+						idString += currentFinancials[i].fin_id;
+						if (j != selectedRows.length-1) idString += "|";
+					});
+				}
+				else
+				{
+					idString = financialToDelete.fin_id;
+					finName = financialToDelete.fin_name;
+				} 
+
+				//Delete
+				axios.delete(`${getBackendURL()}/financial/${idString}`, {withCredentials: true}).then((res) => {
+					toast.success(`Successfully deleted ${finName}.`, toastSuccess);
+					setFinancialToDelete(null);
+					setIsDeleting(false);
+					setShowConfirmationModal(false);
+
+					//Set selected rows
+					if (!isArray) setSelectedRows(selectedRows.filter((rowIndex) => rowIndex !== financialToDelete.index));
+					else setSelectedRows([]);
+
+					refreshData();
+				}).catch((error) => {
+					console.error('Error deleting financial.:', error);
+					toast.error('Failed to delete financial.', toastError);
+					setIsDeleting(false);
+				});
+			}
+			
 		}
-		setShowConfirmationModal(false);
+		
 	};
 
 	const handleRowClick = (financial) => {
@@ -117,42 +202,48 @@ function Financials({ financials, onDeleteFinancial }) {
 	const indexOfFirstFinancial = indexOfLastFinancial - financialsPerPage;
 	const currentFinancials = filteredFinancials.slice(indexOfFirstFinancial, indexOfLastFinancial);
 
-
+	if (isLoading)
+	{
+		<Container>
+		<Spinner />
+		</Container>
+	}
+	else
+	{
 	return (
 		<div>
 			<Row>
 				<Col lg={4} sm={12} xs={12}>
 					<div className='text-start'>
-						<h2>Financials</h2>
+						<h2>Calculations</h2>
 						<br />
-						<h5>Select records to export</h5>
+						<h5>Select calculations to export</h5>
 					</div>
 				</Col>
 				<Col>
 					<div className="text-lg-end text-md-start text-sm-start text-xs-start" style={{textAlign: "left"}}>
-						<Button className="my-1 me-2 btn btn-dark" variant="primary" onClick={handleCreateNewCalc}>Create New Financial</Button>
-						<Button className="my-2" variant="success" onClick={handleExportAllToSpreadsheet} disabled={selectedRows.length === 0}>Export Selected to Spreadsheet</Button>
+						<Button className="my-1 me-2 btn btn-dark" variant="primary" onClick={handleCreateNewCalc}>Create New Calculation</Button>
+						<Button className="my-1 me-2" variant="success" onClick={handleExportAllToSpreadsheet} disabled={selectedRows.length === 0}>Export Selected</Button>
+						<Button className="my-2" variant="danger" onClick={handleDeleteSelectedFinancial} disabled={selectedRows.length === 0}>Delete Selected</Button>
 					</div>
 				</Col>
 			</Row>
 			<Row style={{ marginTop: '20px', marginBottom: '10px', width: '100%'}}>
-				<Col className="mb-1 text-start" lg={{order: 0, span: 3}} xs={{order: 3, span: 6}}>
+				<Col className="mb-1 text-start" lg={{order: 0, span: 2}} xs={{order: 3, span: 6}}>
 					<Button onClick={handleRowSelectAll}>Select All </Button>
 				</Col>
-				<Col className="mb-1" lg={5} xs={12}>
-					<input
-						type="text"
-						placeholder="Search financials..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						style={{
-							width: '100%',
-							padding: '8px',
-							paddingLeft: '30px',
-							borderRadius: '20px',
-							border: '1px solid #ced4da',
-						}}
-					/>
+				<Col className="mb-1" lg={4} xs={8}>
+					<input className="" type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '8px', paddingLeft: '15px', borderRadius: '20px', border: '1px solid #ced4da',}} />
+				</Col>
+				<Col className="mb-1" lg={2} xs={4}>
+					<Form.Select placeholder="Sort" value={sort} onChange={(e) => setSort(e.target.value)}>
+						<option value={0}>Date ↑</option>
+						<option value={1}>Date ↓</option> 
+						<option value={2}>Name A→Z</option>
+						<option value={3}>Name Z→A</option>
+						<option value={4}>Wage $$$→$</option>  
+						<option value={5}>Wage $→$$$</option>
+					</Form.Select>
 				</Col>
 				<Col className="mb-1" lg={2} xs={6}>
 					<Form.Control type="date" placeholder="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -162,38 +253,37 @@ function Financials({ financials, onDeleteFinancial }) {
 				</Col>
 			</Row>
 			{filteredFinancials.length > 0 ? (
-			<Table striped bordered hover responsive>
-				<thead>
-				<tr>
-					<th>Select</th>
-					<th>Date</th>
-					<th>Name</th>
-					<th>Total Hours</th>
-					<th>Hourly Wage</th>
-					<th>Action</th>
-				</tr>
-				</thead>
-				<tbody>
-				{currentFinancials.map((financial, index) => (
-					<tr key={index} style={{ cursor: 'pointer' }}>
-						<td onClick={() => handleRowSelect(index)}><input type="checkbox" checked={selectedRows.includes(index)} onChange={() => handleRowSelect(index)} /></td>
-						<td onClick={() => handleRowClick(financial)}>{moment(financial.date).format("M/DD/YYYY")}</td>
-						<td onClick={() => handleRowClick(financial)}>{financial.fin_name}</td>
-						<td onClick={() => handleRowClick(financial)}>{getTotalFinHours(financial).toFixed(2)}</td>
-						<td onClick={() => handleRowClick(financial)}>${financial.hourly_wage.toFixed(2)}</td>
-						<td>
-							<Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDeleteFinancial(financial); }}>Delete</Button>
-						</td>
+			<>
+			<SimpleBar style={{maxHeight: "610px"}}>
+				<Table striped bordered hover responsive>
+					<thead>
+					<tr>
+						<th>Select</th>
+						<th>Date</th>
+						<th>Name</th>
+						<th>Total Hours</th>
+						<th>Hourly Wage</th>
+						<th>Action</th>
 					</tr>
-				))}
-				</tbody>
-			</Table>
-			) : (
-				<div className="no-financials-message">
-					<p>No financial records to show.</p>
-				</div>
-			)}
-			<Row className="justify-content-center">
+					</thead>
+					<tbody>
+					{currentFinancials.map((financial, index) => (
+						<tr key={index} style={{ cursor: 'pointer' }}>
+							<td onClick={() => handleRowSelect(index)}><input type="checkbox" checked={selectedRows.includes(index)} onChange={() => handleRowSelect(index)} /></td>
+							<td onClick={() => handleRowClick(financial)}>{moment(financial.date).format("M/DD/YYYY")}</td>
+							<td onClick={() => handleRowClick(financial)}>{financial.fin_name}</td>
+							<td onClick={() => handleRowClick(financial)}>{getTotalFinHours(financial).toFixed(2)}</td>
+							<td onClick={() => handleRowClick(financial)}>${financial.hourly_wage.toFixed(2)}</td>
+							<td>
+								<Button variant="danger" style={{ marginRight: '5px' }} onClick={(e) => { e.stopPropagation(); handleDeleteFinancial(financial); }}>Delete</Button>
+							</td>
+						</tr>
+					))}
+					</tbody>
+				</Table>
+			</SimpleBar>
+
+			<Row className="mt-1 justify-content-center">
 				<Col lg={{offset: 1}} md={{offset: 1}} sm={{offset: 4}} xs={{offset: 3}}>
 					<PaginationControl page={currentPage} total={filteredFinancials.length} limit={financialsPerPage} changePage={(page) => {setCurrentPage(page)}} ellipsis={1}/>
 				</Col>
@@ -206,15 +296,18 @@ function Financials({ financials, onDeleteFinancial }) {
 					</Form.Select>
 				</Col>
 			</Row>
+			</>
+			) : (
+				<div className="no-financials-message">
+					<br />
+					<h4>No calculations to show.</h4>
+				</div>
+			)}
 			
-			<ConfirmationModal
-				show={showConfirmationModal}
-				handleClose={() => setShowConfirmationModal(false)}
-				message={deleteMessage}
-				onConfirm={handleConfirmDeleteFinancial}
-			/>
+			<ConfirmationModal show={showConfirmationModal} handleClose={() => setShowConfirmationModal(false)} message={deleteMessage} onConfirm={handleConfirmDeleteFinancial} isLoading={isDeleting} isDelete={true} />
 		</div>
 	);
+}
 }
 
 export default Financials;

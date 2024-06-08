@@ -1,14 +1,14 @@
 module.exports = (sequelize, Sequelize, User, Financial) => {
   const FinStatus = sequelize.define("FinStatus", {
     user_id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.UUID,
       references: {
         model: User,
         key: "user_id"
       }
     },
     fin_id:{
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
       references: {
         model: Financial,
         key: "fin_id"

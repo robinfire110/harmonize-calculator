@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const db = require("../models/models");
-const e = require("express");
 
 module.exports.checkUser = async (req, res, next) => {
 	try {

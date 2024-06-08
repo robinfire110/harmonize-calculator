@@ -1,24 +1,7 @@
 const {Sequelize} = require('sequelize');
 
-
-//Set up Sequelize object and connection to database
-const local_database = new Sequelize(
-    'dev_db',
-    'root',
-    'password', {
-        logging: false,
-        host: 'localhost',
-        dialect: "mysql",
-        define: {
-            freezeTableName: true, //Ensure table names don't get pluralized
-            timestamps: false, //Removes automatic time added and updated columns
-            underscored: true
-        }
-    }
-)
-
 // Function to connect to the database
-const remote_database = new Sequelize(
+const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
     process.env.DB_PASSWORD, {
@@ -34,15 +17,12 @@ const remote_database = new Sequelize(
     }
 );
 
-//Select if you want to use local_sequelize or db_sequelize
-let sequelize = remote_database;
-
 //Connect to database
 const connectToDatabase = async () => {
     try {
         await sequelize.authenticate();
-        if (sequelize == local_database) console.log("Successfully connected to LOCAL database.");
-        else console.log("Successfully connected to REMOTE database.")
+        //if (sequelize == local_database) console.log("Successfully connected to LOCAL database.");
+        console.log("Successfully connected to REMOTE database.")
     }
     catch (error) {
         console.log(error);

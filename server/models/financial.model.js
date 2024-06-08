@@ -2,9 +2,9 @@ module.exports = (sequelize, Sequelize, Event) => {
   const Financial = sequelize.define('Financial', {
     // Model attributes are defined here
     fin_id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false
     },
     fin_name: {
       type: Sequelize.STRING,
@@ -31,7 +31,7 @@ module.exports = (sequelize, Sequelize, Event) => {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
-    rehearse_hours: {
+    rehearsal_hours: {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
@@ -47,9 +47,13 @@ module.exports = (sequelize, Sequelize, Event) => {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
-    mileage_pay: {
+    mileage_covered: {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
+    },
+    travel_fees: {
+      type: Sequelize.FLOAT,
+      default: 0.0
     },
     zip: {
       type: Sequelize.STRING
@@ -70,9 +74,9 @@ module.exports = (sequelize, Sequelize, Event) => {
       type: Sequelize.FLOAT,
       defaultValue: 0.0
     },
-    round_trip: {
-      type: Sequelize.FLOAT,
-      defaultValue: true
+    trip_num: {
+      type: Sequelize.INTEGER,
+      defaultValue: 2
     },
     multiply_pay: {
       type: Sequelize.FLOAT,
@@ -99,45 +103,6 @@ module.exports = (sequelize, Sequelize, Event) => {
       defaultValue: false
     },
   });
-
-  /* Financial with Event */
-  Event.hasOne(Financial, {
-    foreignKey: "event_id", 
-    foreignKeyConstraint: true, 
-    onDelete: 'CASCADE'
-  });
-  Financial.belongsTo(Event, {
-    foreignKey: "event_id", 
-    foreignKeyConstraint: true, 
-    onDelete: 'CASCADE'
-  });
-
-  Financial.getFinancialsByFinIds = async (finIds) => {
-    try {
-      return await Financial.findAll({
-        where: {
-          fin_id: finIds
-        }
-      });
-    } catch (error) {
-      console.error('Error retrieving financials:', error);
-      throw error;
-    }
-  };
-
-  Financial.deleteFinancialByFinId = async (finId) => {
-    try {
-      const deletedFinancial = await Financial.destroy({
-        where: {
-          fin_id: finId
-        }
-      });
-      return deletedFinancial;
-    } catch (error) {
-      console.error('Error deleting financial:', error);
-      throw error;
-    }
-  };
 
   return Financial;
 };
