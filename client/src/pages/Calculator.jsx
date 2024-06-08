@@ -334,8 +334,8 @@ const Calculator = () => {
             }
             else
             {
-                if (modalOriginZip.length != 5) elementOriginZip.setCustomValidity("Zip codes must be 5 characters (#####).");
-                else if (modalDestinationZip.length != 5) elementDestinationZip.setCustomValidity("Zip codes must be 5 characters (#####).");
+                if (modalOriginZip.length != 5) elementOriginZip.setCustomValidity("Zip code must be 5 numbers (#####).");
+                else if (modalDestinationZip.length != 5) elementDestinationZip.setCustomValidity("Zip code must be 5 numbers (#####).");
             }
         }
     }
@@ -795,79 +795,79 @@ const Calculator = () => {
                         <Row>
                             <Col>
                                 
-                                    <Row>
-                                        <Col lg={2} md={2} sm={2} xs={2}>
-                                            <h5 style={{display: "block"}}>Payment: </h5>
-                                        </Col>
-                                        <Col>
-                                        <h5 style={{whiteSpace: "pre-wrap", textAlign: "right", display: "block"}}>{formatCurrency(formData.total_wage)}{formEnabled.event_num && formData.multiply_pay && formData.event_num ? ` x ${formData.event_num} = ${formatCurrency(formData.total_wage*formData.event_num)}` : ""}</h5>
-                                        </Col>
-                                    </Row>
-                                    <Row>
-                                        <Col lg={6} md={6} sm={7} xs={5}>
-                                            {formEnabled.tax ? <h5 style={{display: "block"}}>Tax Cut ({formData.tax ? formData.tax : "0"}%):</h5> : ""}
-                                            {(formEnabled.total_mileage || formEnabled.travel_fees) ? <h5 style={{display: "block"}}>Total Travel Cost:</h5> : ""}
-                                            {formEnabled.fees ? <h5 style={{display: "block"}}>Other Fees:</h5> : ""}
-                                            <hr style={{margin: "0px ", textAlign: "right", width: "0px"}}/>
-                                            <h5 style={{display: "block"}}><br /></h5>
-                                            <h5 style={{display: "block"}}>Total Hours: </h5>
-                                        </Col>
-                                        <Col lg={1} md={1} sm={1} xs={1}>
-                                            <div style={{whiteSpace: "pre-wrap"}}>
-                                            {formEnabled.tax ? <h5 style={{display: "block"}}>-</h5> : ""}
-                                            {(formEnabled.total_mileage || formEnabled.travel_fees) ? <h5 style={{display: "block"}}>-</h5> : ""}
-                                            {formEnabled.fees ? <h5 style={{display: "block"}}>-</h5> : ""}
-                                            <h5 style={{display: "block"}}><br /></h5>
-                                            <h5 style={{display: "block"}}>÷</h5>
-                                            </div>
-                                        </Col>
-                                        <Col>                      
-                                            <div style={{whiteSpace: "pre-wrap", textAlign: "right", display: "block"}}>
-                                                {formEnabled.tax ? <h5 style={{display: "block"}}>{formatCurrency(totalTax)}</h5> : ""}
-                                                {(formEnabled.total_mileage || formEnabled.travel_fees) ? <h5 style={{display: "block"}}>{(formEnabled.total_mileage || formEnabled.travel_fees) ? formatCurrency(totalTravel) : formatCurrency(0)}</h5> : ""}
-                                                {formEnabled.fees ? <h5 style={{display: "block"}}>{formatCurrency(totalOtherFees)}</h5> : ""}
-                                                <hr style={{margin: "0px ", textAlign: "right"}}/>
-                                                <h5 style={{display: "block"}}>{formatCurrency(totalPay)}</h5>
-                                                <h5 style={{display: "block"}}>{totalHours}</h5>
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                    <hr />
-                                    <Row>
-                                        <Col><h4>Total Hourly Wage:</h4></Col>
-                                        <Col style={{textAlign: "right"}} lg="auto" md="auto" sm="auto" xs="auto"><h4>{formatCurrency(hourlyWage)}</h4></Col>
-                                    </Row>        
+                                <Row>
+                                    <Col lg={2} md={2} sm={2} xs={2}>
+                                        <h5 style={{display: "block"}}>Payment: </h5>
+                                    </Col>
+                                    <Col>
+                                    <h5 style={{whiteSpace: "pre-wrap", textAlign: "right", display: "block"}}>{formatCurrency(formData.total_wage)}{formEnabled.event_num && formData.multiply_pay && formData.event_num ? ` x ${formData.event_num} = ${formatCurrency(formData.total_wage*formData.event_num)}` : ""}</h5>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={6} md={6} sm={7} xs={5}>
+                                        {formEnabled.tax ? <h5 style={{display: "block"}}>Tax Cut ({formData.tax ? formData.tax : "0"}%):</h5> : ""}
+                                        {(formEnabled.total_mileage || formEnabled.travel_fees) ? <h5 style={{display: "block"}}>Total Travel Cost:</h5> : ""}
+                                        {formEnabled.fees ? <h5 style={{display: "block"}}>Other Fees:</h5> : ""}
+                                        <hr style={{margin: "0px ", textAlign: "right", width: "0px"}}/>
+                                        <h5 style={{display: "block"}}><br /></h5>
+                                        <h5 style={{display: "block"}}>Total Hours: </h5>
+                                    </Col>
+                                    <Col lg={1} md={1} sm={1} xs={1}>
+                                        <div style={{whiteSpace: "pre-wrap"}}>
+                                        {formEnabled.tax ? <h5 style={{display: "block"}}>-</h5> : ""}
+                                        {(formEnabled.total_mileage || formEnabled.travel_fees) ? <h5 style={{display: "block"}}>-</h5> : ""}
+                                        {formEnabled.fees ? <h5 style={{display: "block"}}>-</h5> : ""}
+                                        <h5 style={{display: "block"}}><br /></h5>
+                                        <h5 style={{display: "block"}}>÷</h5>
+                                        </div>
+                                    </Col>
+                                    <Col>                      
+                                        <div style={{whiteSpace: "pre-wrap", textAlign: "right", display: "block"}}>
+                                            {formEnabled.tax ? <h5 style={{display: "block"}}>{formatCurrency(totalTax)}</h5> : ""}
+                                            {(formEnabled.total_mileage || formEnabled.travel_fees) ? <h5 style={{display: "block"}}>{(formEnabled.total_mileage || formEnabled.travel_fees) ? formatCurrency(totalTravel) : formatCurrency(0)}</h5> : ""}
+                                            {formEnabled.fees ? <h5 style={{display: "block"}}>{formatCurrency(totalOtherFees)}</h5> : ""}
+                                            <hr style={{margin: "0px ", textAlign: "right"}}/>
+                                            <h5 style={{display: "block"}}>{formatCurrency(totalPay)}</h5>
+                                            <h5 style={{display: "block"}}>{totalHours}</h5>
+                                        </div>
+                                    </Col>
+                                </Row>
+                                <hr />
+                                <Row>
+                                    <Col><h4>Total Hourly Wage:</h4></Col>
+                                    <Col style={{textAlign: "right"}} lg="auto" md="auto" sm="auto" xs="auto"><h4>{formatCurrency(hourlyWage)}</h4></Col>
+                                </Row>        
                             </Col>
-                        </Row>
-                        <br />
-                        <Row>
-                            <div className="mb-3">
-                                {user && <Button className="me-3" type="submit" variant="success" onClick={() => {saveFinancial(false)}} style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>{saveStatus ? <BarLoader color="#FFFFFF" height={4} width={50} /> : user && paramId ? "Update" : "Save"}</Button>}
-                                {!user && <OverlayTrigger placement="bottom" overlay={<Popover id="popover-trigger-hover-focus" title="Tool Tip" style={{padding: "10px"}}><div dangerouslySetInnerHTML={{__html: "You must be logged in to save."}}/></Popover>}><span><Button className="me-3" type="submit" variant="success" style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>Save</Button></span></OverlayTrigger>}
-                                <Button className="me-3" type="submit" variant="secondary" onClick={() => {saveFinancial(true)}} style={{paddingLeft: "10px", paddingRight: "10px"}}>Export</Button>
-                                <Button className="float-end" variant="primary" href="/calculator">New Calculation</Button>
-                            </div>
-                        </Row>
-                        {user && 
-                            <>
-                            <Row className="mt-4">
-                                <Col><h4>Saved Calculations</h4></Col>
                             </Row>
+                            <br />
                             <Row>
-                                <input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mx-2 mb-2 py-2" style={{width: '95%', borderRadius: "20px", border: '1px solid #ced4da'}}/>
-                            </Row>
-                            <Row>
-                                <SimpleBar style={{maxHeight: "325px"}}>
-                                    <Container>{userFinancials}</Container>
-                                </SimpleBar>
-                            </Row>  
-                            <Row>
-                                <div>
-                                <Button className="mt-2 mb-3 float-end" variant="secondary" style={{width: "auto"}} onClick={() => {navigate("/account#calculations")}}>Manage</Button>
+                                <div className="mb-3">
+                                    {user && <Button className="me-3" type="submit" variant="success" onClick={() => {saveFinancial(false)}} style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>{saveStatus ? <BarLoader color="#FFFFFF" height={4} width={50} /> : user && paramId ? "Update" : "Save"}</Button>}
+                                    {!user && <OverlayTrigger placement="bottom" overlay={<Popover id="popover-trigger-hover-focus" title="Tool Tip" style={{padding: "10px"}}><div dangerouslySetInnerHTML={{__html: "You must be logged in to save."}}/></Popover>}><span><Button className="me-3" type="submit" variant="success" style={{paddingLeft: "10px", paddingRight: "10px"}} disabled={!user}>Save</Button></span></OverlayTrigger>}
+                                    <Button className="me-3" type="submit" variant="secondary" onClick={() => {saveFinancial(true)}} style={{paddingLeft: "10px", paddingRight: "10px"}}>Export</Button>
+                                    <Button className="float-end" variant="primary" href="/calculator">New Calculation</Button>
                                 </div>
-                            </Row>  
-                            </> 
-                        }
+                            </Row>
+                            {user && 
+                                <>
+                                <Row className="mt-4">
+                                    <Col><h4>Saved Calculations</h4></Col>
+                                </Row>
+                                <Row>
+                                    <input type="text" placeholder="Search calculations..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mx-2 mb-2 py-2" style={{width: '95%', borderRadius: "20px", border: '1px solid #ced4da'}}/>
+                                </Row>
+                                <Row>
+                                    <SimpleBar style={{maxHeight: "325px"}}>
+                                        <Container>{userFinancials}</Container>
+                                    </SimpleBar>
+                                </Row>  
+                                <Row>
+                                    <div>
+                                    <Button className="mt-2 mb-3 float-end" variant="secondary" style={{width: "auto"}} onClick={() => {navigate("/account#calculations")}}>Manage</Button>
+                                    </div>
+                                </Row>  
+                                </> 
+                            }
                         </Container>
                     </Col>
                 </Row>

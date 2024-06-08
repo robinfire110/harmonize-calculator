@@ -68,6 +68,10 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 		setFormData({ ...formData, ["mpg"]: parseFloatZero(vehicleMPG) });
 	}, [vehicleMPG])
 
+	useEffect(() => {
+		console.log(formData);
+	}, [formData]);
+
 	const handleChange = (e) => {
 		const name = e.target.name;
 		let value = e.target.value;
@@ -80,6 +84,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 
 		//Check validity
 		let valid = true;
+
 		//Trip Number
 		if (formData.trip_num <= 0)
 		{
@@ -108,7 +113,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 			<hr />
 			<h3>Account Information</h3>
 			<br />
-			<Form onSubmit={handleSubmit}>
+			<Form id="accountForm" onSubmit={handleSubmit}>
 				<Col>
 					<Row>
 						<Col lg={9} sm={8} xs={12}>
@@ -138,7 +143,7 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 						<Row>
 							<Form.Group className="text-start mb-3">
 								<Form.Label>Default Location</Form.Label>
-								<CalculatorInput placeholder="Ex. 94043" name="zip" isEnabled={false} min={5} max={5} integer={true} value={formData.zip} onChange={handleChange} required={true} tooltip={"Default location used for distance calculations."} />
+								<CalculatorInput placeholder="Ex. 94043" name="zip" isEnabled={false} min={5} max={5} integer={true} value={formData.zip} onChange={(e) => {e.target.setCustomValidity(""); handleChange(e);}} tooltip={"Default location used for distance calculations."} customValidity={"Zip code must be 5 numbers (#####)."} />
 							</Form.Group>
 						</Row>
 						<Row>
@@ -177,13 +182,13 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 							</Form.Group>
 						</Row>
 						<Row>
-							<CalculatorInput id="mileage_covered" isMoney={true} label={"Mileage Covered (in $ per mile)"} isEnabled={false} maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} onChange={e => setFormDataValue("mileage_covered", e.target.value)} tooltip={"Default number of miles that will be covered by organizers. Will subtract from total mileage for final result."}/>
+							<CalculatorInput id="mileage_covered" name='mileage_covered' isMoney={true} label={"Mileage Covered (in $ per mile)"} isEnabled={false} maxValue={999.99} value={formData.mileage_covered} placeholder="Ex. 0.21" integer={false} onChange={handleChange} tooltip={"Default number of miles that will be covered by organizers. Will subtract from total mileage for final result."}/>
 						</Row>
 						<Row className='mt-3'>
 							<TripNumber customTripNum={customTripNum} setCustomTripNum={setCustomTripNum} tripNumSelect={tripNumSelect} setTripNumSelect={setTripNumSelect} setFormDataValue={setFormDataValue} />
 						</Row>
 						<Row className='mt-3'>
-							<CalculatorInput id="travel_fees" isMoney={true} label={"Additional Travel Costs"} isEnabled={false} maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} onChange={e => setFormDataValue("travel_fees", e.target.value)} tooltip={"Default additional travel fees (i.e. tolls, parking). This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."}/>
+							<CalculatorInput id="travel_fees" name="travel_fees" isMoney={true} label={"Additional Travel Costs"} isEnabled={false} maxValue={99999.99} value={formData.travel_fees} placeholder="Ex. 4.50" integer={false} onChange={handleChange} tooltip={"Default additional travel fees (i.e. tolls, parking). This field can also be used to input flat-rate travel costs (such as public transit fares, taxi, ridesharing etc.). This field will be multiplied by <i>Number of gigs</i>, but not <i>Trip Number</i>."}/>
 						</Row>
 					</Col>
 					<Col className="mb-3" lg={6}>
@@ -198,18 +203,18 @@ function EditProfile({ userData, onUserChange, gasPrices}) {
 						<br />
 						<h4>Additional Hours</h4>
 						<Row>
-							<CalculatorInput id="practice_hours" label={"Individual Practice Hours"} isEnabled={false} max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} onChange={e => setFormDataValue("practice_hours", e.target.value)} tooltip={"Default practice hours for event (individually, not including group rehearsal)."}/>
+							<CalculatorInput id="practice_hours" name="practice_hours" label={"Individual Practice Hours"} isEnabled={false} max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} onChange={handleChange} tooltip={"Default practice hours for event (individually, not including group rehearsal)."}/>
 						</Row>
 						<Row>
-							<CalculatorInput id="rehearsal_hours" label={"Rehearsal Hours"} isEnabled={false} max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} onChange={e => setFormDataValue("rehearsal_hours", e.target.value)} tooltip={"Default rehearsal hours for event (not including individual practice)."} />
+							<CalculatorInput id="rehearsal_hours" name="rehearsal_hours" label={"Rehearsal Hours"} isEnabled={false} max={999.9} value={formData.rehearsal_hours} placeholder="Ex. 2" integer={false} onChange={handleChange} tooltip={"Default rehearsal hours for event (not including individual practice)."} />
 						</Row>
 						<br />
 						<h4>Other Expenses</h4>
 						<Row>
-							<CalculatorInput id="tax" preText="%" label={"Income Tax Percentage"} isEnabled={false} value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} onChange={e => setFormDataValue("tax", e.target.value)} tooltip={"Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses."} />                           
+							<CalculatorInput id="tax" name="tax" preText="%" label={"Income Tax Percentage"} isEnabled={false} value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} onChange={handleChange} tooltip={"Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses."} />                           
 						</Row>
 						<Row>
-							<CalculatorInput id="fees" label={"Other Fees"} isEnabled={false} isMoney={true} maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} onChange={e => setFormDataValue("fees", e.target.value)} tooltip={"Any other additional fees (i.e. food, parking, instrument wear etc.) Will be subtracted at the end of the calculation."} />
+							<CalculatorInput id="fees" name="fees" label={"Other Fees"} isEnabled={false} isMoney={true} maxValue={9999.99} value={formData.fees} placeholder="Ex. 15.00" integer={false} onChange={handleChange} tooltip={"Any other additional fees (i.e. food, parking, instrument wear etc.) Will be subtracted at the end of the calculation."} />
 						</Row>
 					</Col>
 				</Row>

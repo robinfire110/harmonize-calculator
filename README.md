@@ -12,6 +12,9 @@ Harmonize Calculator allows the user to calculate expenses for music gigs based 
 
 The application is a spin-off of [Harmonize](https://github.com/robinfire110/music-gig-app), isolating the calculator feature and expanding on it. The original Harmonize was developed by Andy Bonola, Craig Smith and Andy Villasmil as a Senior Capstone project. The work to spin it off into this project was done by Andy Villasmil (robinfire110).
 
+## Overview Video
+[![Overview Video](https://img.youtube.com/vi/-bGkDlbghNQ/0.jpg)](https://www.youtube.com/watch?v=-bGkDlbghNQ)
+
 ## How to Use
 1. Start by inputting your Pay per gig and Hours per gig to get a basic hourly wage.
 2. Add more information about your gig such as travel, additional hours, tax or any other expenses.
@@ -22,6 +25,7 @@ The application is a spin-off of [Harmonize](https://github.com/robinfire110/mus
 * Have multiple gigs or services? Use the Number of Gigs option to multiply your values. Use the Options button to change which fields get multiplied depending on your needs.
 * Don't know the exact distance of the gig? Click the Use Location button to automatically calculate your travel mileage and hours using zip codes.
 * Don't know your exact gas price per mile? Click the Use Average button to use average gas prices and vehicle MPG values.
+* You can install Harmonize as an app (if you prefer) by using the <i>Install App</i> button in your browser!
 
 ## Issues
 If you have any issues or feature requests, please submit it on the [issues page](https://github.com/robinfire110/harmonize-calculator/issues).
@@ -43,3 +47,4 @@ If you wish to delete your account and all associated data, you can do so at any
 * Added sort to Saved Calculations in Profile.
 * Added ability to delete multiple financials.
 * Updated footer and added About Modal.
+* Many, many bug fixes.
