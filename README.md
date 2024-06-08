@@ -3,7 +3,7 @@
   <img src="https://github.com/robinfire110/music-gig-app/blob/dev/client/src/img/logo-circle-white.png?raw=true" height="325px">
 </p>
 
-# Harmonize Calculator - [harmnize.com](harmnize.com)
+# Harmonize Calculator - [harmnize.com](https://harmnize.com)
 Harmonize Calculator allows the user to calculate expenses for music gigs based on pay, travel, practice hours etc. Outside of the basic calculation, the apps has several other features...
 * Automatic calculation of travel distance and time using Google Maps API.
 * Database of up-to-date average gas prices using the [AAA Daily Average Site](https://gasprices.aaa.com/state-gas-price-averages/).
