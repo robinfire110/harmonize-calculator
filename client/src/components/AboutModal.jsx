@@ -3,9 +3,9 @@ import { Accordion, Button, Col, Modal, Row } from 'react-bootstrap';
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 
-function AboutModal({aboutModalOpen, setAboutModalOpen, isNewUser=false}) {
+function AboutModal({modalOpen, setModalOpen, isNewUser=false}) {
     return (
-    <Modal show={aboutModalOpen} onHide={() => {setAboutModalOpen(false);}} centered={true} size="lg">
+    <Modal show={modalOpen} onHide={() => {setModalOpen(false);}} centered={true} size="lg">
         <Modal.Header closeButton>
             <Col>
             <Row><Modal.Title>{isNewUser ? "Welcome to Harmonize Calculator!" : "About Harmonize Calculator"}</Modal.Title></Row>
@@ -86,8 +86,8 @@ function AboutModal({aboutModalOpen, setAboutModalOpen, isNewUser=false}) {
             </Accordion>
         </Modal.Body>
         <Modal.Footer>
-            <small className='me-auto text-muted'>Version 1.0.0</small>
-            <Button variant="primary" onClick={() => {setAboutModalOpen(false)}}>Close</Button>
+            <small className='me-auto text-muted'>Version 1.0.1</small>
+            <Button variant="primary" onClick={() => {setModalOpen(false)}}>Close</Button>
         </Modal.Footer>
     </Modal>
     )

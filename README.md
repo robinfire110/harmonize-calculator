@@ -36,6 +36,9 @@ If you're not signed in, Harmonize Calculator does not store or track any user d
 If you wish to delete your account and all associated data, you can do so at any time in the Account page. If you lose access to your Google account and wish for your data to be deleted, please let the developer know (by contacting them or submitting an issue) and they will assist you.
 
 # Versions
+## Version 1.0.1
+* Added Privacy Policy
+
 ## Version 1.0.0
 * Spin-Off from original Harmonize. Removed all non-calculator related features and pages.
 * Refactored code to be more component based.
