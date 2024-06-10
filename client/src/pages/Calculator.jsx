@@ -138,7 +138,7 @@ const Calculator = () => {
                 setGasPrices(map);
                 setAverageGasPrice(map);
             }).catch((error) => {
-                console.log(error);
+                console.error(error);
                 setGasPrices(undefined);
             });
         }
@@ -163,7 +163,7 @@ const Calculator = () => {
                     setUser(undefined);
                 }
             }).catch((error) => {
-                console.log(error);
+                console.error(error);
                 removeCookie("jwt");
             });
         }
@@ -309,7 +309,6 @@ const Calculator = () => {
                 destinations: [destinationZip],
                 travelMode: "DRIVING"
             }, (data, status) => {
-                console.log(data, status);
                 if (status === "OK" && data.rows[0].elements[0].status == "OK")
                 {
                     const distance = data.rows[0].elements[0].distance.value;
@@ -447,7 +446,6 @@ const Calculator = () => {
         //Data
         let data = gasPrices;
         if (dataOverride) data = dataOverride;
-        console.log(currentState, currentVehicle);
 
         //Set data
         if (data)
@@ -490,7 +488,6 @@ const Calculator = () => {
                 multiply_rehearsal: parseBool(formData.multiply_rehearsal),
                 multiply_other: parseBool(formData.multiply_other)
             }
-            console.log("Submit", data);
             
             //Check validity (will return false if not valid, HTML will take care of the rest).
             const inputs = document.getElementById("calculatorForm").elements;
@@ -498,7 +495,6 @@ const Calculator = () => {
                 if (!inputs[i].disabled && !inputs[i].checkValidity())
                 {
                     inputs[i].reportValidity();
-                    console.log("NOT VALID");
                     return false
                 } 
             }
@@ -520,7 +516,6 @@ const Calculator = () => {
                 //Save to database
                 if (paramId) //If exists, update
                 {
-                    console.log(`UPDATE ${finId} ${paramId}`, data)
                     await axios.put(`${getBackendURL()}/financial/${finId}`, data, {withCredentials: true}).then(res => {
                         toast("Calculator data updated sucessfuly", toastSuccess);
                         setSaveStatus(false);
@@ -548,7 +543,7 @@ const Calculator = () => {
                     }).catch(error => {
                         toast("An error occured while updating. Please ensure all fields are filled out correctly and try again.", toastError);
                         setSaveStatus(false);
-                        console.log(error);
+                        console.error(error);
                     });
                 }
                 else //If new, post.
@@ -571,7 +566,7 @@ const Calculator = () => {
                     }).catch(error => {
                         toast("An error occured while saving. Please ensure all fields are filled out correctly and try again.", toastError);
                         setSaveStatus(false);
-                        console.log(error);
+                        console.error(error);
                     });
                 };
             }

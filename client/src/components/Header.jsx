@@ -4,7 +4,7 @@ import LogoutButton from './LogoutButton';
 import { useCookies } from 'react-cookie';
 import { ToastContainer, toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
-import { getBackendURL, toastSuccess } from '../Utils';
+import { getBackendURL, toastError, toastSuccess } from '../Utils';
 import axios from 'axios';
 
 function Header() {
@@ -62,8 +62,9 @@ function Header() {
                                         window.location.replace("/");
                                     });
                                 }}
-                                onError={() => {
-                                    console.log('Login Failed');
+                                onError={(error) => {
+                                    console.error(error);
+                                    toast("Sign in failed, please try again.", toastError);
                                 }}
                                 /></Nav.Item>}
                             {/*!isLoggedIn && <Nav.Item><Nav.Link href="/login">Login/Register</Nav.Link></Nav.Item>*/}

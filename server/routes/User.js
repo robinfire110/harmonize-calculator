@@ -105,7 +105,6 @@ router.put("/:id", checkUser, async (req, res) => {
             //Update user
             user.set(data);
             await user.save();
-            console.log(user);
             res.status(200).send("User Updated");
         }
         else

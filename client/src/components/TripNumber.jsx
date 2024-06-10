@@ -22,18 +22,15 @@ function TripNumber({customTripNum, setCustomTripNum, tripNumSelect, setTripNumS
             if (window.innerWidth >= 1200)
             {
                 setStyle({});
-                setSize('md')
-                console.log(style, size)
+                setSize('md');
             } 
             else
             {
                 setStyle({fontSize: "16px"});
                 setSize('sm');
-                console.log(style, size)
             }
         }
     }
-    
 
     return (
         <div>

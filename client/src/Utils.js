@@ -213,7 +213,7 @@ async function saveSpreadsheet(formData)
     }
     catch(error)
     {
-        console.log(error);
+        console.error(error);
         toast("An error occured while exporting. Please ensure all fields are filled out correctly and try again.", toastError);
     }
 }

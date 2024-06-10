@@ -32,7 +32,7 @@ function Account() {
             toast("Please sign in to view this page", toastInfo);
         } 
         else {
-            const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true }).catch((error) => {console.log(error); removeCookie("jwt")});
+            const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true }).catch((error) => {console.error(error); removeCookie("jwt")});
             axios.get(`${getBackendURL()}/user/id/${data.user.user_id}`, { withCredentials: true }).then(res => {
                 const data = res.data;
                 setUserData(data);
@@ -41,7 +41,7 @@ function Account() {
                 setIsLoading(false);
             }).catch((error) => {
                 removeCookie('jwt');
-                console.log(error);
+                console.error(error);
                 navigate('/');
                 toast("Please sign in to view this page", toastInfo);
             });
