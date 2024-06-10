@@ -627,7 +627,10 @@ const Calculator = () => {
     return (
         <div>
             <Title/>
+            <div>
             <h2>Harmonize Calculator</h2>
+            <h5>The quick and easy way to calculate, save and manage gig financials</h5>
+            </div>
             <hr />
             <Container className="" style={{textAlign: "left"}}>   
             <Form id="calculatorForm" onSubmit={e => e.preventDefault()}>

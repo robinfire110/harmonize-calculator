@@ -45,63 +45,61 @@ function Sidebar({ handleLinkClick, isAdmin }) {
 
     return (
         <>
-        <Container>
-            {deviceType === "browser" && 
-                <Navbar className="">
-                    <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
-                        <Nav.Link
-                            onClick={() => handleLinkClick('calculations')}
-                            href="/account#calculations"
-                            eventKey={"calculations"}
-                            >Calculations</Nav.Link>
-                        <Nav.Link
-                            onClick={() => handleLinkClick('profile')}
-                            href="/account#profile"
-                            eventKey={"profile"}
-                            >Profile</Nav.Link>
-                        {isAdmin && (
-                            <Nav.Link
-                                onClick={() => handleLinkClick('admin')}
-                                href="/account#admin"
-                                eventKey={"admin"}
-                            >
-                                Admin
-                            </Nav.Link>
-                        )}
-                    </Nav>
-                </Navbar>
-            }
-            {deviceType === "mobile" &&
-            <>
-            <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
-                <Nav.Item>
-                    <Nav.Link className='px-3' eventKey="calculations" style={{color: "black", textDecoration: "none"}}
+        {deviceType === "browser" && 
+            <Navbar className="">
+                <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
+                    <Nav.Link
                         onClick={() => handleLinkClick('calculations')}
                         href="/account#calculations"
-                        >Calculations
-                    </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link className='px-3' eventKey="profile" style={{color: "black", textDecoration: "none"}}
+                        eventKey={"calculations"}
+                        >Calculations</Nav.Link>
+                    <Nav.Link
                         onClick={() => handleLinkClick('profile')}
                         href="/account#profile"
-                    >Profile
-                    </Nav.Link>
-                </Nav.Item>
-                {isAdmin && (
-                    <Nav.Item>
-                        <Nav.Link className='px-3' eventKey="admin" style={{color: "black", textDecoration: "none"}}
+                        eventKey={"profile"}
+                        >Profile</Nav.Link>
+                    {isAdmin && (
+                        <Nav.Link
                             onClick={() => handleLinkClick('admin')}
-                            href="account#admin"
-                        >Admin
+                            href="/account#admin"
+                            eventKey={"admin"}
+                        >
+                            Admin
                         </Nav.Link>
-                </Nav.Item>
-                )}
-            </Nav>
-            <hr />
-            </>
-            }
-        </Container>
+                    )}
+                </Nav>
+            </Navbar>
+        }
+        {deviceType === "mobile" &&
+        <>
+        <Nav variant='underline' className={`${sidebarOrientation}`} activeKey={(window.location.hash).replace("#", "")}>
+            <Nav.Item>
+                <Nav.Link className='px-3' eventKey="calculations" style={{color: "black", textDecoration: "none"}}
+                    onClick={() => handleLinkClick('calculations')}
+                    href="/account#calculations"
+                    >Calculations
+                </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+                <Nav.Link className='px-3' eventKey="profile" style={{color: "black", textDecoration: "none"}}
+                    onClick={() => handleLinkClick('profile')}
+                    href="/account#profile"
+                >Profile
+                </Nav.Link>
+            </Nav.Item>
+            {isAdmin && (
+                <Nav.Item>
+                    <Nav.Link className='px-3' eventKey="admin" style={{color: "black", textDecoration: "none"}}
+                        onClick={() => handleLinkClick('admin')}
+                        href="account#admin"
+                    >Admin
+                    </Nav.Link>
+            </Nav.Item>
+            )}
+        </Nav>
+        <hr />
+        </>
+        }
         </>
     );
 }
