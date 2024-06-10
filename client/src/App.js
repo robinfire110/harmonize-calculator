@@ -14,11 +14,18 @@ import Footer from "./components/Footer";
 import NotFound from './pages/NotFound';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { clientId } from './Utils';
+import {Helmet} from 'react-helmet'
 
 function App() {
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div className="App">
+        <Helmet>
+          <meta property="title" content="Harmonize Calculator" />
+          <meta property="description" content="The quick and easy way to calculate, save and manage gig financials." />
+          <meta property="og:title" content="Harmonize Calculator" />
+          <meta property="og:description" content="The quick and easy way to calculate, save and manage gig financials." />
+        </Helmet>
         <BrowserRouter>
           <Header />
           <Routes>

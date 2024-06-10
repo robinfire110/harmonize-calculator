@@ -25,7 +25,7 @@ const connectToDatabase = async () => {
         console.log("Successfully connected to REMOTE database.")
     }
     catch (error) {
-        console.log(error);
+        console.error(error);
     }
     return sequelize;
 }

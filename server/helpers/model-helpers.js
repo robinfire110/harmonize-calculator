@@ -10,11 +10,6 @@ function getRandomInt(max) {
 
 //Get gas prices
 async function getGasPrices() {
-    //Get data
-    /* API Calls. Cost money to do. Instead, I have files. */
-    //const gasPrice = await axois.get("https://api.collectapi.com/gasPrice/allUsaPrice", {headers: {"content-type": "application/json", "authorization": process.env.API_GAS_PRICE}}).catch(error => console.log(error));
-    //const stateNames = await axois.get("https://api.collectapi.com/gasPrice/usaStateCode", {headers: {"content-type": "application/json", "authorization": process.env.API_GAS_PRICE}}).catch(error => console.log(error));;   
-
     //Get data from AAA site and parse it
     let data = axois.get(`https://gasprices.aaa.com/state-gas-price-averages/`).then(async (res) => {
         const $ = cheerio.load(res.data);

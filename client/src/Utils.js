@@ -80,18 +80,6 @@ function parseStringUndefined(value)
     else return value;
 }
 
-//Send email
-async function sendEmail(to, subject, text=null, html=null)
-{
-    const data = {};
-    data['to'] = to;
-    data['subject'] = subject;
-    if (text) data['text'] = text;
-    if (html) data['html'] = html;
-    console.log(`${getBackendURL()}/api/email`);
-    await axios.post(`${getBackendURL()}/api/email`, data);
-}
-
 //Get fin total
 function getTotalFinHours(fin)
 {
@@ -225,7 +213,7 @@ async function saveSpreadsheet(formData)
     }
     catch(error)
     {
-        console.log(error);
+        console.error(error);
         toast("An error occured while exporting. Please ensure all fields are filled out correctly and try again.", toastError);
     }
 }
@@ -325,4 +313,4 @@ function formatMoneyVars(data)
     return data;
 }
 
-module.exports = {DATA_VALUE, formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, sendEmail, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet, formatMoneyVars};
+module.exports = {DATA_VALUE, formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet, formatMoneyVars};

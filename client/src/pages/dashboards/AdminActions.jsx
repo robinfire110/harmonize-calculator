@@ -77,7 +77,7 @@ function AdminActions({ userData, refreshData }) {
                 setIsPromoting(false);
                 setShowConfirmationModal(false);
             }).catch((error) => {
-                console.log(error);
+                console.error(error);
                 toast("An error occured promoting user.", toastError);
                 setIsPromoting(false);
             });
@@ -99,7 +99,7 @@ function AdminActions({ userData, refreshData }) {
                 setIsPromoting(false);
                 setShowConfirmationModal(false); 
             }).catch((error) => {
-                console.log(error);
+                console.error(error);
                 toast("An error occured demoting user.", toastError);
                 setIsPromoting(false);
             });  

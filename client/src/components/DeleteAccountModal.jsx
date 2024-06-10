@@ -26,7 +26,7 @@ const DeleteAccountModal = ({ show, handleClose, user}) => {
 				}
 				else window.location.reload();
 			}).catch((error) => {
-				console.log(error);
+				console.error(error);
 				toast("An error occured while attempting to delete account.", toastError);
 				setConfirmDelete(false);
 			});

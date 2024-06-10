@@ -16,10 +16,9 @@ const { router: authRoutes } = require('./routes/AuthRoutes');
 const routeFinancial = require('./routes/Financial');
 const routeUser = require('./routes/User');
 const routeGas = require('./routes/GasPrice');
-const routeAPI = require('./routes/API');
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.BACKEND_PORT;
 
 //Allowed origins
 const allowedOrigins = []
@@ -65,6 +64,5 @@ app.listen(port, async () => {
 app.use("/financial", routeFinancial.router);
 app.use("/user", routeUser.router);
 app.use("/gas", routeGas.router);
-app.use("/api", routeAPI.router);
 app.use(authRoutes);
 

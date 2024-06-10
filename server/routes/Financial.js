@@ -89,7 +89,7 @@ router.post("/:id", checkUser, async (req, res) => {
             if (!validEvent) throw new Error("Not valid event id.")
             else
             {
-                console.log(error);
+                console.error(error);
                 return res.status(403).send(error.details);;
             }
         }
@@ -121,7 +121,7 @@ router.put("/:id", checkUser, async (req, res) => {
             if (!validEvent) throw new Error("Not valid event id.")
             else
             {
-                console.log(error);
+                console.error(error);
                 return res.status(403).send(error.details);;
             }
         }
