@@ -641,38 +641,38 @@ const Calculator = () => {
                             </Container>
                         </Row>
                             <Form.Group>
-                                    <Row className="mb-3" xs={1} lg={2}>
-                                        <Col lg="8">
-                                            <Form.Label style={{width: '100%'}}>
-                                                <Row>
-                                                    <Col lg={10}>Name<span style={{color: "red"}}>*</span></Col>
-                                                    <Col className="text-end">{nameLength}/{maxFinancialNameLength}</Col>
-                                                </Row>
-                                            </Form.Label>
-                                            <Form.Control id="fin_name" value={formData.fin_name || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculation Name" onChange={e => setFormDataValue("fin_name", e.target.value, DATA_VALUE.STRING)} pattern={`[a-zA-Z0-9\\s.'"-!,]+`}></Form.Control>
-                                        </Col>
-                                        <Col lg="4">
-                                            <Form.Label>Date<span style={{color: "red"}}>*</span></Form.Label>
-                                            <Form.Control id="date" value={formData.date || ""} type="date" required={true} onChange={e => setFormDataValue("date", e.target.value, DATA_VALUE.STRING)}></Form.Control>
-                                        </Col>
-                                    </Row>
-                                    <Row className="mb-3" xs={1} lg={3}>
-                                        <Col>
-                                            <CalculatorInput id="total_wage" label={"Pay per gig"} isEnabled={false} isMoney={true} maxValue={9999.99} value={formData.total_wage} placeholder="Ex. 75.00" required={true} integer={false} onChange={e => setFormDataValue("total_wage", e.target.value)} tooltip={"Payment for gig."}/>
-                                        </Col>
-                                        <Col lg={3}>
-                                            <CalculatorInput id="event_hours" label={"Hours per gig"} isEnabled={false} maxValue={999} value={formData.event_hours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setFormDataValue("event_hours", e.target.value)} tooltip={"Number of hours for event. Does not include rehearsal or practice hours."}/>
-                                        </Col>
-                                        <Col lg={5}>
-                                            <CalculatorInput id="event_num" label={"Number of gigs"} button={true} buttonText={"Options"} buttonDisabled={!formEnabled.event_num} buttonOnClick={() => {setGigNumModalOpen(!gigNumModalOpen)}} checked={formEnabled.event_num} onCheck={() => {setFormEnabledValue("event_num", !formEnabled.event_num)}} max={2} value={formData.event_num || ""} placeholder="Ex. 1" disabled={!formEnabled.event_num} onChange={e => setFormDataValue("event_num", e.target.value)} tooltip={"Number of gigs. Used if you have multiple of the same gig or service. Will multiply any activated fields in the options by number of gigs."}/>
-                                            <GigOptionsModal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false)}} setFormDataValue={setFormDataValue} formData={formData}/>
-                                        </Col>
-                                    </Row>
+                                <Row className="mb-3">
+                                    <Col xs={7} sm={8}>
+                                        <Form.Label style={{width: '100%'}}>
+                                            <Row>
+                                                <Col>Name<span style={{color: "red"}}>*</span></Col>
+                                                <Col className="text-end">{nameLength}/{maxFinancialNameLength}</Col>
+                                            </Row>
+                                        </Form.Label>
+                                        <Form.Control id="fin_name" value={formData.fin_name || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculation Name" onChange={e => setFormDataValue("fin_name", e.target.value, DATA_VALUE.STRING)} pattern={`[a-zA-Z0-9\\s.'"-!,]+`}></Form.Control>
+                                    </Col>
+                                    <Col xs={5} sm={4}>
+                                        <Form.Label>Date<span style={{color: "red"}}>*</span></Form.Label>
+                                        <Form.Control id="date" value={formData.date || ""} type="date" required={true} onChange={e => setFormDataValue("date", e.target.value, DATA_VALUE.STRING)}></Form.Control>
+                                    </Col>
+                                </Row>
+                                <Row className="mb-3" xs={1} lg={3}>
+                                    <Col>
+                                        <CalculatorInput id="total_wage" label={"Pay per gig"} isEnabled={false} isMoney={true} maxValue={9999.99} value={formData.total_wage} placeholder="Ex. 75.00" required={true} integer={false} onChange={e => setFormDataValue("total_wage", e.target.value)} tooltip={"Payment for gig."}/>
+                                    </Col>
+                                    <Col lg={3}>
+                                        <CalculatorInput id="event_hours" label={"Hours per gig"} isEnabled={false} maxValue={999} value={formData.event_hours} placeholder="Ex. 3" required={true} integer={false} onChange={e => setFormDataValue("event_hours", e.target.value)} tooltip={"Number of hours for event. Does not include rehearsal or practice hours."}/>
+                                    </Col>
+                                    <Col lg={5}>
+                                        <CalculatorInput id="event_num" label={"Number of gigs"} button={true} buttonText={"Options"} buttonDisabled={!formEnabled.event_num} buttonOnClick={() => {setGigNumModalOpen(!gigNumModalOpen)}} checked={formEnabled.event_num} onCheck={() => {setFormEnabledValue("event_num", !formEnabled.event_num)}} max={2} value={formData.event_num || ""} placeholder="Ex. 1" disabled={!formEnabled.event_num} onChange={e => setFormDataValue("event_num", e.target.value)} tooltip={"Number of gigs. Used if you have multiple of the same gig or service. Will multiply any activated fields in the options by number of gigs."}/>
+                                        <GigOptionsModal show={gigNumModalOpen} onHide={() => {setGigNumModalOpen(false)}} setFormDataValue={setFormDataValue} formData={formData}/>
+                                    </Col>
+                                </Row>
                             </Form.Group>
                             <hr />
                             <h3>Travel</h3>
                             <Form.Group>
-                                <Row className="mb-3" xs={1} lg={2}>
+                                <Row className="mb-3" xs={1} md={2}>
                                     <Col>
                                         <Row className="mb-1">
                                             <CalculatorInput id="total_mileage" label={"Total Mileage"} button={true} buttonText={"Use Location"} buttonOnClick={() => {setLocationModalOpen(!locationModalOpen)}} checked={formEnabled.total_mileage} onCheck={() => {setFormEnabledValue("total_mileage", !formEnabled.total_mileage)}} maxValue={9999.99} value={formData.total_mileage} placeholder="Ex. 20" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setFormDataValue("total_mileage", e.target.value)} tooltip={"Total number of miles driven to get to event. Will multiply by <i>Gas Price per Mile</i> for final result. Click <strong>Use Location</strong> to calculate based off Zip Code."}/>
@@ -706,7 +706,7 @@ const Calculator = () => {
                                             <CalculatorInput id="travel_hours" label={"Travel Hours"} checked={formEnabled.travel_hours} onCheck={() => {setFormEnabledValue("travel_hours", !formEnabled.travel_hours)}} maxValue={99.9} value={formData.travel_hours} placeholder="Ex. 2.5" integer={false} disabled={!formEnabled.travel_hours} onChange={e => setFormDataValue("travel_hours", e.target.value)} tooltip={"Number of hours spent traveling. Will be added to total hours."}/>
                                         </Row>
                                         <Row className="mb-3">
-                                            <TripNumber customTripNum={customTripNum} setCustomTripNum={setCustomTripNum} tripNumSelect={tripNumSelect} setTripNumSelect={setTripNumSelect} formEnabled={formEnabled} setFormDataValue={setFormDataValue} />
+                                            <TripNumber customTripNum={customTripNum} setCustomTripNum={setCustomTripNum} tripNumSelect={tripNumSelect} setTripNumSelect={setTripNumSelect} formEnabled={formEnabled} setFormDataValue={setFormDataValue} responsive={true} />
                                         </Row>
                                     </Col>
                                     <Col>
@@ -769,7 +769,7 @@ const Calculator = () => {
                             <hr />
                             <h3>Additional Hours</h3>
                             <Form.Group>
-                                <Row className="mb-3" xs={1} lg={2}>
+                                <Row className="mb-3" xs={1} md={2}>
                                     <Col>
                                         <CalculatorInput id="practice_hours" label={"Individual Practice Hours"} checked={formEnabled.practice_hours} onCheck={() => {setFormEnabledValue("practice_hours", !formEnabled.practice_hours)}} max={999.9} value={formData.practice_hours} placeholder="Ex. 3" integer={false} disabled={!formEnabled.practice_hours} onChange={e => setFormDataValue("practice_hours", e.target.value)} tooltip={"The total hours spent practicing for event (individually, not including group rehearsal)."}/>
                                     </Col>
@@ -781,7 +781,7 @@ const Calculator = () => {
                             <hr />
                             <h3>Other Expenses</h3>
                             <Form.Group>
-                                <Row className="mb-3" xs={1} lg={2}>
+                                <Row className="mb-3" xs={1} md={2}>
                                     <Col>
                                         <CalculatorInput id="tax" preText="%" label={"Income Tax Percentage"} checked={formEnabled.tax} onCheck={() => {setFormEnabledValue("tax", !formEnabled.tax)}} value={formData.tax} maxValue={100} placeholder="Ex. 17.5" integer={false} disabled={!formEnabled.tax} onChange={e => setFormDataValue("tax", e.target.value)} tooltip={"Percentage of income tax. Taken from initial <i>Pay per gig</i> before any other expenses."} />                           
                                     </Col>

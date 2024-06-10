@@ -33,7 +33,7 @@ function FormNumber({placeholder, onChange, disabled=false, integer=true, id, re
     if (controlled)
     {
         return (
-            <Form.Control type="text" id={id} value={value ?? ""} required={required} disabled={disabled} placeholder={placeholder} pattern={`[0-9]*[.]?[0-9]*.{${min},${max}}`} onChange={onChange} minLength={min} min={minValue} maxLength={max} onInput={e => restrictNumber(e, maxValue, integer)} autoFocus={autoFocus} name={name} onInvalid={(e) => {customValidity && e.target.setCustomValidity(customValidity)}}></Form.Control>
+            <Form.Control type="text" id={id} value={value ?? ""} required={required} disabled={disabled} placeholder={placeholder} pattern={`[0-9]*[.]?[0-9]*.{${min},${max}}`} onChange={onChange} minLength={min} min={minValue} maxLength={max} onInput={e => restrictNumber(e, maxValue, integer)} autoFocus={autoFocus} name={name} onInvalid={(e) => {customValidity && e.target.setCustomValidity(customValidity)}} inputMode='numeric'></Form.Control>
         )
     }
 }
