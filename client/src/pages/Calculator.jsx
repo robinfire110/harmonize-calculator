@@ -622,10 +622,15 @@ const Calculator = () => {
     return (
         <div>
             <Title/>
-            <div>
-            <h2>Harmonize Calculator</h2>
-            <h5>The quick and easy way to calculate, save and manage gig financials</h5>
-            </div>
+            <Row>
+                <Col xl={5} lg={4} md={4} className={"text-lg-end text-md-end text-sm-center"}>
+                    <img src={require('../img/logo-circle.png')} height={165}></img>
+                </Col>
+                <Col className="my-auto text-lg-start text-md-start text-sm-middle">
+                    <h1>Harmonize Calculator</h1>
+                    <h4>The quick and easy way to calculate,<br />save and manage gig financials</h4>
+                </Col>
+            </Row>
             <hr />
             <Container className="" style={{textAlign: "left"}}>   
             <Form id="calculatorForm" onSubmit={e => e.preventDefault()}>

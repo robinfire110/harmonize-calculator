@@ -42,6 +42,7 @@ If you wish to delete your account and all associated data, you can do so at any
 * Forced numberic input on mobile
 * Added tagline
 * Update Meta Tags
+* Updated Header
 
 ## Version 1.0.1
 * Added Privacy Policy
