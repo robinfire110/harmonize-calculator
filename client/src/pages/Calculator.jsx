@@ -16,6 +16,7 @@ import Title from "../components/Title";
 import CalculatorInput from "../components/CalculatorInput";
 import GigOptionsModal from "../components/GigOptionsModal";
 import TripNumber from "../components/TripNumber";
+import {useJsApiLoader} from '@react-google-maps/api';
 
 const Calculator = () => {
     /* Variables */
@@ -64,6 +65,12 @@ const Calculator = () => {
         multiply_practice: false,
         multiply_rehearsal: false,
         multiply_other: false,
+    });
+
+    //Load Google Maps
+    const {mapsAPILoaded} = useJsApiLoader({
+        id: "google-map-script",
+        googleMapsApiKey: process.env.REACT_APP_API_GOOGLE_MAPS
     });
 
     function setFormDataValue(variable, value, type=null)
@@ -293,14 +300,20 @@ const Calculator = () => {
     
     async function calculateBasedOnLocation(originZip, destinationZip)
     {
-        setIsGettingLocation(true);
-        axios.get(`${getBackendURL()}/api/distance_matrix/${originZip}/${destinationZip}/`).then(res => {
-            if (res.data)
-            {
-                if (res.data.status == "OK" && res.data.rows[0].elements[0].status == "OK")
+        if (!isGettingLocation)
+        {
+            setIsGettingLocation(true);
+            const service = new window.google.maps.DistanceMatrixService();
+            service.getDistanceMatrix({
+                origins: [originZip],
+                destinations: [destinationZip],
+                travelMode: "DRIVING"
+            }, (data, status) => {
+                console.log(data, status);
+                if (status === "OK" && data.rows[0].elements[0].status == "OK")
                 {
-                    const distance = res.data.rows[0].elements[0].distance.value;
-                    const duration = res.data.rows[0].elements[0].duration.value;
+                    const distance = data.rows[0].elements[0].distance.value;
+                    const duration = data.rows[0].elements[0].duration.value;
                     const distanceInMiles = metersToMiles(distance).toFixed(2);
                     const durationInHours = ((duration/60)/60).toFixed(2);
                     setFormEnabled({...formEnabled, total_mileage: true, travel_hours: true});
@@ -314,10 +327,8 @@ const Calculator = () => {
                     toast("An error occured, please ensure zip codes are correct.", toastError);
                     setIsGettingLocation(false);
                 }
-            }
-        }).catch(error => {
-            console.log(error);
-        });
+            });
+        }
     }
 
     //Get Zip Codes from Modal
@@ -326,17 +337,15 @@ const Calculator = () => {
         //Get elements
         const elementOriginZip = document.getElementById("modalOriginZip");
         const elementDestinationZip = document.getElementById("modalDestinationZip");
-        if (!isGettingLocation)
+        if (modalOriginZip.length == 5 && modalDestinationZip.length == 5)
         {
-            if (modalOriginZip.length == 5 && modalDestinationZip.length == 5)
-            {
-                calculateBasedOnLocation(modalOriginZip, modalDestinationZip);
-            }
-            else
-            {
-                if (modalOriginZip.length != 5) elementOriginZip.setCustomValidity("Zip code must be 5 numbers (#####).");
-                else if (modalDestinationZip.length != 5) elementDestinationZip.setCustomValidity("Zip code must be 5 numbers (#####).");
-            }
+            calculateBasedOnLocation(modalOriginZip, modalDestinationZip);
+        }
+        else
+        {
+            if (modalOriginZip.length != 5) elementOriginZip.setCustomValidity("Zip code must be 5 numbers (#####).");
+            else if (modalDestinationZip.length != 5) elementDestinationZip.setCustomValidity("Zip code must be 5 numbers (#####).");
+            setIsGettingLocation(false);
         }
     }
 
