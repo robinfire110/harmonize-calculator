@@ -36,7 +36,7 @@ If you wish to delete your account and all associated data, you can do so at any
 ## Credits
 The application is a spin-off of [Harmonize](https://github.com/robinfire110/music-gig-app), isolating the calculator feature and expanding on it. The original Harmonize was developed by Andy Bonola, Craig Smith and Andy Villasmil as a Senior Capstone project. The work to spin it off into this project was done by Andy Villasmil (robinfire110).
 
-* Made with - NodeJS, Express, React, Bootstrap
+Made with - NodeJS, Express, React, Bootstrap
 
 # Versions
 ## Version 1.0.3
