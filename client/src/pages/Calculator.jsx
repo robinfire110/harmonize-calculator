@@ -8,7 +8,7 @@ import TooltipButton from "../components/TooltipButton";
 import FormNumber from "../components/FormNumber";
 import axios from "axios";
 import {BarLoader, ClipLoader} from 'react-spinners'
-import {DATA_VALUE, formatCurrency, formatMoneyVars, maxFinancialNameLength, metersToMiles, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, saveSpreadsheet, toastError, toastInfo, toastSuccess} from "../Utils";
+import {DATA_VALUE, financialNameRegEx, formatCurrency, formatMoneyVars, maxFinancialNameLength, metersToMiles, parseBool, parseFloatZero, parseIntZero, parseStringUndefined, saveSpreadsheet, toastError, toastInfo, toastSuccess} from "../Utils";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import {getBackendURL} from "../Utils";
@@ -129,43 +129,40 @@ const Calculator = () => {
         //Get Gas Prices
         if (!gasPrices)
         {
-            axios.get(`${getBackendURL()}/gas`).then(res => {
-                let map = {};
-                for (let i = 0; i < res.data.length; i++)
-                {
-                    map[res.data[i].location] = res.data[i].average_price;
-                }   
-                setGasPrices(map);
-                setAverageGasPrice(map);
-            }).catch((error) => {
-                console.error(error);
-                setGasPrices(undefined);
-            });
+            getGasPrices();
         }
     }, []);
 
     //Load user (after gas price load)
     useEffect(() => {
         //Get user
-        if (cookies.jwt && gasPrices)
+        if (!user)
         {
-            axios.get(`${getBackendURL()}/account`, {withCredentials: true}).then(res => {
-                if (res.data?.user)
-                {
-                    axios.get(`${getBackendURL()}/user/id/${res.data.user.user_id}`, { withCredentials: true }).then(res => {
-                        const userData = res.data;
-                        loadData(userData);
-                        setUser(userData);
-                    });  
-                }
-                else 
-                {
-                    setUser(undefined);
-                }
-            }).catch((error) => {
-                console.error(error);
-                removeCookie("jwt");
-            });
+            if (cookies.jwt)
+            {
+                axios.get(`${getBackendURL()}/account`, {withCredentials: true}).then(res => {
+                    if (res.data?.user)
+                    {
+                        axios.get(`${getBackendURL()}/user/id/${res.data.user.user_id}`, { withCredentials: true }).then(res => {
+                            const userData = res.data;
+                            loadData(userData);
+                            setUser(userData);
+                        }).catch((error) => {
+                            console.error(error);
+                            setUser(undefined);
+                        });  
+                    }
+                    else 
+                    {
+                        setUser(undefined);
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                    removeCookie("jwt");
+                    window.location.reload();
+                });
+            }
+            else setUser(undefined);
         }
     }, [gasPrices]);
 
@@ -184,6 +181,7 @@ const Calculator = () => {
                 }
                 else setIsLoading(false);
             }
+            else setIsLoading(false);
         }
         else
         {
@@ -217,6 +215,25 @@ const Calculator = () => {
         getSavedFinancials();
     }, [searchQuery]);
 
+    //Get Gas Prices
+    function getGasPrices(openModal=false)
+    {
+        axios.get(`${getBackendURL()}/gas`).then(res => {
+            let map = {};
+            for (let i = 0; i < res.data.length; i++)
+            {
+                map[res.data[i].location] = res.data[i].average_price;
+            }   
+            setGasPrices(map);
+            setAverageGasPrice(map);
+            if (openModal) setGasModalOpen(true);
+        }).catch((error) => {
+            console.error(error);
+            setGasPrices(undefined);
+            toast("An error occurred loading gas price data, average gas price values will be temporarily unavaiable.", toastError)
+        });
+    }
+
     //Load data
     function loadData(data)
     {
@@ -239,31 +256,32 @@ const Calculator = () => {
 
         //Decimals (monetary fields load with 2 decimal places)
         formatMoneyVars(newData);
-        /*
-        const moneyVars = ["total_wage", "gas_price", "mileage_covered", "travel_fees", "fees"]
-        moneyVars.forEach(element => {
-            const value = newData[element];
-            if (value) newData[element] = value.toFixed(2);
-        });
-        */
         
         //Set gas prices
-        if (defaultState)
+        if (gasPrices)
         {
-            if (defaultState !== "custom")
+            if (defaultState)
             {
-                newData.gas_price = Math.round(gasPrices[defaultState] * 100) / 100;
-                setCurrentState(defaultState);
-            } 
+                if (defaultState !== "custom")
+                {
+                    newData.gas_price = Math.round(gasPrices[defaultState] * 100) / 100;
+                    setCurrentState(defaultState);
+                } 
+            }
+            
+            if (defaultVehicle)
+            {
+                if (defaultVehicle !== "custom")
+                {
+                    newData.mpg = gasPrices[defaultVehicle];
+                    setCurrentVehicle(defaultVehicle);
+                } 
+            }
         }
-        
-        if (defaultVehicle)
+        else
         {
-            if (defaultVehicle !== "custom")
-            {
-                newData.mpg = gasPrices[defaultVehicle];
-                setCurrentVehicle(defaultVehicle);
-            } 
+            if (defaultState !== "custom") newData.gas_price = null;
+            if (defaultVehicle !== "custom") newData.mpg = null;
         }
 
         //Set Form Data
@@ -271,7 +289,11 @@ const Calculator = () => {
 
         //Set switches
         setFormEnabled({...formEnabled, event_num: newData?.event_num > 0, total_mileage: newData?.total_mileage > 0, travel_hours: newData?.travel_hours > 0, mileage_covered: newData?.mileage_covered > 0, travel_fees: newData?.travel_fees > 0, practice_hours: newData?.practice_hours > 0, rehearsal_hours: newData?.rehearsal_hours > 0, tax: newData?.tax > 0, fees: newData?.fees > 0})
-        if (newData?.zip) setModalOriginZip(newData?.zip);
+        if (newData?.zip)
+        {
+            if (newData?.fin_name) setModalDestinationZip(newData?.zip); //If event
+            else setModalOriginZip(newData?.zip); //If user
+        } 
 
         //Set Trip Num
         setTripNumSelect(Math.min(2, newData.trip_num-1));
@@ -454,6 +476,10 @@ const Calculator = () => {
             setFormData({...formData, gas_price: Math.round(data[state] * 100) / 100, mpg: data[vehicle]})
             setGasModalOpen(false);
         }
+        else
+        {
+            toast("An error occurred loading gas price data, average gas price values will be temporarily unavaiable.", toastError)
+        }
     }
 
     async function saveFinancial(spreadsheet)
@@ -489,6 +515,21 @@ const Calculator = () => {
                 multiply_other: parseBool(formData.multiply_other)
             }
             
+            //Check other validity
+            //Calculation Name
+            if (!financialNameRegEx.test(formData.fin_name))
+            {
+                let nameBox = document.getElementById('fin_name');
+                nameBox.setCustomValidity(`Name must only include valid characters. (', ", &, !, -, /)`);
+            }
+
+            //Trip Number
+            if (formData.trip_num <= 0)
+            {
+                let tripNumBox = document.getElementById('formData.trip_num');
+                tripNumBox.setCustomValidity("Value must be greater than 0.");
+            }
+
             //Check validity (will return false if not valid, HTML will take care of the rest).
             const inputs = document.getElementById("calculatorForm").elements;
             for (let i = 0; i < inputs.length; i++) {
@@ -497,14 +538,6 @@ const Calculator = () => {
                     inputs[i].reportValidity();
                     return false
                 } 
-            }
-
-            //Check other validity
-            //Trip Number
-            if (formData.trip_num <= 0)
-            {
-                let tripNumBox = document.getElementById('formData.trip_num');
-                tripNumBox.setCustomValidity("Value must be greater than 0.");
             }
 
             //Save (in correct place)
@@ -652,7 +685,7 @@ const Calculator = () => {
                                                 <Col className="text-end">{nameLength}/{maxFinancialNameLength}</Col>
                                             </Row>
                                         </Form.Label>
-                                        <Form.Control id="fin_name" value={formData.fin_name || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculation Name" onChange={e => setFormDataValue("fin_name", e.target.value, DATA_VALUE.STRING)} pattern={`[a-zA-Z0-9\\s.'"-!,]+`}></Form.Control>
+                                        <Form.Control id="fin_name" value={formData.fin_name || ""} type="text" maxLength={maxFinancialNameLength} required={true} placeholder="Calculation Name" onChange={e => {setFormDataValue("fin_name", e.target.value, DATA_VALUE.STRING); e.target.setCustomValidity("");}} pattern={`[a-zA-Z0-9\\s.'"-!,&]+`}></Form.Control>
                                     </Col>
                                     <Col xs={5} sm={4}>
                                         <Form.Label>Date<span style={{color: "red"}}>*</span></Form.Label>
@@ -713,7 +746,7 @@ const Calculator = () => {
                                         </Row>
                                     </Col>
                                     <Col>
-                                        <CalculatorInput id='gasPricePerMile' isEnabled={false} isMoney={true} label={"Gas Price per Mile"} button={true} buttonText={"Use Average"} buttonOnClick={() => {setGasModalOpen(true)}} checked={formEnabled.total_mileage} onCheck={() => {setFormEnabledValue("total_mileage", !formEnabled.total_mileage)}} maxValue={9.99} value={gasPricePerMile} placeholder="Ex. 0.14" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setGasPricePerMile(e.target.value)} tooltip={"Price of gas per mile. Calculated using <i>Gas $/Gallon</i> and <i>Vehicle MPG</i>. Click <strong>Calculate Average</strong> to use average values."}/>
+                                        <CalculatorInput id='gasPricePerMile' isEnabled={false} isMoney={true} label={"Gas Price per Mile"} button={true} buttonText={"Use Average"} buttonOnClick={() => {gasPrices ? setGasModalOpen(true) : getGasPrices(true)}} checked={formEnabled.total_mileage} onCheck={() => {setFormEnabledValue("total_mileage", !formEnabled.total_mileage)}} maxValue={9.99} value={gasPricePerMile} placeholder="Ex. 0.14" integer={false} disabled={!formEnabled.total_mileage} onChange={e => setGasPricePerMile(e.target.value)} tooltip={"Price of gas per mile. Calculated using <i>Gas $/Gallon</i> and <i>Vehicle MPG</i>. Click <strong>Calculate Average</strong> to use average values."}/>
                                         <Modal show={gasModalOpen} onHide={() => setGasModalOpen(false)} centered={true}>
                                             <Form onSubmit={e => e.preventDefault()}>
                                                 <Modal.Header closeButton>

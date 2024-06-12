@@ -86,7 +86,7 @@ function AboutModal({modalOpen, setModalOpen, isNewUser=false}) {
             </Accordion>
         </Modal.Body>
         <Modal.Footer>
-            <small className='me-auto text-muted'>Version 1.0.2</small>
+            <small className='me-auto text-muted'>Version 1.0.3</small>
             <Button variant="primary" onClick={() => {setModalOpen(false)}}>Close</Button>
         </Modal.Footer>
     </Modal>
