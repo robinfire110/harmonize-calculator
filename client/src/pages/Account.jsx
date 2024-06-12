@@ -32,7 +32,7 @@ function Account() {
             toast("Please sign in to view this page", toastInfo);
         } 
         else {
-            const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true }).catch((error) => {console.error(error); removeCookie("jwt")});
+            const { data } = await axios.get(`${getBackendURL()}/account`, { withCredentials: true }).catch((error) => {console.error(error); removeCookie("jwt"); window.location.reload()});
             axios.get(`${getBackendURL()}/user/id/${data.user.user_id}`, { withCredentials: true }).then(res => {
                 const data = res.data;
                 setUserData(data);

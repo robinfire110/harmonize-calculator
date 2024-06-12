@@ -11,13 +11,14 @@ function getBackendURL()
 
 //Constant Variables
 const maxFinancialNameLength = 50;
+const financialNameRegEx = /^[a-zA-Z0-9\s.'"&!,-/]+$/;
 const statesList = [ 'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' ];
 const clientId = "60061594536-k5ll1e4hv1ft1pliuftsiubpt9ed6lj4.apps.googleusercontent.com";
 
 //Default toast settings
 const toastTheme = 'dark';
 const toastPosition = 'top-center';
-const toastTimeout = 1750;
+const toastTimeout = 2000;
 const toastSuccess = { theme: toastTheme, position: toastPosition, type: "success", autoClose: toastTimeout};
 const toastError = { theme: toastTheme, position: toastPosition, type: "error", autoClose: toastTimeout};
 const toastInfo = { theme: toastTheme, position: toastPosition, type: "info", autoClose: toastTimeout};
@@ -313,4 +314,4 @@ function formatMoneyVars(data)
     return data;
 }
 
-module.exports = {DATA_VALUE, formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, getTotalFinHours, maxFinancialNameLength, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet, formatMoneyVars};
+module.exports = {DATA_VALUE, formatCurrency, metersToMiles, parseFloatZero, parseIntZero, parseBool, parseStringUndefined, getBackendURL, autoSizeColumn, getTotalFinHours, maxFinancialNameLength, financialNameRegEx, statesList, clientId, toastSuccess, toastError, toastInfo, saveSpreadsheetAll, saveSpreadsheet, formatMoneyVars};

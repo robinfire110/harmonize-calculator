@@ -10,8 +10,6 @@ Harmonize Calculator allows the user to calculate expenses for music gigs based 
 * Ability to export calculations as a functional Excel spreadsheet.
 * Signing in with Google SSO allowing you to save calculations, manage previous results, export multiple results into one spreadsheet and set calculator default values.
 
-The application is a spin-off of [Harmonize](https://github.com/robinfire110/music-gig-app), isolating the calculator feature and expanding on it. The original Harmonize was developed by Andy Bonola, Craig Smith and Andy Villasmil as a Senior Capstone project. The work to spin it off into this project was done by Andy Villasmil (robinfire110).
-
 ## Overview Video
 [![Overview Video](https://img.youtube.com/vi/-bGkDlbghNQ/0.jpg)](https://www.youtube.com/watch?v=-bGkDlbghNQ)
 
@@ -35,24 +33,35 @@ If you're not signed in, Harmonize Calculator does not store or track any user d
 
 If you wish to delete your account and all associated data, you can do so at any time in the Account page. If you lose access to your Google account and wish for your data to be deleted, please let the developer know (by contacting them or submitting an issue) and they will assist you.
 
+## Credits
+The application is a spin-off of [Harmonize](https://github.com/robinfire110/music-gig-app), isolating the calculator feature and expanding on it. The original Harmonize was developed by Andy Bonola, Craig Smith and Andy Villasmil as a Senior Capstone project. The work to spin it off into this project was done by Andy Villasmil (robinfire110).
+
+Made with - NodeJS, Express, React, Bootstrap
+
 # Versions
+## Version 1.0.3
+* Fixed destination/origin zip codes not loading correctly.
+* Increased time before session cookie expires.
+* Improved fallback if backend API doesn't load.
+* Updated acceptable characters in calculation name and validity check.
+
 ## Version 1.0.2
-* Updated Google Maps integration
-* Updated responsivness (better layout on tablets)
-* Forced numberic input on mobile
-* Added tagline
-* Update Meta Tags
-* Updated Header & Favicon
+* Updated Google Maps integration.
+* Updated responsivness (better layout on tablets).
+* Forced numberic input on mobile.
+* Added tagline.
+* Update Meta Tags.
+* Updated Header & Favicon.
 
 ## Version 1.0.1
-* Added Privacy Policy
+* Added Privacy Policy.
 
 ## Version 1.0.0
 * Spin-Off from original Harmonize. Removed all non-calculator related features and pages.
 * Refactored code to be more component based.
 * Added Google SSO, removed email and password login.
 * Added Trip Number (instead of Trip Type).
-* Added Additional Travel Costs
+* Added Additional Travel Costs.
 * Added Calculator Defaults in Profile.
 * Added search to Saved Calculations on Calculator screen.
 * Added sort to Saved Calculations in Profile.

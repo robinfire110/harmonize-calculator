@@ -18,7 +18,6 @@ function TripNumber({customTripNum, setCustomTripNum, tripNumSelect, setTripNumS
     {
         if (responsive)
         {
-            console.log("Width", window.innerWidth);
             if (window.innerWidth >= 1200)
             {
                 setStyle({});

@@ -5,7 +5,8 @@ const {jwtDecode} = require('jwt-decode');
 const router = require("express").Router();
 
 //Create token
-const maxAge = 3*24*60*60;
+const daysTillExpire = 30;
+const maxAge = daysTillExpire*24*60*60;
 const createToken = (id) => {
 	return jwt.sign({ id }, process.env.SECRET, {
 		expiresIn: maxAge,
